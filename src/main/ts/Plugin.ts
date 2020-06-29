@@ -1,15 +1,10 @@
+import { Korektor } from './core/Korektor'
+
+var _corrections = {};
+const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
+
 declare const tinymce: any;
 
-const setup = (editor, url) => {
-  editor.ui.registry.addButton('plinkorektor', {
-    text: 'plinkorektor button',
-    onAction: () => {
-      // tslint:disable-next-line:no-console
-      editor.setContent('<p>content added from plinkorektor</p>');
-    }
-  });
-};
-
 export default () => {
-  tinymce.PluginManager.add('plinkorektor', setup);
+  tinymce.PluginManager.add('plinkorektor', Korektor);
 };
