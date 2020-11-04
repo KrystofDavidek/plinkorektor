@@ -1,10 +1,7 @@
-import { Korektor } from './core/Korektor'
-
-var _corrections = {};
-const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
+import { proofreaderBase } from './core/ProofreaderBase';
 
 declare const tinymce: any;
 
 export default () => {
-  tinymce.PluginManager.add('plinkorektor', Korektor);
+    tinymce.PluginManager.add('plinkorektor', proofreaderBase);
 };

@@ -14,14 +14,14 @@ tinymce.init({
 
   valid_elements: 'p[data-pk-hash],span[class]',
   valid_styles: {
-    'span': 'pk-token, pk-token-glue, pk-token-correction'
+    span: 'pk-token, pk-token-glue, pk-token-correction'
   },
 
   toolbar: false,
 
-  setup: function(editor) {
+  setup: (editor) => {
     // Removal of keyboard shortcuts of editor
-    editor.on('init', function() {
+    editor.on('init', function () {
       editor.formatter.unregister('alignleft');
       editor.formatter.unregister('aligncenter');
       editor.formatter.unregister('alignright');

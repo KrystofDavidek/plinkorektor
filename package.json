@@ -51,5 +51,8 @@
   "main": "./lib/main/ts/api/Main.js",
   "module": "./lib/main/ts/api/Main.js",
   "types": "./lib/main/ts/api/Main.d.ts",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "md5": "^2.3.0"
+  }
 }

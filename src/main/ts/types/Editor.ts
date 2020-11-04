@@ -1,3 +1,3 @@
 export interface Editor {
-  [any:string]: any,
+    [any: string]: any;
 }

@@ -1,9 +1,9 @@
 export enum Spellchecker {
-  DATAFILE = 'datafile',
-  HUNSPELL = 'hunspell',
-};
+    DATAFILE = 'datafile',
+    HUNSPELL = 'hunspell',
+}
 
 export enum SpellcheckerName {
-  datafile = 'Datový soubor',
-  hunspell = 'Hunspell (Experimentální)',
-};
+    datafile = 'Datový soubor',
+    hunspell = 'Hunspell (Experimentální)',
+}
