@@ -34,7 +34,7 @@ module.exports = function(grunt) {
       options: {
         treeshake: true,
         format: 'iife',
-        onwarn: swag.onwarn,
+       // onwarn: swag.onwarn,
         plugins: [
           swag.nodeResolve({
             basedir: __dirname,
