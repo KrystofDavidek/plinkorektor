@@ -1,9 +1,8 @@
 const { CheckerPlugin } = require('awesome-typescript-loader');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
 const path = require('path');
-const swag = require('@ephox/swag');
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   var packageData = grunt.file.readJSON('package.json');
   var BUILD_VERSION = packageData.version + '-' + (process.env.BUILD_NUMBER ? process.env.BUILD_NUMBER : '0');
   const libPluginPath = 'lib/main/ts/Main.js';
@@ -16,7 +15,7 @@ module.exports = function(grunt) {
     pkg: packageData,
 
     clean: {
-      dirs: [ 'dist', 'scratch' ]
+      dirs: ['dist', 'scratch']
     },
 
     tslint: {
@@ -28,29 +27,6 @@ module.exports = function(grunt) {
 
     shell: {
       command: 'tsc'
-    },
-
-    rollup: {
-      options: {
-        treeshake: true,
-        format: 'iife',
-       // onwarn: swag.onwarn,
-        plugins: [
-          swag.nodeResolve({
-            basedir: __dirname,
-            prefixes: {}
-          }),
-          swag.remapImports()
-        ]
-      },
-      plugin: {
-        files: [
-          {
-            src: libPluginPath,
-            dest: scratchPluginPath
-          }
-        ]
-      }
     },
 
     uglify: {
@@ -67,7 +43,7 @@ module.exports = function(grunt) {
     concat: {
       license: {
         options: {
-          process: function(src) {
+          process: function (src) {
             var buildSuffix = process.env.BUILD_NUMBER
               ? '-' + process.env.BUILD_NUMBER
               : '';
@@ -104,7 +80,6 @@ module.exports = function(grunt) {
         ]
       }
     },
-
     webpack: {
       options: {
         mode: 'development',
@@ -146,6 +121,44 @@ module.exports = function(grunt) {
           filename: path.basename(jsDemoDestFile),
           path: path.dirname(jsDemoDestFile)
         }
+      },
+      prod: {
+        watch: false,
+        entry:  path.join(__dirname,libPluginPath),
+        devtool: 'source-map',
+
+        resolve: {
+          extensions: ['.ts', '.js']
+        },
+
+        module: {
+          rules: [
+            {
+              test: /\.js$/,
+              use: ['source-map-loader'],
+              enforce: 'pre'
+            },
+            {
+              test: /\.ts$/,
+              use: [
+                {
+                  loader: 'ts-loader',
+                  options: {
+                    transpileOnly: true,
+                    experimentalWatchApi: true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+
+        plugins: [new CheckerPlugin()],
+
+        output: {
+          filename: path.basename(scratchPluginPath),
+          path:  path.join(__dirname,path.dirname(scratchPluginPath))
+        }
       }
     }
   });
@@ -161,7 +174,7 @@ module.exports = function(grunt) {
     'clean',
     'tslint',
     'shell',
-    'rollup',
+    'webpack:prod',
     'uglify',
     'concat',
     'copy',
