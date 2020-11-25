@@ -12,18 +12,14 @@ const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
 const ajaxCalls = [];
 
-export function processApiCall(hash: string, text: string, p) {
+export function processApiCall(hash: string, p) {
     // Calling the corrector API
     const call = $.ajax({
         type: 'POST',
         dataType: 'json',
         url: API_PATH,
         data: {
-            text,
-            config: JSON.stringify({
-                tagger: config.tagger,
-                spellchecker: config.spellchecker,
-            })
+            text: p.textContent
         },
     });
 

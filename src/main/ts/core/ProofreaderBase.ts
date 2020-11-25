@@ -1,7 +1,6 @@
 import { config } from './Config';
 
 import { guiLoadMainStylesheet } from './gui/Css';
-import { guiInitiateToolbar } from './gui/Toolbar';
 
 import { message as msg } from './Message';
 import { MessageImportance as MI } from '../types/MessageImportance';
@@ -14,8 +13,6 @@ export const proofreaderBase = (editor) => {
     config.editor = editor;
     config.mistakes = new MistakeManager();
 
-    guiInitiateToolbar();
-
     editor.on('init', function () {
         msg('Initialization.');
         guiLoadMainStylesheet();
@@ -23,7 +20,7 @@ export const proofreaderBase = (editor) => {
         // Autocorrect periodically triggered
         autocorrectTrigger = setInterval(function () {
             process();
-        }, 3000);
+        }, 1000);
     });
 
     // Autocorrect triggered by editor change

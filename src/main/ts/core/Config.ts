@@ -8,8 +8,6 @@ import { MessageImportance } from '../types/MessageImportance';
  * See Config type description for more info.
  */
 export let config: Config = {
-  tagger: Tagger.MAJKA,
-  spellchecker: Spellchecker.DATAFILE,
   debug: MessageImportance.DEBUG,
   editor: null,
   mistakes: null,

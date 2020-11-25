@@ -54,6 +54,6 @@ export function process() {
     guiHighlightTokens(hash);
 
     // Caling processing
-    processApiCall(hash, p.textContent, p);
+    processApiCall(hash, p);
   });
 }
