@@ -41,3 +41,19 @@ export const cssMistakeBadValue = `
     text-decoration: underline rgb(192, 57, 43);
     font-weight: bold;
 `;
+
+export const themeCustomization = `
+.tox .tox-button {
+    text-transform: none !important;
+}
+`;
+
+export const cssMistakeNoCorrection = `
+    color: #222f3e;
+    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: normal;
+    line-height: 24px;
+`;

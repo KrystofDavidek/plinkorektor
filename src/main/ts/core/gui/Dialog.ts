@@ -1,7 +1,7 @@
 import * as $ from 'jquery';
 import { config } from '../Config';
 
-import { cssMistakeBadValue, cssMistakeDescription } from '../../assets/style.css';
+import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/style.css';
 import { Mistake } from '../correction/Mistake';
 import { process } from '../process/Process';
 
@@ -111,7 +111,16 @@ function buildSuggestionDialog(helperText: string, mistake: Mistake) {
     }];
 
     // Display suggested corrections
-    mistake.getCorrections().forEach((correction) => {
+    const mistakes = mistake.getCorrections();
+    if(!mistakes.length) {
+        suggestions.push(
+            {
+                type: 'htmlpanel',
+                html: '<p style="' + cssMistakeNoCorrection + '">Žádné návrhy</p>'
+            }
+        );
+    }
+    mistakes.forEach((correction) => {
         partialRulebook[correction.getId()] = correction.getRules();
         suggestions.push(
             {
