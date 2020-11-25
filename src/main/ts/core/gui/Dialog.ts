@@ -135,7 +135,7 @@ function buildSuggestionDialog(helperText: string, mistake: Mistake) {
         suggestions.push(
             {
                 type: 'htmlpanel',
-                html: '<h4">Další informac</h4>'
+                html: '<h4">Další informace</h4>'
             }
         );
         mistake.getAbout().forEach((item) => {
