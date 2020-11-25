@@ -112,7 +112,7 @@ function buildSuggestionDialog(helperText: string, mistake: Mistake) {
 
     // Display suggested corrections
     const mistakes = mistake.getCorrections();
-    if(!mistakes.length) {
+    if (!mistakes.length) {
         suggestions.push(
             {
                 type: 'htmlpanel',

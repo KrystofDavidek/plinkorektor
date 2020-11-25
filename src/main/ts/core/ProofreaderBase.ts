@@ -20,10 +20,16 @@ export const proofreaderBase = (editor) => {
         msg('Initialization.');
         guiLoadMainStylesheet();
         msg('Editor was initialized.', MI.INFO);
+        // Autocorrect periodically triggered
+        autocorrectTrigger = setInterval(function () {
+            process();
+        }, 3000);
     });
 
     // Autocorrect triggered by editor change
-    editor.on('Change', function () {
-        process();
+    editor.on('remove', function () {
+        clearInterval(autocorrectTrigger);
     });
 };
+
+export let autocorrectTrigger;

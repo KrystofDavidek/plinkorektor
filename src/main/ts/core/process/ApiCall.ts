@@ -12,7 +12,7 @@ const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
 const ajaxCalls = [];
 
-export function processApiCall(hash: string, text: string) {
+export function processApiCall(hash: string, text: string, p) {
     // Calling the corrector API
     const call = $.ajax({
         type: 'POST',
@@ -59,6 +59,7 @@ export function processApiCall(hash: string, text: string) {
 
             guiHighlightTokens(hash);
         }
+        p.removeAttribute('data-pk-processing');
     }).fail(() => {
         msg('AJAX request failed.', MI.DANGER);
     }).always(() => {
