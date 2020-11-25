@@ -1,6 +1,4 @@
 import { Config } from '../types/Config';
-import { Tagger } from '../types/Tagger';
-import { Spellchecker } from '../types/Spellchecker';
 import { MessageImportance } from '../types/MessageImportance';
 
 /**

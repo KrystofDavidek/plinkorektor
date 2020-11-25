@@ -131,6 +131,21 @@ function buildSuggestionDialog(helperText: string, mistake: Mistake) {
             }
         );
     });
-
+    if (mistake.getAbout().length) {
+        suggestions.push(
+            {
+                type: 'htmlpanel',
+                html: '<h4">Další informac</h4>'
+            }
+        );
+        mistake.getAbout().forEach((item) => {
+            suggestions.push(
+                {
+                    type: 'htmlpanel',
+                    html: '<a href="' + item.url + '">' + item.label + '</h4>'
+                }
+            );
+        });
+    }
     return {suggestions, partialRulebook};
 }

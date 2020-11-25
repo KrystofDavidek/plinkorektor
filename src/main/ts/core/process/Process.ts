@@ -49,7 +49,6 @@ export function process() {
     // Copying current highlights before paragraph hash is altered.
     config.mistakes.copyMistakes(p.getAttribute('data-pk-hash'), hash);
 
-
     // Applying original highlights until the new api-call resolves itself.
     guiHighlightTokens(hash);
 

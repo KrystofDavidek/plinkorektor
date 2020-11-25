@@ -42,6 +42,9 @@ export function processApiCall(hash: string, p) {
                 const mistake = new Mistake();
                 mistake.setTokens(m.highlights);
                 mistake.setDescription(m.description);
+                if (m.about) {
+                    mistake.setAbout(m.about);
+                }
 
                 m.corrections.forEach((c) => {
                     const correction = new Correction();

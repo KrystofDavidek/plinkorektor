@@ -1,5 +1,3 @@
-import { Tagger } from './Tagger';
-import { Spellchecker } from './Spellchecker';
 import { MessageImportance } from './MessageImportance';
 import { Editor } from './Editor';
 import { MistakeManager } from '../core/correction/MistakeManager';

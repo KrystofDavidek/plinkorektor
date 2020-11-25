@@ -5,12 +5,14 @@ export class Mistake {
     protected tokens: number[]; // Tokens to be highlighted.
     protected description: string; // Description of the mistake.
     protected corrections: Correction[]; // List of possible corrections.
+    protected about: {url: string; label: string}[]; // List of possible corrections.
 
     constructor() {
         this.id = Math.random().toString(36).replace(/[^a-z]+/g, '');
         this.tokens = [];
         this.description = '';
         this.corrections = [];
+        this.about = [];
     }
 
     public setTokens(newTokens: number[]) {
@@ -19,6 +21,10 @@ export class Mistake {
 
     public setDescription(newDescription: string) {
         this.description = newDescription;
+    }
+
+    public setAbout(newAbout: {url: string; label: string}[]) {
+        this.about = newAbout;
     }
 
     public addCorrection(newCorrection: Correction) {
@@ -35,6 +41,10 @@ export class Mistake {
 
     public getDescription() {
         return this.description;
+    }
+
+    public getAbout() {
+        return this.about;
     }
 
     public getTokens() {
