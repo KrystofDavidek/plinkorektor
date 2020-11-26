@@ -30,6 +30,8 @@ export function process() {
 
     // Changes are not over, skipping paragraph
     if (p.getAttribute('data-pk-hash') !== hash) {
+        // Copying current highlights before paragraph hash is altered.
+        config.mistakes.copyMistakes(p.getAttribute('data-pk-hash'), hash);
         // Updating hash.
         p.setAttribute('data-pk-hash', hash);
         p.setAttribute('data-pk-changed', true);
@@ -45,9 +47,6 @@ export function process() {
     }
     p.removeAttribute('data-pk-changed');
     p.setAttribute('data-pk-processing', true);
-
-    // Copying current highlights before paragraph hash is altered.
-    config.mistakes.copyMistakes(p.getAttribute('data-pk-hash'), hash);
 
     // Applying original highlights until the new api-call resolves itself.
     guiHighlightTokens(hash);
