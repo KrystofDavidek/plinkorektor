@@ -6,6 +6,7 @@ Plugin();
 
 tinymce.init({
   selector: 'textarea.tinymce',
+  keep_styles: false, // prevent class copy on p
   plugins: 'code plinkorektor',
   menubar: 'korektor',
   menu: {
