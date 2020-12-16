@@ -5,6 +5,8 @@ import { message as msg } from '../Message';
 import { config } from '../Config';
 import { processApiCall } from './ApiCall';
 import { guiHighlightTokens } from '../gui/Tokens';
+import { processRegexAutocorrect } from './RegexProcess';
+import { guiShowProcessingIndicator } from '../gui/ProcessingIndicator';
 
 /**
  * Goes through every paragraph and if it changed it sends it to the corrector API and call addCorrections with API output
@@ -46,11 +48,13 @@ export function process() {
         return;
     }
     p.removeAttribute('data-pk-changed');
+    guiShowProcessingIndicator();
     p.setAttribute('data-pk-processing', true);
 
     // Applying original highlights until the new api-call resolves itself.
     guiHighlightTokens(hash);
-
+    // Call local regex corrections
+    processRegexAutocorrect(p);
     // Caling processing
     processApiCall(hash, p);
   });

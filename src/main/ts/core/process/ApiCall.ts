@@ -7,6 +7,7 @@ import { guiHideProcessingIndicator, guiShowProcessingIndicator } from '../gui/P
 import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
+import { processRegexHighlight } from './RegexProcess';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
@@ -25,7 +26,6 @@ export function processApiCall(hash: string, p) {
 
     // Archive call (for processing status indication) and show the processing indicator.
     ajaxCalls.push(call);
-    guiShowProcessingIndicator();
 
     call.done((data) => {
         // Report invalid AJAX input status.
@@ -33,11 +33,10 @@ export function processApiCall(hash: string, p) {
             msg('Something went wrong on the API server.', MI.DANGER);
             return;
         }
-
         // Create tokens and add mistakes if tokenization was successful.
         if (guiCreateTokens(hash, data.tokens)) {
             config.mistakes.removeMistakes(hash);
-
+            processRegexHighlight(hash, p, data.tokens);
             data.mistakes.forEach((m) => {
                 const mistake = new Mistake();
                 mistake.setTokens(m.highlights);
@@ -45,11 +44,12 @@ export function processApiCall(hash: string, p) {
                 if (m.about) {
                     mistake.setAbout(m.about);
                 }
-
+                console.log(m.corrections)
                 m.corrections.forEach((c) => {
                     const correction = new Correction();
                     correction.setDescription(c.description);
                     correction.setRules(c.rules);
+                    console.log(c.rules);
                     mistake.addCorrection(correction);
                 });
 
