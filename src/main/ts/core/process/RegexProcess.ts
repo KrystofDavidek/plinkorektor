@@ -2,12 +2,12 @@ import { Correction } from '../correction/Correction';
 import { Mistake } from '../correction/Mistake';
 import { autocorrectRegexRules, highlightRegexRules } from '../correction/RegexRules';
 import { config } from '../Config';
+import * as _ from 'lodash';
 
 export function processRegexAutocorrect(p) {
     autocorrectRegexRules.forEach(rule => {
         console.log('RUNNING RULE ' + rule.name, p.textContent )
         p.textContent = p.textContent.replace(rule.search, rule.replace);
-        console.log(p.textContent)
     });
 }
 
@@ -22,18 +22,23 @@ export function processRegexHighlight(hash, p, tokens ) {
     };
     let match;
     highlightRegexRules.forEach(rule => {
+        const regex = _.cloneDeep(rule.search);
         while ((match = rule.search.exec(p.textContent)) !== null) {
             const highlights = getTokensToHighlight(match.index, match.index + match[0].length, tokenPositions);
             const mistake = new Mistake();
-            mistake.setTokens(highlights);
+            mistake.setTokens(highlights.map((val) => val.pos));
             mistake.setDescription(rule.name);
             if (rule.about) {
                 mistake.setAbout(rule.about);
             }
-            
+            let rules = {};
+            highlights.forEach((token) => {
+                rules[token.pos] = ''; 
+            });
+            rules[highlights[0].pos] = highlights.map((val) => val.token).join('').replace(regex, rule.replace);
             const correction = new Correction();
             correction.setDescription(rule.correctionLabel ? rule.correctionLabel : "OPRAVIT");
-            correction.setRules({});
+            correction.setRules(rules);
             mistake.addCorrection(correction);
 
             config.mistakes.addMistake(hash, mistake);
@@ -42,5 +47,5 @@ export function processRegexHighlight(hash, p, tokens ) {
 }
 
 export function getTokensToHighlight(from: number, to: number, tokenPositions: {start:number,end:number,pos:number, token:string}[]) {
-    return tokenPositions.filter((value) => from <= value.end && to > value.start).map((value) => value.pos);
+    return tokenPositions.filter((value) => from <= value.end && to > value.start);
 }
