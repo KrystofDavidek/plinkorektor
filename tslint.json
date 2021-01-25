@@ -1,5 +1,6 @@
 {
-  "defaultSeverity": "error",
+  
+  "defaultSeverity": "warn",
   "extends": [
       "@ephox/tslint-rules/tslint.json"
   ],

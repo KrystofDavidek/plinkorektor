@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import { config } from '../Config';
 import { message as msg } from '../Message';
 import { MessageImportance as MI } from '../../types/MessageImportance';
-import { guiHideProcessingIndicator, guiShowProcessingIndicator } from '../gui/ProcessingIndicator';
+import { guiHideProcessingIndicator } from '../gui/ProcessingIndicator';
 
 import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
