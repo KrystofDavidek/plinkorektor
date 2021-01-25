@@ -1,4 +1,4 @@
-export type RegexRule = {
+export interface RegexRule {
     name: string;
     about?: { url: string; label: string; }[];
     correctionLabel?: string;

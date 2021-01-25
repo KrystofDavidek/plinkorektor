@@ -44,12 +44,10 @@ export function processApiCall(hash: string, p) {
                 if (m.about) {
                     mistake.setAbout(m.about);
                 }
-                console.log(m.corrections)
                 m.corrections.forEach((c) => {
                     const correction = new Correction();
                     correction.setDescription(c.description);
                     correction.setRules(c.rules);
-                    console.log(c.rules);
                     mistake.addCorrection(correction);
                 });
 

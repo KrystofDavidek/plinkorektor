@@ -11,26 +11,25 @@ export const interpunkceotviraci: string = '[\u{0028}\u{005B}\u{007B}\u{00AB}\u{
 export const apostrof: string = '[\u{02BC}\u{0027}\u{0060}\u{2018}\u{2019}\u{00B4}]';
 export const uvozovky: string = '[\u{0022}\u{0027}\u{0060}\u{2018}\u{2019}\u{201C}\u{201D}\u{00AB}\u{00B4}\u{2039}]';
 
-
 export let autocorrectRegexRules: RegexRule[] = [
     {
         name: 'násobné mezery',
-        search: new RegExp(mezery+'+' , 'g'),
+        search: new RegExp(mezery + '+' , 'g'),
         replace: '\u{0020}'
     },
     {
         name: 'nezlomitelné mezery po jednopísmenných předložkách',
-        search: new RegExp('^('+pismena+')\u{0020}' , 'g'),
+        search: new RegExp('^(' + pismena + ')\u{0020}' , 'g'),
         replace: '$1\u{00A0}'
     },
     {
         name: 'nezlomitelné mezery po iniciálách a jednopísmenných zkratkách s tečkou',
-        search: new RegExp('^('+pismena+'\\.)\u{0020}?='+alnum , 'g'),
+        search: new RegExp('^(' + pismena + '\\.)\u{0020}?=' + alnum , 'g'),
         replace: '$1\u{00A0}'
     },
     {
         name: 'nezlomitelné mezery po řadových číslovkých vyjádřených číslicí',
-        search: new RegExp('('+cislice+'{1,2}\\.)\u{0020}?='+malapismena , 'g'),
+        search: new RegExp('(' + cislice + '{1,2}\\.)\u{0020}?=' + malapismena , 'g'),
         replace: '$1\u{00A0}'
     },
     {
@@ -40,17 +39,17 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'chybějící mezera po tečce',
-        search: new RegExp('(['+interpunkcezaviraci+alnum+']\\.)?='+alnum , 'g'),
+        search: new RegExp('([' + interpunkcezaviraci + alnum + ']\\.)?=' + alnum , 'g'),
         replace: '$1\u{0020}'
     },
     {
         name: 'nadbytečná tečka',
-        search: new RegExp('('+alnum+')\\.\\.\u{0020}' , 'g'),
+        search: new RegExp('(' + alnum + ')\\.\\.\u{0020}' , 'g'),
         replace: '$1.\u{0020}'
     },
     {
         name: 'chybějící úzká mezera mezi řády čísel (a oprava chybné tečky)',
-        search: new RegExp('('+cislice+'{1,3})\u{0020}|\\.?='+cislice+'{3}[^'+cislice+']' , 'g'),
+        search: new RegExp('(' + cislice + '{1,3})\u{0020}|\\.?=' + cislice + '{3}[^' + cislice + ']' , 'g'),
         replace: '$1\u{00A0}'
     },
     {
@@ -60,17 +59,17 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'chybějící mezera po čárce',
-        search: new RegExp('('+pismena+'),?='+pismena , 'g'),
+        search: new RegExp('(' + pismena + '),?=' + pismena , 'g'),
         replace: '$1,\u{2020}'
     },
     {
         name: 'chybějící mezera po středníku a/nebo nadbytečná před ním',
-        search: new RegExp('('+alnum+')\u{0020}?;\u{0020}?('+alnum+')' , 'g'),
+        search: new RegExp('(' + alnum + ')\u{0020}?;\u{0020}?(' + alnum + ')' , 'g'),
         replace: '$1; $2'
     },
     {
         name: 'nadbytečná mezera před otazníkem',
-        search: new RegExp('\u{0020}\\?(\u{0020}|('+interpunkcezaviraci+'))' , 'g'),
+        search: new RegExp('\u{0020}\\?(\u{0020}|(' + interpunkcezaviraci + '))' , 'g'),
         replace: '?$1'
     },
     {
@@ -80,7 +79,7 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'nadbytečná mezera před vykřičníkem',
-        search: new RegExp('\u{0020}!(\u{0020}|('+interpunkcezaviraci+'))' , 'g'),
+        search: new RegExp('\u{0020}!(\u{0020}|(' + interpunkcezaviraci + '))' , 'g'),
         replace: '!$1'
     },
     {
@@ -90,7 +89,7 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'nadbytečná mezera před dvojtečkou nebo chybějící po ní',
-        search: new RegExp('('+pismena+')\u{0020}?:\u{0020}?('+pismena+')' , 'g'),
+        search: new RegExp('(' + pismena + ')\u{0020}?:\u{0020}?(' + pismena + ')' , 'g'),
         replace: '$1:\u{0020}$2'
     },
     {
@@ -100,52 +99,52 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'nadbytečná mezera před třemi tečkami',
-        search: new RegExp('('+alnum+')\u{0020}(\u{2026}|(\\.{3}))', 'g'),
+        search: new RegExp('(' + alnum + ')\u{0020}(\u{2026}|(\\.{3}))', 'g'),
         replace: '$1\u{2026}'
     },
     {
         name: 'nadbytečné koncovky u číslic',
-        search: new RegExp('('+cislice+'+)-?=((ti)|(mi))', 'g'),
+        search: new RegExp('(' + cislice + '+)-?=((ti)|(mi))', 'g'),
         replace: '$1'
     },
     {
         name: 'nesprávný a/nebo nesprávně umístěný apostrof u letopočtu',
-        search: new RegExp(apostrof+'\u{0020}?('+cislice+'{2})?=[^'+cislice+']', 'g'),
+        search: new RegExp(apostrof + '\u{0020}?(' + cislice + '{2})?=[^' + cislice + ']', 'g'),
         replace: '\u{02BC}$1'
     },
     {
         name: 'nesprávná varianta apostrofu',
-        search: new RegExp('('+pismena+')\u{0020}?'+apostrof+'\u{0020}??='+pismena, 'g'),
+        search: new RegExp('(' + pismena + ')\u{0020}?' + apostrof + '\u{0020}??=' + pismena, 'g'),
         replace: '$1\u{02BC}'
     },
     {
         name: 'nadbytečné mezery před lomítkem a po něm v číselných zápisech',
-        search: new RegExp('('+cislice+'){1,4}\u{0020}?/\u{0020}?(?='+cislice+'{1,4})' , 'g'),
+        search: new RegExp('(' + cislice + '){1,4}\u{0020}?/\u{0020}?(?=' + cislice + '{1,4})' , 'g'),
         replace: '$1/'
     },
     {
         name: 'nadbytečné koncovky u procentních zápisů',
-        search: new RegExp('('+cislice+'%)-?ní'+pismena+'{0,2}', 'g'),
+        search: new RegExp('(' + cislice + '%)-?ní' + pismena + '{0,2}', 'g'),
         replace: '$1'
     },
     {
         name: 'chybějící nezlomitelná mezera po znaku § a odstranění dvojitého §',
-        search: new RegExp('§{1,2}\u{0020}?(?='+cislice+')', 'g'),
+        search: new RegExp('§{1,2}\u{0020}?(?=' + cislice + ')', 'g'),
         replace: '§\u{00A0}'
     },
     {
         name: 'chybějící nezlomitelné mezery před znakem & a po něm u spojení slov',
-        search: new RegExp('('+pismena+'{2,})\u{0020}?&\u{0020}?('+pismena+'{2,})', 'g'),
+        search: new RegExp('(' + pismena + '{2,})\u{0020}?&\u{0020}?(' + pismena + '{2,})', 'g'),
         replace: '$1\u{0020}&\u{0020}$2'
     },
     {
         name: 'nadbytečné mezery před znakem & a po něm u spojení písmen',
-        search: new RegExp('(^'+pismena+')\u{0020}?&\u{0020}?('+pismena+'$)', 'g'),
+        search: new RegExp('(^' + pismena + ')\u{0020}?&\u{0020}?(' + pismena + '$)', 'g'),
         replace: '$1&$2'
     },
     {
         name: 'chybějící nezlomitelné mezery po znaménkách narození a úmrtí',
-        search: new RegExp('(\\*|†)\u{0020}?(?='+cislice+')' , 'g'),
+        search: new RegExp('(\\*|†)\u{0020}?(?=' + cislice + ')' , 'g'),
         replace: '$1\u{00A0}'
     },
     {
@@ -155,32 +154,32 @@ export let autocorrectRegexRules: RegexRule[] = [
     },
     {
         name: 'nezlomitelná mezera po znaku ⌀',
-        search: new RegExp('⌀\u{0020}?('+cislice+')', 'g'),
+        search: new RegExp('⌀\u{0020}?(' + cislice + ')', 'g'),
         replace: '⌀\u{00A0}$1'
     },
     {
         name: 'mezera u hashtagů',
-        search: new RegExp('#\u{0020}?('+pismena+')', 'g'),
+        search: new RegExp('#\u{0020}?(' + pismena + ')', 'g'),
         replace: '#$1'
     },
     {
         name: 'nadbytečné mezery uvnitř uvozovek zleva',
-        search: new RegExp('('+interpunkceotviraci+')\u{0020}?=('+alnum+')', 'g'),
+        search: new RegExp('(' + interpunkceotviraci + ')\u{0020}?=(' + alnum + ')', 'g'),
         replace: '$1'
     },
     {
         name: 'nadbytečné mezery uvnitř uvozovek zprava',
-        search: new RegExp('('+alnum+interpunkce+'?)\u{0020}('+interpunkcezaviraci+')', 'g'),
+        search: new RegExp('(' + alnum + interpunkce + '?)\u{0020}(' + interpunkcezaviraci + ')', 'g'),
         replace: '$1$2'
     },
     {
         name: 'chybějící mezery vně závorek zleva',
-        search: new RegExp('('+alnum+')('+interpunkceotviraci+')('+alnum+')', 'g'),
+        search: new RegExp('(' + alnum + ')(' + interpunkceotviraci + ')(' + alnum + ')', 'g'),
         replace: '$1\u{0020}$2$3'
     },
     {
         name: 'chybějící mezery vně závorek zprava',
-        search: new RegExp('('+alnum+interpunkce+'?)('+interpunkcezaviraci+')('+alnum+')', 'g'),
+        search: new RegExp('(' + alnum + interpunkce + '?)(' + interpunkcezaviraci + ')(' + alnum + ')', 'g'),
         replace: '$1$2\u{0020}$3'
     },
     /*{ //TODO
@@ -195,22 +194,22 @@ export let autocorrectRegexRules: RegexRule[] = [
     },*/
     {
         name: 'nesprávný spojovník nebo dlouhá pomlčka v rozsahu čtyřmístných letopočtů 1',
-        search: new RegExp('([^'+cislice+'][12]'+cislice+'{3})[-—]([12]'+cislice+'{3}[^'+cislice+'])', 'g'),
+        search: new RegExp('([^' + cislice + '][12]' + cislice + '{3})[-—]([12]' + cislice + '{3}[^' + cislice + '])', 'g'),
         replace: '$1–$2'
     },
     {
         name: 'nesprávný spojovník nebo dlouhá pomlčka v rozsahu čtyřmístných letopočtů 2',
-        search: new RegExp('([^'+cislice+'][12]'+cislice+'{3})\u0020–\u{0020}([12]'+cislice+'{3}[^'+cislice+'])', 'g'),
+        search: new RegExp('([^' + cislice + '][12]' + cislice + '{3})\u0020–\u{0020}([12]' + cislice + '{3}[^' + cislice + '])', 'g'),
         replace: '$1–$2'
     },
     {
         name: 'nesprávný spojovník nebo dlouhá pomlčka v rozsahu trojmístných letopočtů',
-        search: new RegExp('(?=[^'+cislice+']'+cislice+'{3})[-—](?='+cislice+'{3}[^'+cislice+'])', 'g'),
+        search: new RegExp('(?=[^' + cislice + ']' + cislice + '{3})[-—](?=' + cislice + '{3}[^' + cislice + '])', 'g'),
         replace: '$1–$2'
     },
     {
         name: 'nesprávný spojovník nebo dlouhá pomlčka v rozsahu desetiletí a století',
-        search: new RegExp('('+cislice+'+\\.)\u{0020}?[-—]\u{0020}?('+cislice+'+\\.)', 'g'),
+        search: new RegExp('(' + cislice + '+\\.)\u{0020}?[-—]\u{0020}?(' + cislice + '+\\.)', 'g'),
         replace: '$1–$2'
     }
 
@@ -222,7 +221,7 @@ export let highlightRegexRules: RegexRule[] = [{
 },
 {
     name: 'nadbytečná mezera u desetinných čísel',
-    search: new RegExp('('+cislice+')\u{0020}?,\u{0020}?('+cislice+')', 'g'),
+    search: new RegExp('(' + cislice + ')\u{0020}?,\u{0020}?(' + cislice + ')', 'g'),
     replace: '$1,$2'
 },
 {
@@ -232,32 +231,32 @@ export let highlightRegexRules: RegexRule[] = [{
 },
 {
     name: 'chybějící nezlomitelná mezera před znakem %, ‰',
-    search: new RegExp('('+cislice+')\u{0020}(%|‰)', 'g'),
+    search: new RegExp('(' + cislice + ')\u{0020}(%|‰)', 'g'),
     replace: '$1\u{00A0}$2'
 },
 {
     name: 'chybějící nezlomitelné mezery před znakem ° s udanou teplotní stupnicí',
-    search: new RegExp('('+cislice+')\u{0020}?°\u{0020}?([CFRDN])', 'g'),
+    search: new RegExp('(' + cislice + ')\u{0020}?°\u{0020}?([CFRDN])', 'g'),
     replace: '$1\u00A0°$2'
 },
 {
     name: 'nezlomitelná mezera a odstranění znaku stupně u Kelvinovy teplotní stupnice',
-    search: new RegExp('('+cislice+')\u{0020}?°?\u{0020}?K$', 'g'),
+    search: new RegExp('(' + cislice + ')\u{0020}?°?\u{0020}?K$', 'g'),
     replace: '$1\u00A0K'
 },
 {
     name: 'mezery u znaku × při uvádění rozměrů',
-    search: new RegExp('('+alnum+')\u{0020}?[x×]\u{0020}?('+cislice+')', 'g'),
+    search: new RegExp('(' + alnum + ')\u{0020}?[x×]\u{0020}?(' + cislice + ')', 'g'),
     replace: '$1\u00A0×\u{00A0}$2'
 },
 {
     name: 'mezery u znaku × při zápisu adverbií',
-    search: new RegExp('('+cislice+')\u{0020}?[x×]\u{0020}?('+pismena+')', 'g'),
+    search: new RegExp('(' + cislice + ')\u{0020}?[x×]\u{0020}?(' + pismena + ')', 'g'),
     replace: '$1×\u{0020}$2'
 },
 {
     name: 'nezlomitelná mezera po znaku #',
-    search: new RegExp('#\u{0020}?('+cislice+')', 'g'),
+    search: new RegExp('#\u{0020}?(' + cislice + ')', 'g'),
     replace: '#\u{00A0}$1'
 },
 /*{ //TODO
@@ -267,42 +266,42 @@ export let highlightRegexRules: RegexRule[] = [{
 },*/
 {
     name: 'nezlomitelné mezery před znaménky = a + a po nich v obecných, nematematických zápisech',
-    search: new RegExp('('+alnum+')\u{0020}?([=|\\+])\u{0020}?('+pismena+')', 'g'),
+    search: new RegExp('(' + alnum + ')\u{0020}?([=|\\+])\u{0020}?(' + pismena + ')', 'g'),
     replace: '$1\u{00A0}$2\u{00A0}$3'
 },
 {
     name: 'pomlčka po peněžních částkách, následuje-li Kč nebo korun + nezlomitelná mezera',
-    search: new RegExp('('+cislice+'),[-–—]+\u{0020}?(?=(Kč)|(korun))', 'g'),
+    search: new RegExp('(' + cislice + '),[-–—]+\u{0020}?(?=(Kč)|(korun))', 'g'),
     replace: '$1\u{00A0}'
 },
 {
     name: 'pomlčka po peněžních částkách, nenásleduje-li Kč a zároveň předchází + nezlomitelná mezera',
-    search: new RegExp('(Kč)\u{0020}?('+cislice+'+),[-–—]+', 'g'),
+    search: new RegExp('(Kč)\u{0020}?(' + cislice + '+),[-–—]+', 'g'),
     replace: '$1\u{00A0}$3'
 },
 {
     name: 'nesprávná druhá část u rozsahu letopočtů',
-    search: new RegExp('([^-])(1|2)('+cislice+')('+cislice+'{2})(-|–)('+cislice+'{2})([^0-9-])', 'g'),
+    search: new RegExp('([^-])(1|2)(' + cislice + ')(' + cislice + '{2})(-|–)(' + cislice + '{2})([^0-9-])', 'g'),
     replace: '$1$2$3$4–$2$3$6$7'
 },
 {
     name: 'nesprávné tvary otvíracích uvozovek',
-    search: new RegExp('(^|\u{0020}|'+interpunkceotviraci+')'+uvozovky+'('+alnum+')', 'g'),
+    search: new RegExp('(^|\u{0020}|' + interpunkceotviraci + ')' + uvozovky + '(' + alnum + ')', 'g'),
     replace: '$1„$2'
 },
 {
     name: 'nesprávné tvary zavíracích uvozovek',
-    search: new RegExp('('+alnum+interpunkce+'?)'+uvozovky+'(\u{0020}|'+interpunkcezaviraci+')', 'g'),
+    search: new RegExp('(' + alnum + interpunkce + '?)' + uvozovky + '(\u{0020}|' + interpunkcezaviraci + ')', 'g'),
     replace: '$1“$2'
 },
 {
     name: 'nesprávné nebo chybějící mezery okolo větné pomlčky nebo nesprávného spojovníku',
-    search: new RegExp('('+pismena+interpunkcezaviraci+'?)\u{0020}[-–—]('+alnum+')', 'g'),
+    search: new RegExp('(' + pismena + interpunkcezaviraci + '?)\u{0020}[-–—](' + alnum + ')', 'g'),
     replace: '$1\u00A0–\u{0020}$2'
 },
 {
     name: 'nesprávné nebo chybějící mezery okolo větné pomlčky nebo nesprávného spojovníku 2',
-    search: new RegExp('('+pismena+interpunkcezaviraci+'?)[-–—]\u{0020}('+alnum+')', 'g'),
+    search: new RegExp('(' + pismena + interpunkcezaviraci + '?)[-–—]\u{0020}(' + alnum + ')', 'g'),
     replace: '$1\u00A0–\u{0020}$2'
 },
 /*{//TODO
@@ -312,6 +311,6 @@ export let highlightRegexRules: RegexRule[] = [{
 },*/
 {
     name: 'nesprávné nebo chybějící mezery okolo větné pomlčky nebo nesprávného spojovníku 4',
-    search: new RegExp('('+pismena+')\u{0020}[-–—]\u{0020}('+alnum+')', 'g'),
+    search: new RegExp('(' + pismena + ')\u{0020}[-–—]\u{0020}(' + alnum + ')', 'g'),
     replace: '$1\u00A0–\u{0020}$2'
 }];
