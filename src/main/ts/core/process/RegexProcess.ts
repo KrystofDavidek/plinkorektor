@@ -28,7 +28,7 @@ export function processRegexHighlight(hash, p, tokens ) {
             const highlights = getTokensToHighlight(match.index, match.index + match[0].length, tokenPositions);
             const mistake = new Mistake();
             mistake.setTokens(highlights.map((val) => val.pos));
-            mistake.setDescription(rule.name);
+            mistake.setDescription(rule.description);
             if (rule.about) {
                 mistake.setAbout(rule.about);
             }
