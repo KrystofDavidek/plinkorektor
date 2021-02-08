@@ -142,7 +142,7 @@ function buildSuggestionDialog(helperText: string, mistake: Mistake) {
             suggestions.push(
                 {
                     type: 'htmlpanel',
-                    html: '<a href="' + item.url + '">' + item.label + '</h4>'
+                    html: '<a href="' + item.url + '" target="_blank" rel="noopener noreferrer">' + item.label + '</h4>'
                 }
             );
         });
