@@ -2,7 +2,7 @@ export const cssMainStylesheet = `
     @import url('https://fonts.googleapis.com/css2?family=Varta&display=swap');
 
     body { font-family: Varta; }
-    
+
     @keyframes processing {
         0% {opacity: 1;}
         100% {opacity: 0;}
