@@ -10,6 +10,7 @@ export const interpunkcezaviraci: string = '[\u{0029}\u{005D}\u{007D}\u{00BB}\u{
 export const interpunkceotviraci: string = '[\u{0028}\u{005B}\u{007B}\u{00AB}\u{201A}\u{201E}]';
 export const apostrof: string = '[\u{02BC}\u{0027}\u{0060}\u{2018}\u{2019}\u{00B4}]';
 export const uvozovky: string = '[\u{0022}\u{0027}\u{0060}\u{2018}\u{2019}\u{201C}\u{201D}\u{00AB}\u{00B4}\u{2039}]';
+export const zacatek_slova: string = '[\u{0020}\u{00A0}\u{1680}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{202F}\u{205F}\u{3000}(]';
 
 export let autocorrectRegexRules: RegexRule[] = [
     {
@@ -27,7 +28,7 @@ export let autocorrectRegexRules: RegexRule[] = [
             url: 'IJP',
             label: 'https://prirucka.ujc.cas.cz/?id=880'
         }],
-        search: new RegExp('^(' + pismena + ')\u{0020}' , 'g'),
+        search: new RegExp('('+ zacatek_slova + pismena + ')\u{0020}' , 'g'),
         replace: '$1\u{00A0}'
     },
     {
@@ -38,7 +39,7 @@ export let autocorrectRegexRules: RegexRule[] = [
             url: 'IJP',
             label: 'https://prirucka.ujc.cas.cz/?id=880'
         }],
-        search: new RegExp('^(' + pismena + '\\.)\u{0020}?=' + alnum , 'g'),
+        search: new RegExp('(' + zacatek_slova + pismena + '\\.)\u{0020}?=' + alnum , 'g'),
         replace: '$1\u{00A0}'
     },
     {
@@ -97,8 +98,8 @@ export let autocorrectRegexRules: RegexRule[] = [
         name: 'chybějící mezera po čárce',
         description: 'Chybějící mezera',
         correctionLabel: 'Vložte mezeru za čárku',
-        search: new RegExp('(' + pismena + '),?=' + pismena , 'g'),
-        replace: '$1,\u{2020}'
+        search: new RegExp('(' + pismena + '),(?=' + pismena + ')', 'g'),
+        replace: '$1,\u{0020}'
     },
     {
         name: 'chybějící mezera po středníku a/nebo nadbytečná před ním',
@@ -171,7 +172,7 @@ export let autocorrectRegexRules: RegexRule[] = [
     {
         name: 'nadbytečné koncovky u číslic',
         description: 'Nadbytečné koncovky u číslic',
-        search: new RegExp('(' + cislice + '+)-?=((ti)|(mi))', 'g'),
+        search: new RegExp('(' + cislice + '+)-((ti)|(mi))', 'g'),
         replace: '$1'
     },
     {

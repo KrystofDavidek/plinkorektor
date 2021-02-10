@@ -7,7 +7,9 @@ import * as _ from 'lodash';
 
 export function processRegexAutocorrect(p) {
     autocorrectRegexRules.forEach((rule) => {
-        msg('RUNNING RULE ' + rule.name, p.textContent );
+        if(rule.search.test(p.textContent)) {
+            msg('APPLYING RULE ' + rule.name + ' ON ' + p.textContent);
+        }
         p.textContent = p.textContent.replace(rule.search, rule.replace);
     });
 }
