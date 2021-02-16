@@ -58,7 +58,8 @@ export function processApiCall(hash: string, p) {
         }
         p.removeAttribute('data-pk-processing');
     }).fail(() => {
-        msg('AJAX request failed.', MI.DANGER);
+        msg('AJAX request failed. Trying again.', MI.DANGER);
+        processApiCall(hash, p);
     }).always(() => {
         // Hide processing indicator if there is no other AJAX call present.
         const index = ajaxCalls.indexOf(call);

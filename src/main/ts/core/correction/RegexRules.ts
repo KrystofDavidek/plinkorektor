@@ -172,7 +172,7 @@ export let autocorrectRegexRules: RegexRule[] = [
     {
         name: 'nadbytečné koncovky u číslic',
         description: 'Nadbytečné koncovky u číslic',
-        search: new RegExp('(' + cislice + '+)-((ti)|(mi))', 'g'),
+        search: new RegExp('(' + cislice + '+)-?((ti)|(mi))', 'g'),
         replace: '$1'
     },
     {
