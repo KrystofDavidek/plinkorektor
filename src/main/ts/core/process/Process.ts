@@ -15,6 +15,12 @@ export function process() {
   const content = config.editor.dom.select('p');
   // Looping through paragraphs
   content.forEach(function (p) {
+    if(p.getAttribute('data-pk-init')) {
+      p.removeAttribute('data-pk-hash');
+      p.removeAttribute('data-pk-changed');
+      p.removeAttribute('data-pk-processing');
+      p.removeAttribute('data-pk-init');
+    }
     if (p.getAttribute('data-pk-processing')) {
         msg('Already processing. Processing skipped.');
         return;
