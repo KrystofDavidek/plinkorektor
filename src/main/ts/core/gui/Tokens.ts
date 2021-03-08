@@ -5,11 +5,6 @@ import { message as msg } from '../Message';
 import { guiInitMistakeDialogs } from './Dialog';
 
 export function guiCreateTokens(hash: string, tokens: string[]) {
-    // Building tokens
-    let tokensHtml = '';
-    tokens.forEach(function (token) {
-        tokensHtml += '<span class="pk-token">' + token + '</span>';
-    });
     // Checking if paragraph with given hash was altered during tokenization.
     const paragraph = config.editor.dom.select('p[data-pk-hash="' + hash + '"]');
     let tokenizationSuccess = false;
@@ -25,6 +20,19 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
         } else {
             msg('Paragraph with hash "' + $(p).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
             const bookmark = config.editor.selection.getBookmark(2, true);
+                // Building tokens
+
+            let originalHtml = $(p).html();
+            console.log(originalHtml)
+            let tokensHtml = '';
+            tokens.forEach(function (token) {
+                let pos = originalHtml.indexOf(token);
+                let end = pos + token.length;
+                let subHtml = originalHtml.substring(0, end);
+                originalHtml = originalHtml.replace(subHtml, "");
+                subHtml = subHtml.replace(token, '<span class="pk-token">' + token + '</span>')
+                tokensHtml += subHtml;
+            });
             $(p).html(tokensHtml);
             config.editor.selection.moveToBookmark(bookmark);
             tokenizationSuccess = true;

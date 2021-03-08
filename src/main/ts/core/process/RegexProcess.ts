@@ -5,6 +5,7 @@ import { config } from '../Config';
 import { message as msg } from '../Message';
 import * as _ from 'lodash';
 
+// TODO MAKE WORK WITH HTML
 export function processRegexAutocorrect(p) {
     autocorrectRegexRules.forEach((rule) => {
         if(rule.search.test(p.textContent)) {
