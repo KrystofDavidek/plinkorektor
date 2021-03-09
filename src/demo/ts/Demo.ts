@@ -18,13 +18,4 @@ tinymce.init({
   },
 
   valid_elements: '*[*]',
-
-  toolbar: false,
-
-  setup: (editor) => {
-    // Removal of keyboard shortcuts of editor
-    editor.on('init', function () {
-
-    });
-  }
 });
