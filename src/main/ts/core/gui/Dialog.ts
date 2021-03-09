@@ -55,7 +55,6 @@ export function guiInitMistakeDialogs(hash) {
                     // Apply correction.
                     Object.entries(suggestionRulebook[parts[2]]).forEach(function ([target, correctValue]: [any, string]) {
                         let originalContent: string = config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].innerHTML;
-                        let originalText: string = config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].textContent;
                         let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, "|<>|$1|<>|").split("|<>|");
                         console.log(contentParts);
                         let modifiedContentParts = contentParts.map((part) => {

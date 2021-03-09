@@ -3,7 +3,7 @@ import * as md5 from 'md5';
 import { config } from '../Config';
 import { message as msg } from '../Message';
 import { guiInitMistakeDialogs } from './Dialog';
-import {decode, encode} from 'html-entities';
+import { encode} from 'html-entities';
 
 export function guiCreateTokens(hash: string, tokens: string[]) {
     // Checking if paragraph with given hash was altered during tokenization.
