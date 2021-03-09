@@ -3,6 +3,7 @@ import * as md5 from 'md5';
 import { config } from '../Config';
 import { message as msg } from '../Message';
 import { guiInitMistakeDialogs } from './Dialog';
+import {decode, encode} from 'html-entities';
 
 export function guiCreateTokens(hash: string, tokens: string[]) {
     // Checking if paragraph with given hash was altered during tokenization.
@@ -31,7 +32,9 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
             let tokensHtml = '';
             tokens.forEach(function (token) {
                 // find part of html containing token
+                token = encode(token);
                 let regex: RegExp = new RegExp("(<[^(><.)]+>)*"+token.split("").join("(<[^(><.)]+>)*")+"(<[^(><.)]+>)*");
+                console.log(originalHtml, regex);
                 let tokenReg = originalHtml.match(regex);
                 let end = tokenReg.index + tokenReg[0].length;
                 let subHtml = originalHtml.substring(0, end);

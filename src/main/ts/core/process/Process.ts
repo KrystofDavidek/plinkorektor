@@ -60,7 +60,7 @@ export function process() {
     // Applying original highlights until the new api-call resolves itself.
     guiHighlightTokens(hash);
     // Call local regex corrections
-    //processRegexAutocorrect(p);
+    processRegexAutocorrect(p);
     // Caling processing
     processApiCall(hash, p);
   });

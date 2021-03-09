@@ -11,7 +11,23 @@ export function processRegexAutocorrect(p) {
         if(rule.search.test(p.textContent)) {
             msg('APPLYING RULE ' + rule.name + ' ON ' + p.textContent);
         }
-        p.textContent = p.textContent.replace(rule.search, rule.replace);
+        let correctValue = p.textContent.replace(rule.search, rule.replace);
+        let contentParts = p.innerHTML.replace(/(<[^(><.)]+>|(&[a-z0-9#]+;))/g, "|<>|$1|<>|").split("|<>|");
+        console.log(contentParts);
+        let modifiedContentParts = contentParts.map((part) => {
+            if(!part.match(/(<[^(><.)]+>)/)) {
+                let newVal = correctValue.length > part.length ? correctValue.substring(0, part.length) : correctValue;
+                correctValue = correctValue.length > part.length ? correctValue.slice(part.length) : "";
+                return newVal;
+            }
+            return part;
+        });
+        if(correctValue.length > 0) {
+            modifiedContentParts.push(correctValue);
+        }
+        let newContent = modifiedContentParts.join("");
+        console.log(newContent);
+        p.innerHTML = newContent;
     });
 }
 
