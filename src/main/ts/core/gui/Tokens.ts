@@ -22,15 +22,60 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
             const bookmark = config.editor.selection.getBookmark(2, true);
                 // Building tokens
 
-            let originalHtml = $(p).html();
-            console.log(originalHtml)
+            let originalHtml: string = $(p).html();
             let tokensHtml = '';
             tokens.forEach(function (token) {
-                let pos = originalHtml.indexOf(token);
-                let end = pos + token.length;
+                let regex: RegExp = new RegExp("(<[^(><.)]+>)*"+token.split("").join("(<[^(><.)]+>)*")+"(<[^(><.)]+>)*");
+                let tokenReg = originalHtml.match(regex);
+                let end = tokenReg.index + tokenReg[0].length;
                 let subHtml = originalHtml.substring(0, end);
+                let tokenWithHtml = tokenReg[0];
+                let unclosed = [];
+                let unopened = [];
+                let tags = tokenWithHtml.match(/(<[^(><.)]+>)/g);
+                if(tags) {
+                    for(let tag of tags) {
+                        if(tag[1] == "/") {
+                            let lastOpen: string = unclosed.pop();
+                            let start = tag.replace("/", "").replace(">", "");
+                            if(!lastOpen || !lastOpen.startsWith(start)) {
+                                unopened.push(tag);
+                            }
+                        }   else {
+                            unclosed.push(tag);
+                        }
+                    }
+                }
+                let closeTags = unclosed.map((tag: string) => {
+                    let tagType = tag.match(/<([^(</>)]+)>/);
+                    return "</"+tagType[1]+">";
+                })
+                let openTags = [];
+                if(unopened.length) {
+                    let previousTags = (tokensHtml + originalHtml.substring(0, tokenReg.index)).match(/(<[^(><.)]+>)/g);
+                    let index = 0;
+                    let skip = 0;
+                    for(let prevTag of previousTags.reverse()) {
+                        console.log(prevTag, index, unopened, skip)
+                        if(index >= unopened.length) {
+                            break;
+                        }
+                        if(prevTag[1] == "/") {
+                            skip++;
+                        }   else {
+                            if(skip > 0) {
+                                skip--;
+                            }   else {
+                                let start = unopened[index].replace("/", "").replace(">", "");
+                                if(prevTag.startsWith(start)) {
+                                    openTags.push(prevTag);
+                                }
+                            }
+                        }
+                    }
+                }
                 originalHtml = originalHtml.replace(subHtml, "");
-                subHtml = subHtml.replace(token, '<span class="pk-token">' + token + '</span>')
+                subHtml = subHtml.replace(tokenWithHtml, unopened.join("")+'<span class="pk-token">' + openTags.reverse().join("") + tokenWithHtml + closeTags.reverse().join("") + '</span>' + unclosed.join(""));
                 tokensHtml += subHtml;
             });
             $(p).html(tokensHtml);
