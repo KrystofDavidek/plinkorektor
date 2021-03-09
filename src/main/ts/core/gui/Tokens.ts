@@ -19,17 +19,24 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
         // If content was not changed, insert tokens (& set success variable)
         } else {
             msg('Paragraph with hash "' + $(p).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
-            const bookmark = config.editor.selection.getBookmark(2, true);
-                // Building tokens
 
+            // clean old tokens
+            $(p).find(".pk-token").replaceWith(function() {
+                return $( this ).contents();
+            });
+
+            const bookmark = config.editor.selection.getBookmark(2, true);
+            // Building tokens
             let originalHtml: string = $(p).html();
             let tokensHtml = '';
             tokens.forEach(function (token) {
+                // find part of html containing token
                 let regex: RegExp = new RegExp("(<[^(><.)]+>)*"+token.split("").join("(<[^(><.)]+>)*")+"(<[^(><.)]+>)*");
                 let tokenReg = originalHtml.match(regex);
                 let end = tokenReg.index + tokenReg[0].length;
                 let subHtml = originalHtml.substring(0, end);
                 let tokenWithHtml = tokenReg[0];
+                // find unclosed and unopened tags
                 let unclosed = [];
                 let unopened = [];
                 let tags = tokenWithHtml.match(/(<[^(><.)]+>)/g);
@@ -46,17 +53,18 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                         }
                     }
                 }
+                // create missing closing tags
                 let closeTags = unclosed.map((tag: string) => {
                     let tagType = tag.match(/<([^(</>)]+)>/);
                     return "</"+tagType[1]+">";
                 })
+                // find missed opening tags in preceding html
                 let openTags = [];
                 if(unopened.length) {
                     let previousTags = (tokensHtml + originalHtml.substring(0, tokenReg.index)).match(/(<[^(><.)]+>)/g);
                     let index = 0;
                     let skip = 0;
                     for(let prevTag of previousTags.reverse()) {
-                        console.log(prevTag, index, unopened, skip)
                         if(index >= unopened.length) {
                             break;
                         }
@@ -74,8 +82,11 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                         }
                     }
                 }
+                // remove parsed html
                 originalHtml = originalHtml.replace(subHtml, "");
+                // add span with pk-token
                 subHtml = subHtml.replace(tokenWithHtml, unopened.join("")+'<span class="pk-token">' + openTags.reverse().join("") + tokenWithHtml + closeTags.reverse().join("") + '</span>' + unclosed.join(""));
+                // add modified part of html to final html
                 tokensHtml += subHtml;
             });
             $(p).html(tokensHtml);
