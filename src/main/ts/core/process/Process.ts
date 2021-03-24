@@ -26,7 +26,7 @@ export function process() {
         return;
     }
     // Skipping empty paragraphs
-    if (p.textContent.length === 0) {
+    if (p.textContent.trim().length === 0) {
         msg('Empty paragraph. Processing skipped.');
         p.removeAttribute('data-pk-hash');
         p.removeAttribute('data-pk-changed');

@@ -20,7 +20,7 @@ export function processApiCall(hash: string, p) {
         dataType: 'json',
         url: API_PATH,
         data: {
-            text: p.textContent
+            text: p.textContent.trim()
         },
     });
 
@@ -57,7 +57,8 @@ export function processApiCall(hash: string, p) {
             guiHighlightTokens(hash);
         }
         p.removeAttribute('data-pk-processing');
-    }).fail(() => {
+    }).fail((err) => {
+        console.log(err);
         msg('AJAX request failed. Trying again.', MI.DANGER);
         processApiCall(hash, p);
     }).always(() => {
