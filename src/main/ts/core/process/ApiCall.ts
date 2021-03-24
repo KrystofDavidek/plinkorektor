@@ -8,6 +8,7 @@ import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
 import { processRegexHighlight } from './RegexProcess';
+import { decode } from 'html-entities';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
@@ -20,7 +21,7 @@ export function processApiCall(hash: string, p) {
         dataType: 'json',
         url: API_PATH,
         data: {
-            text: p.textContent.trim()
+            text: decode(p.textContent.trim())
         },
     });
 
