@@ -4,6 +4,9 @@ import { config } from '../Config';
 import { message as msg } from '../Message';
 import { guiInitMistakeDialogs } from './Dialog';
 import { decode, encode} from 'html-entities';
+import { parseEl } from '../process/HtmlParser';
+import { ParsedHtml } from '../process/ParsedHtml';
+
 export function escapeRegex(string) {
     return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
@@ -31,6 +34,18 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
 
             const bookmark = config.editor.selection.getBookmark(2, true);
             // Building tokens
+            let parsedHtml: ParsedHtml = parseEl($(p));
+            let tokenPos: {from: number, to: number}[] = [];
+            let charCount = 0;
+            for(let token of tokens) {
+                tokenPos.push({
+                    from: charCount,
+                    to: charCount + token.length - 1
+                });
+                charCount += token.length;
+            }
+            console.log(parsedHtml.getElements(), parsedHtml.getHtml(), parsedHtml.getIndexedText(), tokenPos);
+            console.log(parsedHtml.getTextRangeElementIndices(tokenPos[0].from, tokenPos[0].to));
             let originalHtml: string = decode($(p).html());
             let tokensHtml = '';
             tokens.forEach(function (token) {
