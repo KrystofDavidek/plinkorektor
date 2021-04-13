@@ -45,7 +45,7 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                 charCount += token.length;
             }
             console.log(parsedHtml.getElements(), parsedHtml.getHtml(), parsedHtml.getIndexedText(), tokenPos);
-            console.log(parsedHtml.getTextRangeElementIndices(tokenPos[0].from, tokenPos[0].to));
+            console.log(parsedHtml.wrapToken(tokenPos[0].from, tokenPos[0].to, tokens[0]));
             let originalHtml: string = decode($(p).html());
             let tokensHtml = '';
             tokens.forEach(function (token) {
