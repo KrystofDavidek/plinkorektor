@@ -44,75 +44,10 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                 });
                 charCount += token.length;
             }
-            console.log(parsedHtml.getElements(), parsedHtml.getHtml(), parsedHtml.getIndexedText(), tokenPos);
-            console.log(parsedHtml.wrapToken(tokenPos[0].from, tokenPos[0].to, tokens[0]));
-            let originalHtml: string = decode($(p).html());
-            let tokensHtml = '';
-            tokens.forEach(function (token) {
-                // find part of html containing token
-                console.log(token);
-                token = decode(token);
-                console.log(token);
-                let regex: RegExp = new RegExp("(<[^(><.)]+>)*"+token.split("").map((character) => escapeRegex((character))).join("(<[^(><.)]+>)*")+"(<[^(><.)]+>)*");
-                console.log(originalHtml, regex);
-                let tokenReg = originalHtml.match(regex);
-                let end = tokenReg.index + tokenReg[0].length;
-                let subHtml = originalHtml.substring(0, end);
-                let tokenWithHtml = tokenReg[0];
-                // find unclosed and unopened tags
-                let unclosed = [];
-                let unopened = [];
-                let tags = tokenWithHtml.match(/(<[^(><.)]+>)/g);
-                if(tags) {
-                    for(let tag of tags) {
-                        if(tag[1] == "/") {
-                            let lastOpen: string = unclosed.pop();
-                            let start = tag.replace("/", "").replace(">", "");
-                            if(!lastOpen || !lastOpen.startsWith(start)) {
-                                unopened.push(tag);
-                            }
-                        }   else {
-                            unclosed.push(tag);
-                        }
-                    }
-                }
-                // create missing closing tags
-                let closeTags = unclosed.map((tag: string) => {
-                    let tagType = tag.match(/<([^(</>)]+)>/);
-                    return "</"+tagType[1]+">";
-                })
-                // find missed opening tags in preceding html
-                let openTags = [];
-                if(unopened.length) {
-                    let previousTags = (tokensHtml + originalHtml.substring(0, tokenReg.index)).match(/(<[^(><.)]+>)/g);
-                    let index = 0;
-                    let skip = 0;
-                    for(let prevTag of previousTags.reverse()) {
-                        if(index >= unopened.length) {
-                            break;
-                        }
-                        if(prevTag[1] == "/") {
-                            skip++;
-                        }   else {
-                            if(skip > 0) {
-                                skip--;
-                            }   else {
-                                let start = unopened[index].replace("/", "").replace(">", "");
-                                if(prevTag.startsWith(start)) {
-                                    openTags.push(prevTag);
-                                }
-                            }
-                        }
-                    }
-                }
-                // remove parsed html
-                originalHtml = originalHtml.replace(subHtml, "");
-                // add span with pk-token
-                subHtml = subHtml.replace(tokenWithHtml, unopened.join("")+'<span class="pk-token">' + openTags.reverse().join("") + tokenWithHtml + closeTags.reverse().join("") + '</span>' + unclosed.join(""));
-                // add modified part of html to final html
-                tokensHtml += subHtml;
+            tokens.forEach(function (token, index) {
+                parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
             });
-            $(p).html(tokensHtml);
+            $(p).html(parsedHtml.getHtml());
             config.editor.selection.moveToBookmark(bookmark);
             tokenizationSuccess = true;
         }

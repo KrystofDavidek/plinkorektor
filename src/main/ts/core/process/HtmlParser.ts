@@ -22,7 +22,6 @@ export function parseEl(element): ParsedHtml {
                     parsedHtml.add({ type: ParsedHtmlElementType.TEXT, content: el.textContent });
                 }
                 let endPos = parsedHtml.getElements().length;
-                console.log(startPos, endPos);
                 parsedHtml.add({ type: ParsedHtmlElementType.END, content: "</" + el.localName + ">" });
                 parsedHtml.setLink(startPos, endPos);
                 parsedHtml.setLink(endPos, startPos);

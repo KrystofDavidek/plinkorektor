@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 export class ParsedHtml {
     elements: ParsedHtmlElement[];
 
@@ -10,7 +11,7 @@ export class ParsedHtml {
     }
 
     join(parsedHtml: ParsedHtml) {
-        this.elements.concat(parsedHtml.getElements());
+        this.elements = this.elements.concat(parsedHtml.getElements());
     }
 
     getElements(): ParsedHtmlElement[] {
@@ -48,7 +49,6 @@ export class ParsedHtml {
                 };
             }
         }
-        console.log(start, end);
         if(start == -1 || end == -1) {
             return null;
         }
@@ -112,10 +112,12 @@ export class ParsedHtml {
                 this.elements = this.modifyRange(range.to.index + (fromBeforeToken.length ? 1 : 0), range.to.index + (fromBeforeToken.length ? 1 : 0), newElements);
             }
         }
+        this.fixLinks();
     }
     
     wrapToken(from: number, to: number, token: string) {
         this.isolateToken(from, to, token);
+        // FIND RELEVANT RANGE OF SEGMENTS (CLOSEST COMMON ANCESTOR TO TOKEN AND ALL OF ITS FORMATING)
         let range = this.getTextRangeElementIndices(from, to);
         let min = range.from.index;
         let max = range.to.index;
@@ -128,15 +130,33 @@ export class ParsedHtml {
                 max = element.linked;
             }
         }
+        if(min == range.from.index && max == range.from.index) {
+            console.log("SIMPLE WRAP");
+            let opening: ParsedHtmlElement[] = [{
+                type: ParsedHtmlElementType.BEGIN,
+                content: "<span class=\"pk-token\">",
+                linked: elements.length + 2  
+            }];
+            let ending: ParsedHtmlElement[] = [{
+                type: ParsedHtmlElementType.END,
+                content: "</span>",
+                linked: 0
+            }]
+            let wrappedElements: ParsedHtmlElement[] = opening.concat(elements, ending);
+            this.elements = this.modifyRange(min, max, wrappedElements);
+            this.fixLinks();
+            return this.getElements();
+        }
         let leftPos = range.from.index - min;
         let rightShift = max - range.to.index;
         elements = this.getElementsRange(min, max);
+        elements = this.fixLinks(elements);
+        console.log(elements);
         let rightPos = elements.length - rightShift - 1;
-        console.log(elements[leftPos], elements[rightPos])
         // FIND OPEN SPAN POS
         let start = leftPos - 1;
         while(start >= 0 && elements[start].type != ParsedHtmlElementType.TEXT) {
-            if(elements[start].type == ParsedHtmlElementType.ISOLATED || elements[start].type == ParsedHtmlElementType.BEGIN) {
+            if(elements[start].type == ParsedHtmlElementType.ISOLATED || (elements[start].type == ParsedHtmlElementType.BEGIN)) {
                 leftPos = start;
             }
             start--;
@@ -149,22 +169,43 @@ export class ParsedHtml {
             }
             start++;
         }
-        console.log(elements[leftPos], elements[rightPos])
-        console.log(min, max, elements, elements.slice(leftPos, rightPos + 1));
-        let wrappedUnsanitizedElements: ParsedHtmlElement[] = [];
-        wrappedUnsanitizedElements.push({
+        // FIX CROSSING TAGS
+        let trailingEndTags: ParsedHtmlElement[] = [];
+        let correspondingStartTags: ParsedHtmlElement[] = [];
+        let trailingStartTags: ParsedHtmlElement[] = [];
+        let correspondingEndTags: ParsedHtmlElement[] = [];
+        for(let pos = leftPos; pos <= rightPos; pos++) {
+            if(elements[pos].linked) {
+                if(elements[pos].type == ParsedHtmlElementType.BEGIN && elements[pos].linked > rightPos) {
+                    trailingEndTags.push(_.cloneDeep(elements[elements[pos].linked]));
+                    correspondingStartTags.push(_.cloneDeep(elements[pos]));
+                }
+                if(elements[pos].type == ParsedHtmlElementType.END && elements[pos].linked < leftPos) {
+                    trailingStartTags.push(_.cloneDeep(elements[elements[pos].linked]));
+                    correspondingEndTags.push(_.cloneDeep(elements[pos]));
+                }
+            }
+        }
+        // PUT IT TOGETHER
+        console.log(correspondingEndTags, "SPAN", trailingStartTags.reverse(), elements.slice(leftPos, rightPos + 1), trailingEndTags.reverse(), "/SPAN", correspondingStartTags)
+        let wrappedElements: ParsedHtmlElement[] = correspondingEndTags;
+        wrappedElements.push({
             type: ParsedHtmlElementType.BEGIN,
-            content: "<span class=\"pk-token\">"
+            content: "<span class=\"pk-token\">",
+            linked: rightPos + correspondingEndTags.length + trailingStartTags.length + trailingEndTags.length + 1
         });
-        wrappedUnsanitizedElements = wrappedUnsanitizedElements.concat(elements.slice(leftPos, rightPos + 1));
-        wrappedUnsanitizedElements.push({
+        wrappedElements = wrappedElements.concat(trailingStartTags.reverse(), elements.slice(leftPos, rightPos + 1), trailingEndTags.reverse());
+        wrappedElements.push({
             type: ParsedHtmlElementType.END,
-            content: "</span>"     
-        })
-        console.log(wrappedUnsanitizedElements);
-        let wrappedElements = this.modifyRange(leftPos, rightPos, wrappedUnsanitizedElements, elements);
-        
-        this.elements = this.modifyRange(min, max, wrappedElements);
+            content: "</span>",
+            linked: leftPos + correspondingEndTags.length    
+        });
+        wrappedElements = wrappedElements.concat(correspondingStartTags);
+        console.log(wrappedElements);
+        // REPLACE ORIGINAL SEGMENTS BY WRAPPED VERSION AND FIX LINKS BETWEEN SEGMENTS
+        this.elements = this.modifyRange(min, max, this.modifyRange(leftPos, rightPos, wrappedElements, elements));
+        console.log(this.elements);
+        this.fixLinks();
         return this.getElements();
     }
 
@@ -180,7 +221,6 @@ export class ParsedHtml {
         if(to < sourceRange.length - 1) {
             sufix = sourceRange.slice(to + 1, this.elements.length);
         }
-        console.log(from, to, prefix, sufix, newElements)
         return prefix.concat(newElements, sufix);
     }
 
@@ -211,6 +251,24 @@ export class ParsedHtml {
 
     setLink(position, linkTo) {
         this.elements[position].linked = linkTo;
+    }
+
+    fixLinks(elements?: ParsedHtmlElement[]) {
+        if(!elements) {
+            elements = this.elements;
+        }
+        let begins = [];
+        for(let pos in elements) {
+            if(elements[pos].type == ParsedHtmlElementType.BEGIN) {
+                begins.push(pos);
+            } 
+            if(elements[pos].type == ParsedHtmlElementType.END) {
+                let link = begins.pop();
+                elements[pos].linked = parseInt(link);
+                elements[link].linked = parseInt(pos);
+            }
+        }
+        return elements;
     }
 }
 
