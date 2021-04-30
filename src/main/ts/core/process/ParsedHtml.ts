@@ -131,7 +131,6 @@ export class ParsedHtml {
             }
         }
         if(min == range.from.index && max == range.from.index) {
-            console.log("SIMPLE WRAP");
             let opening: ParsedHtmlElement[] = [{
                 type: ParsedHtmlElementType.BEGIN,
                 content: "<span class=\"pk-token\">",
@@ -153,7 +152,6 @@ export class ParsedHtml {
         let rightShift = max - range.to.index;
         elements = this.getElementsRange(min, max);
         elements = this.fixLinks(elements);
-        console.log(elements);
         let rightPos = elements.length - rightShift - 1;
         // FIND OPEN SPAN POS
         let start = leftPos - 1;
@@ -178,7 +176,6 @@ export class ParsedHtml {
         let correspondingEndTags: ParsedHtmlElement[] = [];
         for(let pos = leftPos; pos <= rightPos; pos++) {
             if(elements[pos].linked !== undefined) {
-                console.log(leftPos, rightPos, elements[pos]);
                 if(elements[pos].type == ParsedHtmlElementType.BEGIN && elements[pos].linked > rightPos) {
                     trailingEndTags.push(_.cloneDeep(elements[elements[pos].linked]));
                     correspondingStartTags.push(_.cloneDeep(elements[pos]));
@@ -190,7 +187,6 @@ export class ParsedHtml {
             }
         }
         // PUT IT TOGETHER
-        console.log(correspondingEndTags, "SPAN", trailingStartTags.reverse(), elements.slice(leftPos, rightPos + 1), trailingEndTags.reverse(), "/SPAN", correspondingStartTags)
         let wrappedElements: ParsedHtmlElement[] = correspondingEndTags;
         wrappedElements.push({
             type: ParsedHtmlElementType.BEGIN,
@@ -206,10 +202,8 @@ export class ParsedHtml {
             linked: leftPos + correspondingEndTags.length    
         });
         wrappedElements = wrappedElements.concat(correspondingStartTags);
-        console.log(wrappedElements);
         // REPLACE ORIGINAL SEGMENTS BY WRAPPED VERSION AND FIX LINKS BETWEEN SEGMENTS
         this.elements = this.modifyRange(min, max, this.modifyRange(leftPos, rightPos, wrappedElements, elements));
-        console.log(this.elements);
         this.fixLinks();
         return this.getElements();
     }
