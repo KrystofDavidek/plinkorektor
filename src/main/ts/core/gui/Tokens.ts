@@ -3,7 +3,6 @@ import * as md5 from 'md5';
 import { config } from '../Config';
 import { message as msg } from '../Message';
 import { guiInitMistakeDialogs } from './Dialog';
-import { decode, encode} from 'html-entities';
 import { parseEl } from '../process/HtmlParser';
 import { ParsedHtml } from '../process/ParsedHtml';
 

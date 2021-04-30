@@ -5,7 +5,6 @@ import { message as msg } from '../Message';
 import { config } from '../Config';
 import { processApiCall } from './ApiCall';
 import { guiHighlightTokens } from '../gui/Tokens';
-import { processRegexAutocorrect } from './RegexProcess';
 import { guiShowProcessingIndicator } from '../gui/ProcessingIndicator';
 
 /**
