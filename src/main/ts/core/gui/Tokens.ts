@@ -31,7 +31,8 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                 return $( this ).contents();
             });
 
-            const bookmark = config.editor.selection.getBookmark(2, true);
+            const bookmark = config.editor.selection.getBookmark();
+            console.log(bookmark);
             // Building tokens
             let parsedHtml: ParsedHtml = parseEl($(p));
             let tokenPos: {from: number, to: number}[] = [];
