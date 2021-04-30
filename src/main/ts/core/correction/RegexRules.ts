@@ -15,11 +15,16 @@ export const zacatek_slova: string = '[\u{0020}\u{00A0}\u{1680}\u{2001}\u{2002}\
 export const konec_slova: string = '[\u{0020}\u{00A0}\u{1680}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{202F}\u{205F}\u{3000}\u{0029}\u{005D}\u{007D}\u{00BB}\u{2018}\u{201C}]';
 
 export let autocorrectRegexRules: RegexRule[] = [
+    
+
+];
+export let highlightRegexRules: RegexRule[] = [
+
     {
         name: 'násobné mezery',
         description: 'Nadbytečné mezery',
         correctionLabel: 'Odstraňte nadbytečné mezery',
-        search: new RegExp(mezery + '+' , 'g'),
+        search: new RegExp(mezery + '{2,}' , 'g'),
         replace: '\u{0020}'
     },
     {
@@ -380,10 +385,14 @@ export let autocorrectRegexRules: RegexRule[] = [
         }],
         search: new RegExp('(' + cislice + '+\\.)\u{0020}?[-—]\u{0020}?(' + cislice + '+\\.)', 'g'),
         replace: '$1–$2'
-    }
+    },
+    
+    
 
-];
-export let highlightRegexRules: RegexRule[] = [{
+
+
+
+    {
     name: 'oprava čárek místo uvozovek',
     description: 'Oprava čárek místo uvozovek',
     search: new RegExp(',,([a-zA-Z0-9])', 'g'),

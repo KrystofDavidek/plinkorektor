@@ -135,11 +135,13 @@ export class ParsedHtml {
             let opening: ParsedHtmlElement[] = [{
                 type: ParsedHtmlElementType.BEGIN,
                 content: "<span class=\"pk-token\">",
+                token: true,
                 linked: elements.length + 2  
             }];
             let ending: ParsedHtmlElement[] = [{
                 type: ParsedHtmlElementType.END,
                 content: "</span>",
+                token: true,
                 linked: 0
             }]
             let wrappedElements: ParsedHtmlElement[] = opening.concat(elements, ending);
@@ -175,7 +177,8 @@ export class ParsedHtml {
         let trailingStartTags: ParsedHtmlElement[] = [];
         let correspondingEndTags: ParsedHtmlElement[] = [];
         for(let pos = leftPos; pos <= rightPos; pos++) {
-            if(elements[pos].linked) {
+            if(elements[pos].linked !== undefined) {
+                console.log(leftPos, rightPos, elements[pos]);
                 if(elements[pos].type == ParsedHtmlElementType.BEGIN && elements[pos].linked > rightPos) {
                     trailingEndTags.push(_.cloneDeep(elements[elements[pos].linked]));
                     correspondingStartTags.push(_.cloneDeep(elements[pos]));
@@ -191,12 +194,14 @@ export class ParsedHtml {
         let wrappedElements: ParsedHtmlElement[] = correspondingEndTags;
         wrappedElements.push({
             type: ParsedHtmlElementType.BEGIN,
+            token: true,
             content: "<span class=\"pk-token\">",
             linked: rightPos + correspondingEndTags.length + trailingStartTags.length + trailingEndTags.length + 1
         });
         wrappedElements = wrappedElements.concat(trailingStartTags.reverse(), elements.slice(leftPos, rightPos + 1), trailingEndTags.reverse());
         wrappedElements.push({
             type: ParsedHtmlElementType.END,
+            token: true,
             content: "</span>",
             linked: leftPos + correspondingEndTags.length    
         });
@@ -276,6 +281,7 @@ export interface ParsedHtmlElement {
     type: ParsedHtmlElementType;
     content: string;
     linked?: number;
+    token?: boolean;
 }
 
 export enum ParsedHtmlElementType {
