@@ -29,35 +29,44 @@ export function processApiCall(hash: string, p) {
     ajaxCalls.push(call);
 
     call.done((data) => {
-        // Report invalid AJAX input status.
-        if (!data.ok) {
-            msg('Something went wrong on the API server.', MI.DANGER);
-            return;
-        }
-        // Create tokens and add mistakes if tokenization was successful.
-        if (guiCreateTokens(hash, data.tokens)) {
-            config.mistakes.removeMistakes(hash);
-            processRegexHighlight(hash, p, data.tokens);
-            data.mistakes.forEach((m) => {
-                const mistake = new Mistake();
-                mistake.setTokens(m.highlights);
-                mistake.setDescription(m.description);
-                if (m.about) {
-                    mistake.setAbout(m.about);
-                }
-                m.corrections.forEach((c) => {
-                    const correction = new Correction();
-                    correction.setDescription(c.description);
-                    correction.setRules(c.rules);
-                    mistake.addCorrection(correction);
+        try {
+            // Report invalid AJAX input status.
+            if (!data.ok) {
+                msg('Something went wrong on the API server.', MI.DANGER);
+                return;
+            }
+            // Create tokens and add mistakes if tokenization was successful.
+            if (guiCreateTokens(hash, data.tokens)) {
+                config.mistakes.removeMistakes(hash);
+                processRegexHighlight(hash, p, data.tokens);
+                data.mistakes.forEach((m) => {
+                    const mistake = new Mistake();
+                    mistake.setTokens(m.highlights);
+                    mistake.setDescription(m.description);
+                    if (m.about) {
+                        mistake.setAbout(m.about);
+                    }
+                    m.corrections.forEach((c) => {
+                        const correction = new Correction();
+                        correction.setDescription(c.description);
+                        correction.setRules(c.rules);
+                        mistake.addCorrection(correction);
+                    });
+
+                    config.mistakes.addMistake(hash, mistake);
                 });
 
-                config.mistakes.addMistake(hash, mistake);
-            });
-
-            guiHighlightTokens(hash);
+                guiHighlightTokens(hash);
+            }
+            p.removeAttribute('data-pk-processing');
+        } catch(e) {
+            p.setAttribute('data-pk-unprocessed', true);
+            p.setAttribute('data-tooltip', 'Při opravě odstavce došlo k chybě.');
+            $(p).on('click', () => {
+                p.removeAttribute('data-tooltip');
+            })
+            p.removeAttribute('data-pk-processing');
         }
-        p.removeAttribute('data-pk-processing');
     }).fail((err) => {
         console.log(err);
         msg('AJAX request failed. Trying again.', MI.DANGER);

@@ -12,56 +12,59 @@ export function escapeRegex(string) {
 
 export function guiCreateTokens(hash: string, tokens: string[]) {
     // Checking if paragraph with given hash was altered during tokenization.
-    const paragraph = config.editor.dom.select('p[data-pk-hash="' + hash + '"]');
-    let tokenizationSuccess = false;
-    paragraph.forEach(function (p) {
-        const newHash = md5($(p).text());
+    try {
+        const paragraph = config.editor.dom.select('p[data-pk-hash="' + hash + '"]');
+        let tokenizationSuccess = false;
+        paragraph.forEach(function (p) {
+            const newHash = md5($(p).text());
 
-        // If content was changed, do not insert tokens (& remove hash attribute)
-        if ($(p).attr('data-pk-hash') !== newHash) {
-            msg('Paragraph was altered during correction. Tokens insertion aborted. Hash "' + $(p).attr('data-pk-hash') + '" removed');
-            $(p).removeAttr('data-pk-hash');
+            // If content was changed, do not insert tokens (& remove hash attribute)
+            if ($(p).attr('data-pk-hash') !== newHash) {
+                msg('Paragraph was altered during correction. Tokens insertion aborted. Hash "' + $(p).attr('data-pk-hash') + '" removed');
+                $(p).removeAttr('data-pk-hash');
 
-        // If content was not changed, insert tokens (& set success variable)
-        } else {
-            msg('Paragraph with hash "' + $(p).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
+            // If content was not changed, insert tokens (& set success variable)
+            } else {
+                msg('Paragraph with hash "' + $(p).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
 
-            // clean old tokens
-            $(p).find(".pk-token").replaceWith(function() {
-                return $( this ).contents();
-            });
-
-            const bookmark = config.editor.selection.getBookmark();
-            console.log(bookmark);
-            // Building tokens
-            let parsedHtml: ParsedHtml = parseEl($(p));
-            let tokenPos: {from: number, to: number}[] = [];
-            let charCount = 0;
-            for(let token of tokens) {
-                tokenPos.push({
-                    from: charCount,
-                    to: charCount + token.length - 1
+                // clean old tokens
+                $(p).find(".pk-token").replaceWith(function() {
+                    return $( this ).contents();
                 });
-                charCount += token.length;
+
+                const bookmark = config.editor.selection.getBookmark();
+                // Building tokens
+                let parsedHtml: ParsedHtml = parseEl($(p));
+                let tokenPos: {from: number, to: number}[] = [];
+                let charCount = 0;
+                for(let token of tokens) {
+                    tokenPos.push({
+                        from: charCount,
+                        to: charCount + token.length - 1
+                    });
+                    charCount += token.length;
+                }
+                tokens.forEach(function (token, index) {
+                    parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
+                });
+                $(p).html(parsedHtml.getHtml());
+                config.editor.selection.moveToBookmark(bookmark);
+                tokenizationSuccess = true;
             }
-            tokens.forEach(function (token, index) {
-                parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
-            });
-            $(p).html(parsedHtml.getHtml());
-            config.editor.selection.moveToBookmark(bookmark);
-            tokenizationSuccess = true;
+        });
+
+        // Debug messages
+        if (tokenizationSuccess) {
+            msg('Token insertion successful on hash "' + hash + '".');
+        } else {
+            msg('Token insertion did not happen on hash "' + hash + '".');
         }
-    });
 
-    // Debug messages
-    if (tokenizationSuccess) {
-        msg('Token insertion successful on hash "' + hash + '".');
-    } else {
-        msg('Token insertion did not happen on hash "' + hash + '".');
+        // Return
+        return tokenizationSuccess;
+    } catch(err) {
+        throw new Error(err);
     }
-
-    // Return
-    return tokenizationSuccess;
 }
 
 /**

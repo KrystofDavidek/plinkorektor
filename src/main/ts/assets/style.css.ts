@@ -8,6 +8,24 @@ export const cssMainStylesheet = `
         100% {opacity: 0;}
     }
 
+    [data-pk-unprocessed] {
+        background-color: rgba(255,0,0, 0.4);
+    }
+
+    [data-tooltip]:before {            
+        position : absolute;
+        content : attr(data-tooltip);
+        opacity : 0;
+        right: 0;
+        left: 0;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    [data-tooltip]:hover:before {        
+        opacity : 1;
+    }
+
     html[data-pk-processing]::before {
         display: block;
         content: '●';

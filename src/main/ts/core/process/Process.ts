@@ -27,6 +27,8 @@ export function process() {
     // Skipping empty paragraphs
     if (p.textContent.trim().length === 0) {
         msg('Empty paragraph. Processing skipped.');
+        p.removeAttribute('data-pk-unprocessed');
+        p.removeAttribute('data-tooltip');
         p.removeAttribute('data-pk-hash');
         p.removeAttribute('data-pk-changed');
         p.removeAttribute('data-pk-processing');
@@ -40,6 +42,8 @@ export function process() {
         // Copying current highlights before paragraph hash is altered.
         config.mistakes.copyMistakes(p.getAttribute('data-pk-hash'), hash);
         // Updating hash.
+        p.removeAttribute('data-pk-unprocessed');
+        p.removeAttribute('data-tooltip');
         p.setAttribute('data-pk-hash', hash);
         p.setAttribute('data-pk-changed', true);
         msg('Paragraph with changed hash "' + hash + '" si still changing. Processing skipped.');
@@ -52,6 +56,8 @@ export function process() {
         msg('Paragraph with unchanged hash "' + hash + ' wasn\'t changed last time". Processing skipped.');
         return;
     }
+    p.removeAttribute('data-pk-unprocessed');
+    p.removeAttribute('data-tooltip');
     p.removeAttribute('data-pk-changed');
     guiShowProcessingIndicator();
     p.setAttribute('data-pk-processing', true);
@@ -62,5 +68,6 @@ export function process() {
     //processRegexAutocorrect(p);
     // Caling processing
     processApiCall(hash, p);
+
   });
 }
