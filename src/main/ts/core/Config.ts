@@ -7,6 +7,8 @@ import { MessageImportance } from '../types/MessageImportance';
  */
 export let config: Config = {
   debug: MessageImportance.DEBUG,
-  editor: null,
+  selection: null,
+  textfield: null,
+  windowmanager: null,
   mistakes: null,
 };

@@ -1,7 +1,7 @@
 import * as $ from 'jquery';
 import * as md5 from 'md5';
 import { config } from '../Config';
-import { message as msg } from '../Message';
+import { message as msg } from '../utilities/Message';
 import { guiInitMistakeDialogs } from './Dialog';
 import { parseEl } from '../process/HtmlParser';
 import { ParsedHtml } from '../process/ParsedHtml';
@@ -13,9 +13,9 @@ export function escapeRegex(string) {
 export function guiCreateTokens(hash: string, tokens: string[]) {
     // Checking if paragraph with given hash was altered during tokenization.
     try {
-        const paragraph = config.editor.dom.select('p[data-pk-hash="' + hash + '"]');
+        const paragraph = config.textfield.find('p[data-pk-hash="' + hash + '"]');
         let tokenizationSuccess = false;
-        paragraph.forEach(function (p) {
+        paragraph.each(function (i, p) {
             const newHash = md5($(p).text());
 
             // If content was changed, do not insert tokens (& remove hash attribute)
@@ -32,7 +32,7 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                     return $( this ).contents();
                 });
 
-                const bookmark = config.editor.selection.getBookmark();
+                const bookmark = config.selection.getBookmark();
                 // Building tokens
                 let parsedHtml: ParsedHtml = parseEl($(p));
                 let tokenPos: {from: number, to: number}[] = [];
@@ -48,7 +48,7 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
                     parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
                 });
                 $(p).html(parsedHtml.getHtml());
-                config.editor.selection.moveToBookmark(bookmark);
+                config.selection.moveToBookmark(bookmark);
                 tokenizationSuccess = true;
             }
         });
@@ -86,7 +86,7 @@ export function guiHighlightTokens(hash: string) {
         const highlights = mistake.getTokens();
 
         highlights.forEach((tokenId) => {
-            const token = config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + tokenId + ')');
+            const token = config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + tokenId + ')');
             msg('Added error class on token "' + token[0].innerText + '" of hash "' + hash + '".');
             token[0].classList.add('pk-token-correction');
         });
@@ -97,6 +97,6 @@ export function guiHighlightTokens(hash: string) {
 
 function removeOldHighlights(hash: string) {
     msg('Clearing old highlights on paragraph "' + hash + '".');
-    $(config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token')).removeClass('pk-token-correction');
-    $(config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token')).off('click');
+    config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').removeClass('pk-token-correction');
+    config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').off('click');
 }

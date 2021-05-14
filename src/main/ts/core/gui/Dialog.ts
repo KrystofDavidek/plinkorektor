@@ -12,10 +12,10 @@ import { process } from '../process/Process';
  */
 export function guiInitMistakeDialogs(hash) {
     // Removes original left-click triggers on tokens
-    $(config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token')).off('click');
+    config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').off('click');
 
     // Binds tokens to corresponding correction dialogs
-    config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token').forEach(function (token, i) {
+    config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').each(function (i, token) {
         // Skip tokens with no correction bound
         if (!token.classList.contains('pk-token-correction')) { return; }  // <-- continue;
 
@@ -40,7 +40,7 @@ export function guiInitMistakeDialogs(hash) {
 
         $(token).click(function (e) {
             e.preventDefault();
-            config.editor.windowManager.open({
+            config.windowmanager.open({
                 title: 'Návrh na opravu',
                 body: {
                   type: 'panel',
@@ -54,7 +54,7 @@ export function guiInitMistakeDialogs(hash) {
 
                     // Apply correction.
                     Object.entries(suggestionRulebook[parts[2]]).forEach(function ([target, correctValue]: [any, string]) {
-                        let originalContent: string = config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].innerHTML;
+                        let originalContent: string = config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].innerHTML;
                         let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, "|<>|$1|<>|").split("|<>|");
                         console.log(contentParts);
                         let modifiedContentParts = contentParts.map((part) => {
@@ -69,14 +69,14 @@ export function guiInitMistakeDialogs(hash) {
                             modifiedContentParts.push(correctValue);
                         }
                         let newContent = modifiedContentParts.join("");
-                        config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].innerHTML = newContent;
+                        config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + target + ')')[0].innerHTML = newContent;
                     });
 
                     // Remove mistake record to hide it afterwards.
                     config.mistakes.removeMistake(hash, parts[1]);
                     process();
 
-                    config.editor.windowManager.close();
+                    config.windowmanager.close();
                   }
                 }
             });
@@ -93,7 +93,7 @@ function defineHelperText(hash: string, mistake: Mistake) {
 
     // Define boundaries
     const minimalBoundary = Math.max(minimalToken - 20, 0);
-    const maximalBoundary = Math.min(maximalToken + 21, config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token').length);
+    const maximalBoundary = Math.min(maximalToken + 21, config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').length);
 
     // Display highlighted tokens and suitable context
     let helperText = '';
@@ -101,7 +101,7 @@ function defineHelperText(hash: string, mistake: Mistake) {
         if (mistake.getTokens().includes(j)) {
             helperText += '<span style="' + cssMistakeBadValue + '">';
         }
-        helperText += config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + j + ')')[0].textContent;
+        helperText += config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token:eq(' + j + ')')[0].textContent;
         if (mistake.getTokens().includes(j)) { helperText += '</span>'; }
     }
 
@@ -109,7 +109,7 @@ function defineHelperText(hash: string, mistake: Mistake) {
     if (minimalBoundary > 0) {
         helperText = '…' + helperText.trim();
     }
-    if (maximalBoundary < config.editor.dom.select('p[data-pk-hash="' + hash + '"] .pk-token').length) {
+    if (maximalBoundary < config.textfield.find('p[data-pk-hash="' + hash + '"] .pk-token').length) {
         helperText = helperText.trim() + '…';
     }
 

@@ -1,5 +1,5 @@
-import { MessageImportance } from '../types/MessageImportance';
-import { config } from './Config';
+import { MessageImportance } from '../../types/MessageImportance';
+import { config } from '../Config';
 
 export const message = function (messageText, level: MessageImportance = MessageImportance.DEBUG) {
   let color = '#777777';

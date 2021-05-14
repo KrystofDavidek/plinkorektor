@@ -1,7 +1,7 @@
 // IMPORTS
 
 import { config } from '../Config';
-import { message as msg } from '../Message';
+import { message as msg } from '../utilities/Message';
 
 // EXPORTS
 
@@ -10,13 +10,13 @@ import { message as msg } from '../Message';
  */
 export function guiShowProcessingIndicator() {
     msg('Processing indicator displayed.');
-    config.editor.dom.select('html')[0].setAttribute('data-pk-processing', 'true');
+    config.textfield.attr('data-pk-processing', 'true');
 }
 
 /**
  * Hides indicator for processing.
  */
 export function guiHideProcessingIndicator() {
-    config.editor.dom.select('html')[0].removeAttribute('data-pk-processing');
+    config.textfield.removeAttr('data-pk-processing');
     msg('Processing indicator hidden.');
 }

@@ -1,6 +1,6 @@
 import * as md5 from 'md5';
 
-import { message as msg } from '../Message';
+import { message as msg } from '../utilities/Message';
 
 import { config } from '../Config';
 import { processApiCall } from './ApiCall';
@@ -11,9 +11,9 @@ import { guiShowProcessingIndicator } from '../gui/ProcessingIndicator';
  * Goes through every paragraph and if it changed it sends it to the corrector API and call addCorrections with API output
  */
 export function process() {
-  const content = config.editor.dom.select('p');
+  const content = config.textfield.find('p');
   // Looping through paragraphs
-  content.forEach(function (p) {
+  content.each(function (i, p) {
     if(p.getAttribute('data-pk-init')) {
       p.removeAttribute('data-pk-hash');
       p.removeAttribute('data-pk-changed');
@@ -45,7 +45,7 @@ export function process() {
         p.removeAttribute('data-pk-unprocessed');
         p.removeAttribute('data-tooltip');
         p.setAttribute('data-pk-hash', hash);
-        p.setAttribute('data-pk-changed', true);
+        p.setAttribute('data-pk-changed', "true");
         msg('Paragraph with changed hash "' + hash + '" si still changing. Processing skipped.');
         return;
     }
@@ -60,7 +60,7 @@ export function process() {
     p.removeAttribute('data-tooltip');
     p.removeAttribute('data-pk-changed');
     guiShowProcessingIndicator();
-    p.setAttribute('data-pk-processing', true);
+    p.setAttribute('data-pk-processing', "true");
 
     // Applying original highlights until the new api-call resolves itself.
     guiHighlightTokens(hash);

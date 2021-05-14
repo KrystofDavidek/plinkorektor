@@ -1,6 +1,6 @@
 import * as $ from 'jquery';
 import { config } from '../Config';
-import { message as msg } from '../Message';
+import { message as msg } from '../utilities/Message';
 import { MessageImportance as MI } from '../../types/MessageImportance';
 import { guiHideProcessingIndicator } from '../gui/ProcessingIndicator';
 

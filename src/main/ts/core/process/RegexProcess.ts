@@ -1,33 +1,8 @@
 import { Correction } from '../correction/Correction';
 import { Mistake } from '../correction/Mistake';
-import { autocorrectRegexRules, highlightRegexRules } from '../correction/RegexRules';
+import { highlightRegexRules } from '../correction/RegexRules';
 import { config } from '../Config';
-import { message as msg } from '../Message';
 import * as _ from 'lodash';
-
-// TODO MAKE WORK WITH HTML
-export function processRegexAutocorrect(p) {
-    autocorrectRegexRules.forEach((rule) => {
-        if(rule.search.test(p.textContent)) {
-            msg('APPLYING RULE ' + rule.name + ' ON ' + p.textContent);
-        }
-        let correctValue = p.textContent.replace(rule.search, rule.replace);
-        let contentParts = p.innerHTML.replace(/(<[^(><.)]+>|(&[a-z0-9#]+;))/g, "|<>|$1|<>|").split("|<>|");
-        let modifiedContentParts = contentParts.map((part) => {
-            if(!part.match(/(<[^(><.)]+>)/)) {
-                let newVal = correctValue.length > part.length ? correctValue.substring(0, part.length) : correctValue;
-                correctValue = correctValue.length > part.length ? correctValue.slice(part.length) : "";
-                return newVal;
-            }
-            return part;
-        });
-        if(correctValue.length > 0) {
-            modifiedContentParts.push(correctValue);
-        }
-        let newContent = modifiedContentParts.join("");
-        p.innerHTML = newContent;
-    });
-}
 
 export function processRegexHighlight(hash, p, tokens ) {
     let start = 0;

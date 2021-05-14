@@ -14,10 +14,6 @@ export const uvozovky: string = '[\u{0022}\u{0027}\u{0060}\u{2018}\u{2019}\u{201
 export const zacatek_slova: string = '[\u{0020}\u{00A0}\u{1680}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{202F}\u{205F}\u{3000}\u{0028}\u{005B}\u{007B}\u{00AB}\u{201A}\u{201E}]';
 export const konec_slova: string = '[\u{0020}\u{00A0}\u{1680}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{202F}\u{205F}\u{3000}\u{0029}\u{005D}\u{007D}\u{00BB}\u{2018}\u{201C}]';
 
-export let autocorrectRegexRules: RegexRule[] = [
-    
-
-];
 export let highlightRegexRules: RegexRule[] = [
 
     {
