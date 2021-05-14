@@ -2,7 +2,6 @@ import * as $ from 'jquery';
 import { config } from '../Config';
 import { message as msg } from '../utilities/Message';
 import { MessageImportance as MI } from '../../types/MessageImportance';
-import { guiHideProcessingIndicator } from '../gui/ProcessingIndicator';
 
 import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
@@ -28,7 +27,7 @@ export function processApiCall(hash: string, p) {
     // Archive call (for processing status indication) and show the processing indicator.
     ajaxCalls.push(call);
 
-    call.done((data) => {
+    return call.done((data) => {
         try {
             // Report invalid AJAX input status.
             if (!data.ok) {
@@ -77,9 +76,6 @@ export function processApiCall(hash: string, p) {
         if (index > -1) {
             ajaxCalls.splice(index, 1);
         }
-
-        if (ajaxCalls.length === 0) {
-            guiHideProcessingIndicator();
-        }
+        return ajaxCalls.length;
     });
 }

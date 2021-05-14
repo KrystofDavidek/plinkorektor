@@ -1,5 +1,5 @@
 import { themeCustomization } from './assets/style.css';
-import { Proofreader } from './core/ProofreaderBase';
+import { Proofreader } from './core/Proofreader';
 import { cssMainStylesheet } from './assets/style.css';
 import { config } from './core/Config';
 import { message as msg } from './core/utilities/Message';

@@ -3,7 +3,6 @@ import { config } from '../Config';
 
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/style.css';
 import { Mistake } from '../correction/Mistake';
-import { process } from '../process/Process';
 
 /**
  * Creates correction dialogs for highlighted tokens.
