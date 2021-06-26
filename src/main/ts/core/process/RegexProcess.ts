@@ -3,6 +3,9 @@ import { Mistake } from '../correction/Mistake';
 import { highlightRegexRules } from '../correction/RegexRules';
 import { config } from '../Config';
 import * as _ from 'lodash';
+import { TextChunk } from '../correction/TextChunk';
+
+// TO BE REMOVED WHEN TYPOGRAPHY MOVE TO SERVER
 
 export function processRegexHighlight(hash: string, chunk: TextChunk, tokens: string[] ) {
     let start = 0;

@@ -1,12 +1,12 @@
 import * as $ from 'jquery';
 import { config } from '../Config';
 import { message as msg } from '../utilities/Message';
-import { MessageImportance as MI } from '../../types/MessageImportance';
+import { MessageImportance as MI } from '../types/MessageImportance';
 
-import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
 import { processRegexHighlight } from './RegexProcess';
+import { TextChunk } from '../correction/TextChunk';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
@@ -34,7 +34,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
                 return;
             }
             // Create tokens and add mistakes if tokenization was successful.
-            if (guiCreateTokens(hash, data.tokens, chunk)) {
+            if (chunk.createTokens(data.tokens)) {
                 config.mistakes.removeMistakes(hash);
                 processRegexHighlight(hash, chunk, data.tokens);
                 data.mistakes.forEach((m) => {
@@ -54,7 +54,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
                     config.mistakes.addMistake(hash, mistake);
                 });
 
-                guiHighlightTokens(hash, chunk);
+                chunk.highlightTokens();
             }
             chunk.setProcessing(false);
             

@@ -1,7 +1,11 @@
 import * as $ from 'jquery';
 import { ParsedHtml, ParsedHtmlElementType } from './ParsedHtml';
+
+
 export const HTML_TOKEN_START = "<span class=\"pk-token\">";
 export const HTML_TOKEN_END = "</span>";
+
+
 export function parseEl(element): ParsedHtml {
     let parsedHtml = new ParsedHtml(HTML_TOKEN_START, HTML_TOKEN_END);
     element.contents().map(function (ind, el) {

@@ -1,13 +1,16 @@
+import * as $ from 'jquery';
 import { decode } from 'html-entities';
+import { message as msg } from '../utilities/Message';
+import { TextChunk } from './TextChunk';
 
 export class HtmlParagraphChunk extends TextChunk {
     protected p;
     public constructor(p) {
         super();
         this.p = p;
-        this.processing = p.getAttribute('data-pk-processing');
-        this.changed = p.getAttribute('data-pk-changed');
-        this.lastHash = p.getAttribute('data-pk-hash');
+        this.processing = this.p.getAttribute('data-pk-processing');
+        this.changed = this.p.getAttribute('data-pk-changed');
+        this.lastHash = this.p.getAttribute('data-pk-hash');
         if(this.p.getAttribute('data-pk-init')) {
             this.setFailed(false);
             this.setChanged(false);
@@ -82,7 +85,39 @@ export class HtmlParagraphChunk extends TextChunk {
         return this.p.textContent.trim().length === 0;
     }
 
-    public clean() {
-        this.p.removeAttribute('data-pk-hash');
+    public getToken(tokenId: number) {
+        return $(this.p).find('.pk-token:eq(' + tokenId + ')');
+    }
+
+    public removeOldHighlights() {
+        msg('Clearing old highlights on paragraph "' + this.lastHash + '".');
+        console.log(this.p)
+        $(this.p).find('.pk-token').removeClass('pk-token-correction');
+        $(this.p).find('.pk-token').off('click');
+    }
+
+    public markTokenForCorrection(token) {
+        msg('Added error class on token "' + token[0].innerText + '" of hash "' + this.lastHash + '".');
+        token[0].classList.add('pk-token-correction');
+    }
+
+    public getTokenCount(): number {
+        return $(this.p).find('.pk-token').length;
+    }
+
+    public getTokenText(tokenId: number): string {
+       return this.getToken(tokenId)[0].textContent;
+    }
+
+    public getTokens(): any[] {
+        let tokens = [];
+        $(this.p).find('.pk-token').each(function (i, token) {
+            tokens.push(token);
+        });
+        return tokens;
+    }
+
+    public isMarkedForCorrection(token: any): boolean {
+        return token.classList.contains('pk-token-correction');
     }
 }

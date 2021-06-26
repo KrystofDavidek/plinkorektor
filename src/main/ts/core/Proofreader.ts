@@ -1,31 +1,31 @@
 import * as md5 from 'md5';
 import { message as msg } from './utilities/Message';
-import { MessageImportance as MI } from '../types/MessageImportance';
+import { MessageImportance as MI } from './types/MessageImportance';
 
 import { MistakeManager } from './correction/MistakeManager';
-import { Config } from '../types/Config';
+import { Config } from './types/Config';
 
 
 import { processApiCall } from './process/ApiCall';
-import { guiHighlightTokens } from './gui/Tokens';
+import { ProofreaderGui } from './gui/ProofreaderGui';
 
 export class Proofreader {
 
     config: Config;
     autocorrectTrigger: NodeJS.Timeout;
-    stylesheetLoader: () => void;
 
-    constructor(config: Config, gui: ProofreaderGui) {
+    constructor(config: Config) {
         this.config = config;
         this.config.mistakes = new MistakeManager();
-        this.config.gui = gui;
+        this.config.proofreader = this;
     }
 
-    initialize() {
+    initialize(gui: ProofreaderGui) {
         msg('Initialization.');
+        this.config.gui = gui;
         msg('Proofreader was initialized.', MI.INFO);
         // Autocorrect periodically triggered
-        this.autocorrectTrigger = setInterval(function () {
+        this.autocorrectTrigger = setInterval(() => {
             this.process();
         }, 1000);
     }
@@ -77,7 +77,7 @@ export class Proofreader {
             chunk.setProcessing(true);
         
             // Applying original highlights until the new api-call resolves itself.
-            guiHighlightTokens(hash, chunk);
+            chunk.highlightTokens();
             // Caling processing
             processApiCall(hash, chunk).always((ajaxCalls) => {
                 console.log(ajaxCalls);

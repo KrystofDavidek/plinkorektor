@@ -1,5 +1,5 @@
-import { Config } from '../types/Config';
-import { MessageImportance } from '../types/MessageImportance';
+import { Config } from './types/Config';
+import { MessageImportance } from './types/MessageImportance';
 
 /**
  * Main configuration variable, contains options as well as global values.
@@ -8,5 +8,6 @@ import { MessageImportance } from '../types/MessageImportance';
 export let config: Config = {
   debug: MessageImportance.DEBUG,
   mistakes: null,
-  gui: null
+  gui: null,
+  proofreader: null
 };

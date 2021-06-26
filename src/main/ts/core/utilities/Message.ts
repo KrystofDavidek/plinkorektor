@@ -1,4 +1,4 @@
-import { MessageImportance } from '../../types/MessageImportance';
+import { MessageImportance } from '../types/MessageImportance';
 import { config } from '../Config';
 
 export const message = function (messageText, level: MessageImportance = MessageImportance.DEBUG) {
