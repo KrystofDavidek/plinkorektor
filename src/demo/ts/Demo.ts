@@ -13,6 +13,7 @@ tinymce.init({
   content_style: '@import url(\'https://fonts.googleapis.com/css2?family=Varta&display=swap\'); body { font-family: Varta; }',
   plugins: 'code plinkorektor',
   menubar: 'korektor',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | newdocument | reporterror',
   menu: {
     korektor: {title: 'Korektor', items: 'pk-tagger pk-spellchecker'}
   },

@@ -30,6 +30,10 @@ export class Proofreader {
         }, 1000);
     }
 
+    report(selection: string, context: string) {
+        //TODO
+    }
+
     /**
      * Goes through every paragraph and if it changed it sends it to the corrector API and call addCorrections with API output
      */
