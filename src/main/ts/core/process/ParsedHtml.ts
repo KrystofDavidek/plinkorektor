@@ -1,9 +1,13 @@
 import * as _ from "lodash";
 export class ParsedHtml {
     elements: ParsedHtmlElement[];
+    tokenStart: string;
+    tokenEnd: string;
 
-    constructor() {
+    constructor(tokenStart, tokenEnd) {
         this.elements = [];
+        this.tokenStart = tokenStart;
+        this.tokenEnd = tokenEnd;
     }
 
     add(element:ParsedHtmlElement) {
@@ -133,13 +137,13 @@ export class ParsedHtml {
         if(min == range.from.index && max == range.from.index) {
             let opening: ParsedHtmlElement[] = [{
                 type: ParsedHtmlElementType.BEGIN,
-                content: "<span class=\"pk-token\">",
+                content: this.tokenStart,
                 token: true,
                 linked: elements.length + 2  
             }];
             let ending: ParsedHtmlElement[] = [{
                 type: ParsedHtmlElementType.END,
-                content: "</span>",
+                content: this.tokenEnd,
                 token: true,
                 linked: 0
             }]
@@ -191,14 +195,14 @@ export class ParsedHtml {
         wrappedElements.push({
             type: ParsedHtmlElementType.BEGIN,
             token: true,
-            content: "<span class=\"pk-token\">",
+            content: this.tokenStart,
             linked: rightPos + correspondingEndTags.length + trailingStartTags.length + trailingEndTags.length + 1
         });
         wrappedElements = wrappedElements.concat(trailingStartTags.reverse(), elements.slice(leftPos, rightPos + 1), trailingEndTags.reverse());
         wrappedElements.push({
             type: ParsedHtmlElementType.END,
             token: true,
-            content: "</span>",
+            content: this.tokenEnd,
             linked: leftPos + correspondingEndTags.length    
         });
         wrappedElements = wrappedElements.concat(correspondingStartTags);

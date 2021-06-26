@@ -56,8 +56,8 @@ export class MistakeManager {
         const keys = Object.keys(this.mistakes);
 
         // Find inactive hashes
-        config.textfield.find('p[data-pk-hash]').each((i, p) => {
-            const hash = p.getAttribute('data-pk-hash');
+        config.gui.getChunks().forEach((chunk) => {
+            const hash = chunk.getLastHash();
             const index = keys.indexOf(hash);
             if (index > -1) {
                 keys.splice(index, 1);

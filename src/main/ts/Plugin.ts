@@ -4,15 +4,17 @@ import { cssMainStylesheet } from './assets/style.css';
 import { config } from './core/Config';
 import { message as msg } from './core/utilities/Message';
 import * as $ from 'jquery';
+import { TinyMceGui } from './core/gui/TinyMceGui';
 
 declare const tinymce: any;
 
 export default () => {
     tinymce.PluginManager.add('plinkorektor', (editor) => {
         msg('Pre-initialization.');
-        let proofreader  = new Proofreader(config, editor.selection, editor.windowManager, () => {editor.dom.addStyle(cssMainStylesheet);});
+        let gui: ProofreaderGui = new TinyMceGui(editor, () => {editor.dom.addStyle(cssMainStylesheet);})
+        let proofreader  = new Proofreader(config, gui);
         editor.on('init', function () {
-            proofreader.initialize($(editor.dom.select('html')[0]));
+            proofreader.initialize();
         });
         // Autocorrect triggered by editor change
         editor.on('remove', function () {

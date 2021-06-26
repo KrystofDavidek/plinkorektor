@@ -10,48 +10,46 @@ export function escapeRegex(string) {
     return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-export function guiCreateTokens(hash: string, tokens: string[]) {
+export function guiCreateTokens(hash: string, tokens: string[], chunk: TextChunk) {
     // Checking if paragraph with given hash was altered during tokenization.
     try {
-        const paragraph = config.textfield.find('p[data-pk-hash="' + hash + '"]');
+        const content = chunk.getElement();
         let tokenizationSuccess = false;
-        paragraph.each(function (i, p) {
-            const newHash = md5($(p).text());
+        const newHash = md5(chunk.getText());
 
-            // If content was changed, do not insert tokens (& remove hash attribute)
-            if ($(p).attr('data-pk-hash') !== newHash) {
-                msg('Paragraph was altered during correction. Tokens insertion aborted. Hash "' + $(p).attr('data-pk-hash') + '" removed');
-                $(p).removeAttr('data-pk-hash');
+        // If content was changed, do not insert tokens (& remove hash attribute)
+        if ($(content).attr('data-pk-hash') !== newHash) {
+            msg('Paragraph was altered during correction. Tokens insertion aborted. Hash "' + $(content).attr('data-pk-hash') + '" removed');
+            $(content).removeAttr('data-pk-hash');
 
-            // If content was not changed, insert tokens (& set success variable)
-            } else {
-                msg('Paragraph with hash "' + $(p).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
+        // If content was not changed, insert tokens (& set success variable)
+        } else {
+            msg('Paragraph with hash "' + $(content).attr('data-pk-hash') + '" was not altered during correction. Inserting tokens.');
 
-                // clean old tokens
-                $(p).find(".pk-token").replaceWith(function() {
-                    return $( this ).contents();
+            // clean old tokens
+            $(content).find(".pk-token").replaceWith(function() {
+                return $( this ).contents();
+            });
+
+            const bookmark = config.selection.getBookmark();
+            // Building tokens
+            let parsedHtml: ParsedHtml = parseEl($(content));
+            let tokenPos: {from: number, to: number}[] = [];
+            let charCount = 0;
+            for(let token of tokens) {
+                tokenPos.push({
+                    from: charCount,
+                    to: charCount + token.length - 1
                 });
-
-                const bookmark = config.selection.getBookmark();
-                // Building tokens
-                let parsedHtml: ParsedHtml = parseEl($(p));
-                let tokenPos: {from: number, to: number}[] = [];
-                let charCount = 0;
-                for(let token of tokens) {
-                    tokenPos.push({
-                        from: charCount,
-                        to: charCount + token.length - 1
-                    });
-                    charCount += token.length;
-                }
-                tokens.forEach(function (token, index) {
-                    parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
-                });
-                $(p).html(parsedHtml.getHtml());
-                config.selection.moveToBookmark(bookmark);
-                tokenizationSuccess = true;
+                charCount += token.length;
             }
-        });
+            tokens.forEach(function (token, index) {
+                parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token)
+            });
+            $(content).html(parsedHtml.getHtml());
+            config.selection.moveToBookmark(bookmark);
+            tokenizationSuccess = true;
+        }
 
         // Debug messages
         if (tokenizationSuccess) {
@@ -72,7 +70,7 @@ export function guiCreateTokens(hash: string, tokens: string[]) {
  *
  * @param {string} hash MD5 hash of the paragraph
  */
-export function guiHighlightTokens(hash: string) {
+export function guiHighlightTokens(hash: string, chunk: TextChunk) {
     // Clear old highlights
     removeOldHighlights(hash);
     config.mistakes.autoremove();

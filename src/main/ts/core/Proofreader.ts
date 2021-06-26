@@ -4,8 +4,6 @@ import { MessageImportance as MI } from '../types/MessageImportance';
 
 import { MistakeManager } from './correction/MistakeManager';
 import { Config } from '../types/Config';
-import { WindowManager } from 'tinymce';
-import { CursorManager } from '../types/CursorManager';
 
 
 import { processApiCall } from './process/ApiCall';
@@ -17,18 +15,14 @@ export class Proofreader {
     autocorrectTrigger: NodeJS.Timeout;
     stylesheetLoader: () => void;
 
-    constructor(config: Config, selection: CursorManager, windowmanager: WindowManager, stylesheetLoader: () => void = () => {}) {
+    constructor(config: Config, gui: ProofreaderGui) {
         this.config = config;
-        this.config.windowmanager = windowmanager;
-        this.config.selection = selection;
         this.config.mistakes = new MistakeManager();
-        this.stylesheetLoader = stylesheetLoader;
+        this.config.gui = gui;
     }
 
-    initialize(textfield) {
+    initialize() {
         msg('Initialization.');
-        this.config.textfield = textfield;
-        this.stylesheetLoader()
         msg('Proofreader was initialized.', MI.INFO);
         // Autocorrect periodically triggered
         this.autocorrectTrigger = setInterval(function () {
@@ -40,85 +34,58 @@ export class Proofreader {
      * Goes through every paragraph and if it changed it sends it to the corrector API and call addCorrections with API output
      */
     process() {
-        const content = this.config.textfield.find('p');
         // Looping through paragraphs
-        content.each((i, p) => {
-            if(p.getAttribute('data-pk-init')) {
-                p.removeAttribute('data-pk-hash');
-                p.removeAttribute('data-pk-changed');
-                p.removeAttribute('data-pk-processing');
-                p.removeAttribute('data-pk-init');
-            }
-            if (p.getAttribute('data-pk-processing')) {
+        this.config.gui.getChunks().forEach((chunk) => {
+            
+            if (chunk.isProcessing()) {
                 msg('Already processing. Processing skipped.');
                 return;
             }
             // Skipping empty paragraphs
-            if (p.textContent.trim().length === 0) {
+            if (chunk.isEmpty()) {
                 msg('Empty paragraph. Processing skipped.');
-                p.removeAttribute('data-pk-unprocessed');
-                p.removeAttribute('data-tooltip');
-                p.removeAttribute('data-pk-hash');
-                p.removeAttribute('data-pk-changed');
-                p.removeAttribute('data-pk-processing');
+                chunk.setProcessing(false);
+                chunk.setChanged(false);
+                chunk.setFailed(false);
+                chunk.setLastHash(null);
                 return;
             }
             // Hashing for easier detection of changes and pointing in subsequent processes
-            const hash = md5(p.textContent);
+            const hash = md5(chunk.getText());
         
             // Changes are not over, skipping paragraph
-            if (p.getAttribute('data-pk-hash') !== hash) {
+            if (chunk.getLastHash() !== hash) {
                 // Copying current highlights before paragraph hash is altered.
-                this.config.mistakes.copyMistakes(p.getAttribute('data-pk-hash'), hash);
+                this.config.mistakes.copyMistakes(chunk.getLastHash(), hash);
                 // Updating hash.
-                p.removeAttribute('data-pk-unprocessed');
-                p.removeAttribute('data-tooltip');
-                p.setAttribute('data-pk-hash', hash);
-                p.setAttribute('data-pk-changed', "true");
+                chunk.setFailed(false);
+                chunk.setLastHash(hash);
+                chunk.setChanged(true);
                 msg('Paragraph with changed hash "' + hash + '" si still changing. Processing skipped.');
                 return;
             }
         
             // Skipping unchanged paragraph
-            if (p.getAttribute('data-pk-hash') === hash && !p.getAttribute('data-pk-changed')) {
-                p.removeAttribute('data-pk-changed');
+            if (chunk.getLastHash() === hash && !chunk.isChanged()) {
+                chunk.setChanged(false);
                 msg('Paragraph with unchanged hash "' + hash + ' wasn\'t changed last time". Processing skipped.');
                 return;
             }
-            p.removeAttribute('data-pk-unprocessed');
-            p.removeAttribute('data-tooltip');
-            p.removeAttribute('data-pk-changed');
-            this.guiShowProcessingIndicator();
-            p.setAttribute('data-pk-processing', "true");
+            chunk.setFailed(false);
+            chunk.setChanged(false);
+            this.config.gui.setProcessing(true);
+            chunk.setProcessing(true);
         
             // Applying original highlights until the new api-call resolves itself.
-            guiHighlightTokens(hash);
-            // Call local regex corrections
-            //processRegexAutocorrect(p);
+            guiHighlightTokens(hash, chunk);
             // Caling processing
-            processApiCall(hash, p).always((ajaxCalls) => {
+            processApiCall(hash, chunk).always((ajaxCalls) => {
                 console.log(ajaxCalls);
                 if (ajaxCalls.length === 0) {
-                    this.guiHideProcessingIndicator();
+                    this.config.gui.setProcessing(false);
                 }
             });
         });
-    }
-
-    /**
-     * Displays indicator for processing.
-     */
-    guiShowProcessingIndicator() {
-        msg('Processing indicator displayed.');
-        this.config.textfield.attr('data-pk-processing', 'true');
-    }
-
-    /**
-     * Hides indicator for processing.
-     */
-    guiHideProcessingIndicator() {
-        this.config.textfield.removeAttr('data-pk-processing');
-        msg('Processing indicator hidden.');
     }
 
     destroy() {

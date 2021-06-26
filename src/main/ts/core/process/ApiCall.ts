@@ -7,20 +7,19 @@ import { guiCreateTokens, guiHighlightTokens } from '../gui/Tokens';
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
 import { processRegexHighlight } from './RegexProcess';
-import { decode } from 'html-entities';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
 const ajaxCalls = [];
 
-export function processApiCall(hash: string, p) {
+export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
     // Calling the corrector API
     const call = $.ajax({
         type: 'POST',
         dataType: 'json',
         url: API_PATH,
         data: {
-            text: decode(p.textContent.trim())
+            text: chunk.getText(),//
         },
     });
 
@@ -35,9 +34,9 @@ export function processApiCall(hash: string, p) {
                 return;
             }
             // Create tokens and add mistakes if tokenization was successful.
-            if (guiCreateTokens(hash, data.tokens)) {
+            if (guiCreateTokens(hash, data.tokens, chunk)) {
                 config.mistakes.removeMistakes(hash);
-                processRegexHighlight(hash, p, data.tokens);
+                processRegexHighlight(hash, chunk, data.tokens);
                 data.mistakes.forEach((m) => {
                     const mistake = new Mistake();
                     mistake.setTokens(m.highlights);
@@ -55,21 +54,23 @@ export function processApiCall(hash: string, p) {
                     config.mistakes.addMistake(hash, mistake);
                 });
 
-                guiHighlightTokens(hash);
+                guiHighlightTokens(hash, chunk);
             }
-            p.removeAttribute('data-pk-processing');
+            chunk.setProcessing(false);
+            
         } catch(e) {
-            p.setAttribute('data-pk-unprocessed', true);
-            p.setAttribute('data-tooltip', 'Při opravě odstavce došlo k chybě.');
-            $(p).on('click', () => {
-                p.removeAttribute('data-tooltip');
-            })
-            p.removeAttribute('data-pk-processing');
+            chunk.setFailed(true);
         }
     }).fail((err) => {
         console.log(err);
-        msg('AJAX request failed. Trying again.', MI.DANGER);
-        processApiCall(hash, p);
+        if(retry < 3) {
+            msg('AJAX request failed' + (retry > 0 ? ' again' : '') + '. Trying again.', MI.DANGER);
+            processApiCall(hash, chunk, retry + 1);
+        }   else {
+            msg('AJAX request failed three times. Paragraph skipped.', MI.DANGER);
+            chunk.setFailed(true);
+        }
+
     }).always(() => {
         // Hide processing indicator if there is no other AJAX call present.
         const index = ajaxCalls.indexOf(call);

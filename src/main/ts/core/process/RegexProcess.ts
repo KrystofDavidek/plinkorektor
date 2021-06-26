@@ -4,7 +4,7 @@ import { highlightRegexRules } from '../correction/RegexRules';
 import { config } from '../Config';
 import * as _ from 'lodash';
 
-export function processRegexHighlight(hash, p, tokens ) {
+export function processRegexHighlight(hash: string, chunk: TextChunk, tokens: string[] ) {
     let start = 0;
     let pos = 0;
     let tokenPositions = [];
@@ -16,7 +16,7 @@ export function processRegexHighlight(hash, p, tokens ) {
     let match;
     highlightRegexRules.forEach((rule) => {
         const regex = _.cloneDeep(rule.search);
-        while ((match = rule.search.exec(p.textContent)) !== null) {
+        while ((match = rule.search.exec(chunk.getText())) !== null) {
             const highlights = getTokensToHighlight(match.index, match.index + match[0].length, tokenPositions);
             const mistake = new Mistake();
             mistake.setTokens(highlights.map((val) => val.pos));
