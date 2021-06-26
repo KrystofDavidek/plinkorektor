@@ -53,7 +53,6 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
 
                     config.mistakes.addMistake(hash, mistake);
                 });
-
                 chunk.highlightTokens();
             }
             chunk.setProcessing(false);
@@ -76,6 +75,10 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
         const index = ajaxCalls.indexOf(call);
         if (index > -1) {
             ajaxCalls.splice(index, 1);
+        }
+        console.log("RETURNING", ajaxCalls.length);
+        if (ajaxCalls.length === 0) {
+            config.gui.setProcessing(false);
         }
         return ajaxCalls.length;
     });

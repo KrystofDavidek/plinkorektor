@@ -79,12 +79,7 @@ export class Proofreader {
             // Applying original highlights until the new api-call resolves itself.
             chunk.highlightTokens();
             // Caling processing
-            processApiCall(hash, chunk).always((ajaxCalls) => {
-                console.log(ajaxCalls);
-                if (ajaxCalls.length === 0) {
-                    this.config.gui.setProcessing(false);
-                }
-            });
+            processApiCall(hash, chunk);
         });
     }
 
