@@ -26,6 +26,11 @@ export class TinyMceGui extends ProofreaderGui {
             $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing');
             msg('Processing indicator hidden.');
         }
+        this.processing = processing;
+    }
+
+    public isProcessing(): boolean {
+        return this.processing;
     }
 
     public getChunks(): HtmlParagraphChunk[] {
@@ -94,40 +99,47 @@ export class TinyMceGui extends ProofreaderGui {
                 },
                 buttons: [],
                 onAction: (instance, trigger) => {
-                    if (trigger.name.startsWith('correction')) {
-                        // Get mistake and correction information from the triger name.
-                        const parts = trigger.name.split('-');
-
-                        // Apply correction.
-                        Object.entries(suggestionRulebook[parts[2]]).forEach(([target, correctValue]: [any, string]) => {
-                            let originalContent: string = $(chunk.getToken(target))[0].innerHTML;
-                            let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, "|<>|$1|<>|").split("|<>|");
-                            console.log(contentParts);
-                            let modifiedContentParts = contentParts.map((part) => {
-                                if(!part.match(/(<[^(><.)]+>)/)) {
-                                    let newVal = correctValue.length > part.length ? correctValue.substring(0, part.length) : correctValue;
-                                    correctValue = correctValue.length > part.length ? correctValue.slice(part.length) : "";
-                                    return newVal;
-                                }
-                                return part;
-                            });
-                            if(correctValue.length > 0) {
-                                modifiedContentParts.push(correctValue);
-                            }
-                            let newContent = modifiedContentParts.join("");
-                            $(chunk.getToken(target))[0].innerHTML = newContent;
-                        });
-
-                        // Remove mistake record to hide it afterwards.
-                        config.mistakes.removeMistake(chunk.getLastHash(), parts[1]);
+                    // Get mistake and correction information from the triger name.
+                    const [actionType, mistakeId, correctionId] = trigger.name.split('-');
+                    if (actionType == 'correction') {
+                        this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
                         config.proofreader.process();
-
-                        this.editor.windowManager.close();
+                    } else if (actionType == 'ignore') {
+                        this.ignoreMistake(chunk, mistakeId);
+                    } else if (actionType == 'allcorrection') {
+                        this.fixAll(chunk, mistakeId, suggestionRulebook[correctionId])
+                        config.proofreader.process();
                     }
+                    this.editor.windowManager.close();
                 }
             });
 
         });
+    }
+
+    protected fixMistake(chunk: HtmlParagraphChunk, mistakeId: string, correctionRules) {
+        Object.entries(correctionRules).forEach(([target, correctValue]: [any, string]) => {
+            // TODO SMARTER WAY TO REPLACE TOKENS (USE ENGINE FOR PARSING)
+            let originalContent: string = $(chunk.getToken(target))[0].innerHTML;
+            let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, "|<>|$1|<>|").split("|<>|");
+            console.log(contentParts);
+            let modifiedContentParts = contentParts.map((part) => {
+                if(!part.match(/(<[^(><.)]+>)/)) {
+                    let newVal = correctValue.length > part.length ? correctValue.substring(0, part.length) : correctValue;
+                    correctValue = correctValue.length > part.length ? correctValue.slice(part.length) : "";
+                    return newVal;
+                }
+                return part;
+            });
+            if(correctValue.length > 0) {
+                modifiedContentParts.push(correctValue);
+            }
+            let newContent = modifiedContentParts.join("");
+            $(chunk.getToken(target))[0].innerHTML = newContent;
+        });
+
+        // Remove mistake record to hide it afterwards.
+        config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
     }
 
     private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake) {
@@ -149,15 +161,39 @@ export class TinyMceGui extends ProofreaderGui {
                 }
             );
         }
+        suggestions.push(
+            {
+                type: 'button',
+                name: 'ignore-' + mistake.getId(),
+                text: "Ignorovat chybu",
+                borderless: true,
+            }
+        );
         mistakes.forEach((correction) => {
             partialRulebook[correction.getId()] = correction.getRules();
             suggestions.push(
                 {
-                    type: 'button',
-                    name: 'correction-' + mistake.getId() + '-' + correction.getId(),
-                    text: correction.getDescription(),
-                    borderless: true,
-                }
+                    type: 'htmlpanel',
+                    html: correction.getDescription()
+                },
+                {
+                    type: 'grid',
+                    columns: 2,
+                    items: [
+                        {
+                            type: 'button',
+                            name: 'correction-' + mistake.getId() + '-' + correction.getId(),
+                            text: "Opravit jen tady",
+                            borderless: true,
+                        },
+                        {
+                            type: 'button',
+                            name: 'allcorrection-' + mistake.getId() + '-' + correction.getId(),
+                            text: "Opravit všude",
+                            borderless: true,
+                        }
+                    ],
+                }  
             );
         });
         if (mistake.getAbout().length) {
