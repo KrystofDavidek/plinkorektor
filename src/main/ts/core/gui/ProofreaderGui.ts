@@ -2,7 +2,6 @@ import { config } from "../Config";
 import { Mistake } from "../correction/Mistake";
 import { TextChunk } from "../correction/TextChunk";
 import * as $ from 'jquery';
-import { getTokensToHighlight } from "../process/RegexProcess";
 
 export type MistakeStructure = {
     base: number,

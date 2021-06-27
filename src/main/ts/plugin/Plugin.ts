@@ -32,9 +32,9 @@ export default () => {
                 while($(paragraph)[0].tagName != "P") {
                     paragraph = $(paragraph)[0].parent();
                 };
-                let confirmed = confirm("Chcete nahlásit chybně opravený text: \n" + selection + "\n nacházející se v tomto odstavci: \n " + $(paragraph).text());
-                if(confirmed) {
-                    proofreader.report(selection, $(paragraph).html());
+                let note = prompt("Chystáte se nahlásit chybně opravený text: \n" + selection + "\n nacházející se v tomto odstavci: \n " + $(paragraph).text() + " \n Zde můžete doplnit poznámku: ");
+                if(note) {
+                    proofreader.report(selection, $(paragraph).html(), note);
                 }
             },
             onSetup: function (buttonApi) {

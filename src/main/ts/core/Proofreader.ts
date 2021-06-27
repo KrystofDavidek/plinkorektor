@@ -30,7 +30,7 @@ export class Proofreader {
         }, 1000);
     }
 
-    report(selection: string, context: string) {
+    report(selection: string, context: string, note: string) {
         //TODO
     }
 
