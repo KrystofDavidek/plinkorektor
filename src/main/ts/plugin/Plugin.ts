@@ -1,5 +1,5 @@
-import { TinyMceGui } from "./TinyMceGui";
-import * as $ from "jquery";
+import { TinyMceGui } from './TinyMceGui';
+import * as $ from 'jquery';
 import {
   config,
   cssMainStylesheet,
@@ -7,40 +7,40 @@ import {
   ProofreaderGui,
   themeCustomization,
   message as msg,
-} from "plinkorektor-core";
+} from 'plinkorektor-core';
 
 declare const tinymce: any;
 
-export const MISTAKE_BG_COLOR = "rgb(255, 255, 0)";
+export const MISTAKE_BG_COLOR = 'rgb(255, 255, 0)';
 
 export default () => {
-  tinymce.PluginManager.add("plinkorektor", (editor) => {
-    msg("Pre-initialization.");
+  tinymce.PluginManager.add('plinkorektor', (editor) => {
+    msg('Pre-initialization.');
     let proofreader = new Proofreader(config);
-    editor.on("init", function () {
+    editor.on('init', function () {
       let gui: ProofreaderGui = new TinyMceGui(editor, () => {
         editor.dom.addStyle(cssMainStylesheet);
       });
       proofreader.initialize(gui);
     });
     // Autocorrect triggered by editor change
-    editor.on("remove", function () {
+    editor.on('remove', function () {
       proofreader.destroy();
     });
-    editor.ui.registry.addButton("reporterror", {
-      text: "Nahlásit chybu",
+    editor.ui.registry.addButton('reporterror', {
+      text: 'Nahlásit chybu',
       onAction: function (_) {
-        let selection = editor.selection.getContent({ format: "text" });
+        let selection = editor.selection.getContent({ format: 'text' });
         let paragraph = editor.selection.getNode();
-        while ($(paragraph)[0].tagName != "P") {
+        while ($(paragraph)[0].tagName != 'P') {
           paragraph = $(paragraph)[0].parent();
         }
         let note = prompt(
-          "Chystáte se nahlásit chybně opravený text: \n" +
+          'Chystáte se nahlásit chybně opravený text: \n' +
             selection +
-            "\n nacházející se v tomto odstavci: \n " +
+            '\n nacházející se v tomto odstavci: \n ' +
             $(paragraph).text() +
-            " \n Zde můžete doplnit poznámku: "
+            ' \n Zde můžete doplnit poznámku: ',
         );
         if (note) {
           proofreader.report(selection, $(paragraph).html(), note);
@@ -50,22 +50,22 @@ export default () => {
         var editorEventCallback = function () {
           buttonApi.setDisabled(proofreader.config.gui.isProcessing());
         };
-        editor.on("NodeChange", editorEventCallback);
+        editor.on('NodeChange', editorEventCallback);
 
         /* onSetup should always return the unbind handlers */
         return function (buttonApi) {
-          editor.off("NodeChange", editorEventCallback);
+          editor.off('NodeChange', editorEventCallback);
         };
       },
     });
-    editor.ui.registry.addButton("calculate-confustion-matrix", {
-      text: "Statistiky oprav",
+    editor.ui.registry.addButton('calculate-confustion-matrix', {
+      text: 'Statistiky oprav',
       onAction: function (_) {
-        let tokens = editor.dom.select(".pk-token");
+        let tokens = editor.dom.select('.pk-token');
         let total = tokens.length;
         let [TP, FP, TN, FN]: number[] = [0, 0, 0, 0];
         $(tokens).each((i, token) => {
-          let hasError = $(token).hasClass("pk-token-correction");
+          let hasError = $(token).hasClass('pk-token-correction');
           let shouldHaveError = realBackgroundColor(token) == MISTAKE_BG_COLOR;
           if (hasError && shouldHaveError) {
             TP += 1;
@@ -80,35 +80,33 @@ export default () => {
         let precision: number = (TP / (TP + FP)) * 100;
         let recall: number = TP + FN == 0 ? 100 : (TP / (TP + FN)) * 100;
         let results: string =
-          "Celkem tokenů: " +
+          'Celkem tokenů: ' +
           total +
-          " TP: " +
+          ' TP: ' +
           TP +
-          " FP: " +
+          ' FP: ' +
           FP +
-          " TN: " +
+          ' TN: ' +
           TN +
-          " FN: " +
+          ' FN: ' +
           FN +
-          " \n Přesnost: " +
+          ' \n Přesnost: ' +
           Math.floor(precision * 100) / 100 +
-          " % Pokrytí: " +
+          ' % Pokrytí: ' +
           Math.floor(recall * 100) / 100 +
-          " %";
-        $(".tox-statusbar.stats").remove();
-        $(".tox-statusbar").before(
-          '<div class="tox-statusbar stats">' + results + "</div>"
-        );
+          ' %';
+        $('.tox-statusbar.stats').remove();
+        $('.tox-statusbar').before('<div class="tox-statusbar stats">' + results + '</div>');
       },
       onSetup: function (buttonApi) {
         var editorEventCallback = function () {
           buttonApi.setDisabled(proofreader.config.gui.isProcessing());
         };
-        editor.on("NodeChange", editorEventCallback);
+        editor.on('NodeChange', editorEventCallback);
 
         /* onSetup should always return the unbind handlers */
         return function (buttonApi) {
-          editor.off("NodeChange", editorEventCallback);
+          editor.off('NodeChange', editorEventCallback);
         };
       },
     });
@@ -117,8 +115,8 @@ export default () => {
 };
 
 function realBackgroundColor(elem) {
-  var transparent = "rgba(0, 0, 0, 0)";
-  var transparentIE11 = "transparent";
+  var transparent = 'rgba(0, 0, 0, 0)';
+  var transparentIE11 = 'transparent';
   if (!elem) return transparent;
 
   var bg = getComputedStyle(elem).backgroundColor;

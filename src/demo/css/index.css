@@ -1,0 +1,13 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+.main-container {
+  margin: 1rem;
+}
+
+.mce-container {
+  border: 0px !important;
+}
