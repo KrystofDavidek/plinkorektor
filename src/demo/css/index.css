@@ -8,6 +8,18 @@ body {
   margin: 1rem;
 }
 
-.mce-container {
+.editor {
+  display: flex;
+}
+
+.tox-statusbar__text-container {
+  display: none !important;
+}
+
+.tox-statusbar {
   border: 0px !important;
 }
+
+/* .tox-tinymce {
+  border: 0px !important;
+} */

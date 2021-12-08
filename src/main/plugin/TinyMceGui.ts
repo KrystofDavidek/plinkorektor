@@ -5,12 +5,10 @@ import {
   HtmlParagraphChunk,
   parseEl,
   ParsedHtml,
-  cssMistakeBadValue,
   config,
-  cssMistakeDescription,
-  cssMistakeNoCorrection,
   Mistake,
 } from 'plinkorektor-core';
+import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
@@ -101,6 +99,8 @@ export class TinyMceGui extends ProofreaderGui {
 
     $(token).click((e) => {
       e.preventDefault();
+      console.log(this.editor.getContent());
+
       this.editor.windowManager.open({
         title: 'Návrh na opravu',
         body: {

@@ -1,13 +1,7 @@
+import { cssMainStylesheet, themeCustomization } from '../../assets/editor-styles';
 import { TinyMceGui } from './TinyMceGui';
 import * as $ from 'jquery';
-import {
-  config,
-  cssMainStylesheet,
-  Proofreader,
-  ProofreaderGui,
-  themeCustomization,
-  message as msg,
-} from 'plinkorektor-core';
+import { config, Proofreader, ProofreaderGui, message as msg } from 'plinkorektor-core';
 
 declare const tinymce: any;
 

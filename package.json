@@ -15,7 +15,7 @@
   "devDependencies": {
     "@ephox/agar": "latest",
     "@ephox/bedrock-client": "latest",
-    "@ephox/bedrock-server": "latest",
+    "@ephox/bedrock-server": "^12.3.0",
     "@ephox/mcagar": "latest",
     "@ephox/tslint-rules": "latest",
     "@types/jquery": "^3.5.9",
@@ -56,7 +56,7 @@
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
-    "plinkorektor-core": "^1.0.13",
+    "plinkorektor-core": "^1.0.14",
     "source-map-loader": "^3.0.0",
     "ts-loader": "^9.2.6"
   },

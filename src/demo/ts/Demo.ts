@@ -1,6 +1,10 @@
+import { copy } from './utils';
 import Plugin from '../../main/plugin/Plugin';
+import * as $ from 'jquery';
 
 declare let tinymce: any;
+declare var window: any;
+window.$ = window.jQuery = $;
 
 Plugin();
 
@@ -19,6 +23,9 @@ tinymce.init({
     korektor: { title: 'Korektor', items: 'pk-tagger pk-spellchecker' },
   },
   valid_elements: '*[*]',
-  statusbar: false,
-  inline_boundaries: false,
+  draggable_modal: true,
+});
+
+$(() => {
+  copy(tinymce);
 });
