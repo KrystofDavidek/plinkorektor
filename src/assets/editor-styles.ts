@@ -8,6 +8,12 @@ export const cssMainStylesheet = `
         100% {opacity: 0;}
     }
 
+    @keyframes fade-out {
+        from {
+  	        opacity: 1;
+            }
+    }
+
     [data-pk-unprocessed] {
         background-color: rgba(255,0,0, 0.4);
     }
@@ -27,15 +33,32 @@ export const cssMainStylesheet = `
     }
 
     html[data-pk-processing]::before {
+        margin-right: 0.2rem;
+        top: 0;
+        font-size: 3rem;
         display: block;
         content: '●';
         position: fixed;
-        right: 0.1em;
+        right: 0.2rem;
         color: rgb(192, 57, 43);
         animation-name: processing;
         animation-duration: 0.7s;
         animation-iteration-count: infinite;
         animation-direction: alternate;
+    }
+
+    html[data-pk-processing-finished]::before {
+        margin-right: 0.2rem;
+    top: 0;
+    font-size: 3rem;
+    content: '●';
+    position: fixed;
+    right: 0.2rem;
+    color: green;
+    display: block;
+    animation: fade-out 5s;
+  	opacity: 0;
+
     }
 
     .pk-token-correction {

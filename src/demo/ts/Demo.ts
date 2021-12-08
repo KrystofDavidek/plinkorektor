@@ -16,7 +16,10 @@ tinymce.init({
   },
   content_style:
     "@import url('https://fonts.googleapis.com/css2?family=Varta&display=swap'); body { font-family: Varta; };",
-  plugins: 'code plinkorektor',
+  plugins: 'code plinkorektor autoresize',
+  autoresize_bottom_margin: 10,
+  width: '100%',
+  min_height: 200,
   menubar: 'korektor',
   toolbar: 'none',
   menu: {

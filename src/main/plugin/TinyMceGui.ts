@@ -25,6 +25,7 @@ export class TinyMceGui extends ProofreaderGui {
       $(this.editor.dom.select('html')[0]).attr('data-pk-processing', 'true');
     } else {
       $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing');
+      $(this.editor.dom.select('html')[0]).attr('data-pk-processing-finished', 'true');
       msg('Processing indicator hidden.');
     }
     this.processing = processing;
