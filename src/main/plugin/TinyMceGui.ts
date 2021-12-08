@@ -8,10 +8,15 @@ import {
   config,
   Mistake,
 } from 'plinkorektor-core';
+import { CorrectionType } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
+
+  public correctionsInfo: CorrectionType[] = [];
+  public counterCorrections: number = 0;
+
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
     this.editor = editor;
@@ -21,12 +26,14 @@ export class TinyMceGui extends ProofreaderGui {
 
   public setProcessing(processing: boolean) {
     if (processing) {
-      msg('Processing indicator displayed.');
+      this.resetMistakesCol();
+      // msg('Processing indicator displayed.');
+      $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing-finished');
       $(this.editor.dom.select('html')[0]).attr('data-pk-processing', 'true');
     } else {
       $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing');
       $(this.editor.dom.select('html')[0]).attr('data-pk-processing-finished', 'true');
-      msg('Processing indicator hidden.');
+      // msg('Processing indicator hidden.');
     }
     this.processing = processing;
   }
@@ -45,6 +52,7 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public wrapTokens(chunk: HtmlParagraphChunk, tokens: string[], tokenPos: { from: number; to: number }[]) {
+    this.resetMistakesCol();
     let parsedHtml: ParsedHtml = parseEl($(chunk.getElement()));
     tokens.forEach(function (token, index) {
       parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token);
@@ -79,6 +87,12 @@ export class TinyMceGui extends ProofreaderGui {
     const currentMistakes = [];
     let suggestionRulebook = {};
 
+    this.initMistake(chunk.getToken(pos).text());
+
+    $('.mistakes-container').show();
+    $('.mistakes-container').append(this.createCard(pos));
+    this.createFixHandler(chunk, pos);
+
     config.mistakes.getMistakes(chunk.getLastHash()).forEach((mistake) => {
       if (!mistake.getTokens().includes(pos)) {
         return;
@@ -96,11 +110,14 @@ export class TinyMceGui extends ProofreaderGui {
         align: 'stretch',
         items: dialogOutput.suggestions,
       });
+      console.log('%cLOG, blue text', 'color: blue', {
+        currentMistakes: currentMistakes,
+      });
     });
 
+    this.counterCorrections++;
     $(token).click((e) => {
       e.preventDefault();
-      console.log(this.editor.getContent());
 
       this.editor.windowManager.open({
         title: 'Návrh na opravu',
@@ -132,7 +149,6 @@ export class TinyMceGui extends ProofreaderGui {
       // TODO SMARTER WAY TO REPLACE TOKENS (USE ENGINE FOR PARSING)
       let originalContent: string = $(chunk.getToken(target))[0].innerHTML;
       let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, '|<>|$1|<>|').split('|<>|');
-      console.log(contentParts);
       let modifiedContentParts = contentParts.map((part) => {
         if (!part.match(/(<[^(><.)]+>)/)) {
           let newVal = correctValue.length > part.length ? correctValue.substring(0, part.length) : correctValue;
@@ -225,6 +241,63 @@ export class TinyMceGui extends ProofreaderGui {
         });
       });
     }
+
+    if (this.checkDuplicityMistake('helperText')) {
+      this.setValueToMistakeObj('helperText', helperText);
+    }
+
+    console.log('%cLOG, blue text', 'color: blue', {
+      helperText: helperText,
+      getDescription: mistake.getDescription(),
+      mistakes: mistakes,
+      partialRulebook: partialRulebook,
+      getAbout: mistake.getAbout(),
+    });
     return { suggestions, partialRulebook };
   }
+
+  checkDuplicityMistake(atr: string) {
+    return !this.correctionsInfo[this.counterCorrections] || !this.getValueFromMistakeObj(atr);
+  }
+
+  initMistake(token: string) {
+    if (this.checkDuplicityMistake('mistake')) {
+      this.correctionsInfo.push({ mistake: token, helperText: '' });
+    }
+  }
+
+  setValueToMistakeObj(atr: string, value) {
+    if (this.correctionsInfo[this.counterCorrections][atr]) {
+      this.correctionsInfo[this.counterCorrections][atr] = value;
+    }
+  }
+
+  getValueFromMistakeObj(atr: string) {
+    console.log(this.correctionsInfo);
+    if (this.correctionsInfo[this.counterCorrections][atr]) {
+      return this.correctionsInfo[this.counterCorrections][atr];
+    }
+  }
+
+  resetMistakesCol() {
+    this.correctionsInfo = [];
+    this.counterCorrections = 0;
+    $('.mistakes-container').empty();
+  }
+
+  createFixHandler(chunk, pos) {
+    $(`#${pos}`).on('click', () => {
+      this.fixMistake(chunk, 'syycscsvj', 'Testovací');
+      config.proofreader.process();
+    });
+  }
+
+  createCard(id: number) {
+    return `<div>
+    <p>${this.getValueFromMistakeObj('mistake')}</p>
+    <button id="${id}">Fix</button>
+    </div>`;
+  }
+
+  //
 }

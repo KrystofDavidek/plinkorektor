@@ -32,10 +32,11 @@ export const cssMainStylesheet = `
         opacity : 1;
     }
 
+
     html[data-pk-processing]::before {
         margin-right: 0.2rem;
         top: 0;
-        font-size: 3rem;
+        font-size: 50px;
         display: block;
         content: '●';
         position: fixed;
@@ -50,11 +51,11 @@ export const cssMainStylesheet = `
     html[data-pk-processing-finished]::before {
         margin-right: 0.2rem;
     top: 0;
-    font-size: 3rem;
+    font-size: 50px;
     content: '●';
     position: fixed;
     right: 0.2rem;
-    color: green;
+    color: #92d384;
     display: block;
     animation: fade-out 5s;
   	opacity: 0;

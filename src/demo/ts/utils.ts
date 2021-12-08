@@ -8,7 +8,6 @@ const copyToClipboard = (str: string) => {
   el.select();
   document.execCommand('copy');
   document.body.removeChild(el);
-  console.log('done');
 };
 
 export const copy = (tinymce) => {

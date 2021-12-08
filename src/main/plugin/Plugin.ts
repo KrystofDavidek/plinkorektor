@@ -9,7 +9,7 @@ export const MISTAKE_BG_COLOR = 'rgb(255, 255, 0)';
 
 export default () => {
   tinymce.PluginManager.add('plinkorektor', (editor) => {
-    msg('Pre-initialization.');
+    // msg('Pre-initialization.');
     let proofreader = new Proofreader(config);
     editor.on('init', function () {
       let gui: ProofreaderGui = new TinyMceGui(editor, () => {
