@@ -8,14 +8,13 @@ import {
   config,
   Mistake,
 } from 'plinkorektor-core';
-import { CorrectionType } from 'src/demo/ts/models';
+import { MistakeInfo, MistakeType } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
 
-  public correctionsInfo: CorrectionType[] = [];
-  public counterCorrections: number = 0;
+  public mistakeInfo: MistakeInfo = {};
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
@@ -87,18 +86,16 @@ export class TinyMceGui extends ProofreaderGui {
     const currentMistakes = [];
     let suggestionRulebook = {};
 
-    this.initMistake(chunk.getToken(pos).text());
+    this.initMistake(chunk.getToken(pos).text(), pos);
 
     $('.mistakes-container').show();
-    $('.mistakes-container').append(this.createCard(pos));
-    this.createFixHandler(chunk, pos);
 
     config.mistakes.getMistakes(chunk.getLastHash()).forEach((mistake) => {
       if (!mistake.getTokens().includes(pos)) {
         return;
       } // <-- continue;
 
-      const dialogOutput = this.buildSuggestionDialog(chunk, mistake);
+      const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos);
 
       suggestionRulebook = {
         ...suggestionRulebook,
@@ -115,7 +112,13 @@ export class TinyMceGui extends ProofreaderGui {
       });
     });
 
-    this.counterCorrections++;
+    console.log(this.mistakeInfo);
+
+    $('.mistakes-container').append(this.createCard(pos));
+    this.createFixHandler(chunk, pos);
+
+    this.setHovers(token, pos);
+
     $(token).click((e) => {
       e.preventDefault();
 
@@ -130,6 +133,8 @@ export class TinyMceGui extends ProofreaderGui {
           // Get mistake and correction information from the triger name.
           const [actionType, mistakeId, correctionId] = trigger.name.split('-');
           if (actionType == 'correction') {
+            console.log(mistakeId, suggestionRulebook[correctionId]);
+
             this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
             config.proofreader.process();
           } else if (actionType == 'ignore') {
@@ -168,7 +173,7 @@ export class TinyMceGui extends ProofreaderGui {
     config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
   }
 
-  private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake) {
+  private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number) {
     const partialRulebook = {};
     const helperText = chunk.getContext(mistake);
 
@@ -203,6 +208,8 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     mistakes.forEach((correction) => {
+      this.pushValueToMistakeObj('corrections', correction, pos);
+
       partialRulebook[correction.getId()] = correction.getRules();
       suggestions.push(
         {
@@ -242,9 +249,8 @@ export class TinyMceGui extends ProofreaderGui {
       });
     }
 
-    if (this.checkDuplicityMistake('helperText')) {
-      this.setValueToMistakeObj('helperText', helperText);
-    }
+    this.setValueToMistakeObj('helperText', helperText, pos);
+    this.setValueToMistakeObj('description', mistake.getDescription(), pos);
 
     console.log('%cLOG, blue text', 'color: blue', {
       helperText: helperText,
@@ -256,46 +262,76 @@ export class TinyMceGui extends ProofreaderGui {
     return { suggestions, partialRulebook };
   }
 
-  checkDuplicityMistake(atr: string) {
-    return !this.correctionsInfo[this.counterCorrections] || !this.getValueFromMistakeObj(atr);
-  }
-
-  initMistake(token: string) {
-    if (this.checkDuplicityMistake('mistake')) {
-      this.correctionsInfo.push({ mistake: token, helperText: '' });
+  isValueSet(atr: string, pos: number) {
+    if (Array.isArray(this.mistakeInfo[pos][atr])) {
+      return this.mistakeInfo[pos][atr].length > 0;
+    } else {
+      return !!this.mistakeInfo[pos][atr];
     }
   }
 
-  setValueToMistakeObj(atr: string, value) {
-    if (this.correctionsInfo[this.counterCorrections][atr]) {
-      this.correctionsInfo[this.counterCorrections][atr] = value;
+  initMistake(token: string, pos: number) {
+    if (!this.mistakeInfo.hasOwnProperty(pos)) {
+      this.mistakeInfo[pos] = { mistake: token, helperText: '', description: '', corrections: [] };
     }
   }
 
-  getValueFromMistakeObj(atr: string) {
-    console.log(this.correctionsInfo);
-    if (this.correctionsInfo[this.counterCorrections][atr]) {
-      return this.correctionsInfo[this.counterCorrections][atr];
+  setValueToMistakeObj(atr: string, value: any, pos: number) {
+    if (!this.isValueSet('atr', pos)) {
+      this.mistakeInfo[pos][atr] = value;
+    }
+  }
+
+  pushValueToMistakeObj(atr: string, value: any, pos: number) {
+    this.mistakeInfo[pos][atr].push(value);
+  }
+
+  getValueFromMistakeObj(atr: string, pos: number) {
+    if (this.mistakeInfo[pos][atr]) {
+      return this.mistakeInfo[pos][atr];
     }
   }
 
   resetMistakesCol() {
-    this.correctionsInfo = [];
-    this.counterCorrections = 0;
+    this.mistakeInfo = {};
     $('.mistakes-container').empty();
   }
 
   createFixHandler(chunk, pos) {
-    $(`#${pos}`).on('click', () => {
-      this.fixMistake(chunk, 'syycscsvj', 'Testovací');
+    $(`#${pos}-fix`).on('click', () => {
+      const correction = this.getValueFromMistakeObj('corrections', pos)[0];
+      this.fixMistake(chunk, correction.id, correction.rules);
       config.proofreader.process();
     });
   }
 
-  createCard(id: number) {
-    return `<div>
-    <p>${this.getValueFromMistakeObj('mistake')}</p>
-    <button id="${id}">Fix</button>
+  setHovers(token, pos) {
+    $(token).mouseenter(() => {
+      $(`#${pos}`).addClass('selected');
+    });
+
+    $(`#${pos}`).mouseenter(() => {
+      $(`#${pos}`).addClass('selected');
+      $(token).addClass('hovered');
+    });
+
+    $(`#${pos}`).mouseleave(() => {
+      $(`#${pos}`).removeClass('selected');
+      $(token).removeClass('hovered');
+    });
+
+    $(token).mouseleave(() => {
+      $(`#${pos}`).removeClass('selected');
+    });
+  }
+
+  createCard(pos: number) {
+    return `<div id="${pos}" class="mistake">
+    <h4>${this.getValueFromMistakeObj('description', pos)}</h4>
+    <p>${this.getValueFromMistakeObj('mistake', pos)} -> ${
+      this.getValueFromMistakeObj('corrections', pos)[0]['rules'][pos]
+    }</p>
+    <button id="${pos}-fix" type="button" class="btn btn-primary">Fix</button>
     </div>`;
   }
 

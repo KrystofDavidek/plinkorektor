@@ -70,7 +70,7 @@ export const cssMainStylesheet = `
         transition: background-size 0.25s ease-in;
     }
 
-    .pk-token-correction:hover {
+    .pk-token-correction:hover, .pk-token-correction.hovered {
         background-image: linear-gradient(120deg, rgba(192, 57, 43, .3) 0%, rgba(192, 57, 43, .3) 100%);
         background-size: 100% 100%;
         border-radius: 0.2em;

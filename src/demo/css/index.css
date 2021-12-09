@@ -6,6 +6,7 @@ body {
 
 .main-container {
   margin: 1rem;
+  padding: 2rem;
 }
 
 .editor {
@@ -20,8 +21,20 @@ body {
   border: 0px !important;
 }
 
+.copy-button {
+  margin: 1rem 1rem 1rem 0;
+}
+
 .mistakes-container {
   display: none;
+}
+
+.mistake {
+  padding: 1rem;
+}
+
+.selected {
+  border: 1px solid red;
 }
 
 /* .tox-tinymce {
