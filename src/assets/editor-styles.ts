@@ -75,6 +75,16 @@ export const cssMainStylesheet = `
         background-size: 100% 100%;
         border-radius: 0.2em;
     }
+
+    .pk-token-correction-fixed {
+         background-image: linear-gradient(120deg, rgba(76, 206, 76, 1) 0%, rgba(76, 206, 76, 1) 100%);
+    }
+
+    .pk-token-correction-fixed:hover{
+        background-image: linear-gradient(120deg, rgba(76, 206, 76, .3) 0%, rgba(76, 206, 76, .3) 100%);
+        background-size: 100% 100%;
+        border-radius: 0.2em;
+    }  
 `;
 
 export const cssMistakeDescription = `

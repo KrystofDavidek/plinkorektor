@@ -1,13 +1,5 @@
 import * as $ from 'jquery';
-import {
-  ProofreaderGui,
-  message as msg,
-  HtmlParagraphChunk,
-  parseEl,
-  ParsedHtml,
-  config,
-  Mistake,
-} from 'plinkorektor-core';
+import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from 'plinkorektor-core';
 import { MistakeInfo, MistakeType } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 
@@ -107,15 +99,12 @@ export class TinyMceGui extends ProofreaderGui {
         align: 'stretch',
         items: dialogOutput.suggestions,
       });
-      console.log('%cLOG, blue text', 'color: blue', {
-        currentMistakes: currentMistakes,
-      });
     });
 
     console.log(this.mistakeInfo);
 
     $('.mistakes-container').append(this.createCard(pos));
-    this.createFixHandler(chunk, pos);
+    this.createFixHandler(chunk, token, pos);
 
     this.setHovers(token, pos);
 
@@ -297,9 +286,11 @@ export class TinyMceGui extends ProofreaderGui {
     $('.mistakes-container').empty();
   }
 
-  createFixHandler(chunk, pos) {
+  createFixHandler(chunk, token, pos) {
     $(`#${pos}-fix`).on('click', () => {
       const correction = this.getValueFromMistakeObj('corrections', pos)[0];
+      $(token).addClass('pk-token-correction-fixed');
+      delete this.mistakeInfo[pos];
       this.fixMistake(chunk, correction.id, correction.rules);
       config.proofreader.process();
     });
@@ -326,6 +317,11 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number) {
+    if (
+      this.getValueFromMistakeObj('mistake', pos) === this.getValueFromMistakeObj('corrections', pos)[0]['rules'][pos]
+    ) {
+      return;
+    }
     return `<div id="${pos}" class="mistake">
     <h4>${this.getValueFromMistakeObj('description', pos)}</h4>
     <p>${this.getValueFromMistakeObj('mistake', pos)} -> ${
