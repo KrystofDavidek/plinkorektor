@@ -77,14 +77,18 @@ export const cssMainStylesheet = `
     }
 
     .pk-token-correction-fixed {
-         background-image: linear-gradient(120deg, rgba(76, 206, 76, 1) 0%, rgba(76, 206, 76, 1) 100%);
+        background-image: linear-gradient(120deg, rgba(76, 206, 76, 1) 0%, rgba(76, 206, 76, 1) 100%);
+        background-repeat: no-repeat;
+        background-size: 100% 0.25em;
+        background-position: 0 95%;
+        transition: background-size 0.25s ease-in;
     }
 
-    .pk-token-correction-fixed:hover{
+    .pk-token-correction-fixed:hover, .pk-token-correction-fixed.hovered {
         background-image: linear-gradient(120deg, rgba(76, 206, 76, .3) 0%, rgba(76, 206, 76, .3) 100%);
         background-size: 100% 100%;
         border-radius: 0.2em;
-    }  
+    }
 `;
 
 export const cssMistakeDescription = `

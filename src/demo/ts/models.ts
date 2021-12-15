@@ -1,10 +1,12 @@
 import { Correction } from 'plinkorektor-core/lib/correction/Correction';
 
 export type MistakeType = {
-  mistake: string;
-  helperText: string;
-  description: string;
-  corrections: Correction[];
+  [key: number]: {
+    token: string;
+    helperText: string;
+    description: string;
+    corrections: Correction[];
+  };
 };
 
 export type MistakeInfo = {

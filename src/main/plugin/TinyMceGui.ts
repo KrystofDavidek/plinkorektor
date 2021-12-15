@@ -1,7 +1,8 @@
 import * as $ from 'jquery';
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from 'plinkorektor-core';
-import { MistakeInfo, MistakeType } from 'src/demo/ts/models';
+import { MistakeInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
+import * as _ from 'lodash';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
@@ -43,7 +44,6 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public wrapTokens(chunk: HtmlParagraphChunk, tokens: string[], tokenPos: { from: number; to: number }[]) {
-    this.resetMistakesCol();
     let parsedHtml: ParsedHtml = parseEl($(chunk.getElement()));
     tokens.forEach(function (token, index) {
       parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token);
@@ -72,22 +72,26 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public visualizeMistakes(chunk: HtmlParagraphChunk, pos: number, token) {
+    const parId = this.getParId(chunk);
+    this.resetMistakesCol();
     // Removes original left-click triggers on tokens
     $(token).off('click');
     // Create dialog itself
     const currentMistakes = [];
     let suggestionRulebook = {};
 
-    this.initMistake(chunk.getToken(pos).text(), pos);
-
-    $('.mistakes-container').show();
+    if (!this.initMistake(chunk.getToken(pos).text(), token, pos, parId)) {
+      return;
+    }
+    this.createFixAllHandler(chunk, parId);
+    $(`#fix-all`).show();
 
     config.mistakes.getMistakes(chunk.getLastHash()).forEach((mistake) => {
       if (!mistake.getTokens().includes(pos)) {
         return;
       } // <-- continue;
 
-      const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos);
+      const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
 
       suggestionRulebook = {
         ...suggestionRulebook,
@@ -101,12 +105,9 @@ export class TinyMceGui extends ProofreaderGui {
       });
     });
 
-    console.log(this.mistakeInfo);
-
-    $('.mistakes-container').append(this.createCard(pos));
-    this.createFixHandler(chunk, token, pos);
-
-    this.setHovers(token, pos);
+    $('.mistakes').append(this.createCard(pos, parId));
+    this.createFixHandler(chunk, pos, parId);
+    this.setHovers(token, pos, parId);
 
     $(token).click((e) => {
       e.preventDefault();
@@ -122,8 +123,6 @@ export class TinyMceGui extends ProofreaderGui {
           // Get mistake and correction information from the triger name.
           const [actionType, mistakeId, correctionId] = trigger.name.split('-');
           if (actionType == 'correction') {
-            console.log(mistakeId, suggestionRulebook[correctionId]);
-
             this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
             config.proofreader.process();
           } else if (actionType == 'ignore') {
@@ -162,7 +161,7 @@ export class TinyMceGui extends ProofreaderGui {
     config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
   }
 
-  private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number) {
+  private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number, parId: number) {
     const partialRulebook = {};
     const helperText = chunk.getContext(mistake);
 
@@ -197,7 +196,7 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     mistakes.forEach((correction) => {
-      this.pushValueToMistakeObj('corrections', correction, pos);
+      this.pushValueToMistakeObj('corrections', correction, pos, parId);
 
       partialRulebook[correction.getId()] = correction.getRules();
       suggestions.push(
@@ -238,96 +237,145 @@ export class TinyMceGui extends ProofreaderGui {
       });
     }
 
-    this.setValueToMistakeObj('helperText', helperText, pos);
-    this.setValueToMistakeObj('description', mistake.getDescription(), pos);
+    this.setValueToMistakeObj('helperText', helperText, pos, parId);
+    this.setValueToMistakeObj('description', mistake.getDescription(), pos, parId);
 
-    console.log('%cLOG, blue text', 'color: blue', {
-      helperText: helperText,
-      getDescription: mistake.getDescription(),
-      mistakes: mistakes,
-      partialRulebook: partialRulebook,
-      getAbout: mistake.getAbout(),
-    });
     return { suggestions, partialRulebook };
   }
 
-  isValueSet(atr: string, pos: number) {
-    if (Array.isArray(this.mistakeInfo[pos][atr])) {
-      return this.mistakeInfo[pos][atr].length > 0;
+  getParId(chunk: HtmlParagraphChunk): number {
+    let parId = -1;
+    const content = $(this.editor.dom.select('html')[0]).find('p');
+    content.each((i, p) => {
+      if (chunk.getElement() === p) {
+        parId = i;
+        return;
+      }
+    });
+    return parId;
+  }
+
+  isValueSet(atr: string, pos: number, parId: number) {
+    if (Array.isArray(this.mistakeInfo[parId][pos][atr])) {
+      return this.mistakeInfo[parId][pos][atr].length > 0;
     } else {
-      return !!this.mistakeInfo[pos][atr];
+      return !!this.mistakeInfo[parId][pos][atr];
     }
   }
 
-  initMistake(token: string, pos: number) {
-    if (!this.mistakeInfo.hasOwnProperty(pos)) {
-      this.mistakeInfo[pos] = { mistake: token, helperText: '', description: '', corrections: [] };
+  initMistake(token, htmlToken, pos: number, parId: number): boolean {
+    if (!this.mistakeInfo.hasOwnProperty(parId)) {
+      this.mistakeInfo[parId] = {};
+    }
+    if ($(htmlToken).hasClass('pk-token-correction-fixed') || !$(htmlToken).hasClass('pk-token-correction')) {
+      return false;
+    }
+    if (!this.mistakeInfo[parId].hasOwnProperty(pos)) {
+      this.mistakeInfo[parId][pos] = {
+        token: token,
+        helperText: '',
+        description: '',
+        corrections: [],
+      };
+    }
+    return true;
+  }
+
+  setValueToMistakeObj(atr: string, value: any, pos: number, parId: number) {
+    if (!this.isValueSet('atr', pos, parId)) {
+      this.mistakeInfo[parId][pos][atr] = value;
     }
   }
 
-  setValueToMistakeObj(atr: string, value: any, pos: number) {
-    if (!this.isValueSet('atr', pos)) {
-      this.mistakeInfo[pos][atr] = value;
-    }
+  pushValueToMistakeObj(atr: string, value: any, pos: number, parId: number) {
+    this.mistakeInfo[parId][pos][atr].push(value);
   }
 
-  pushValueToMistakeObj(atr: string, value: any, pos: number) {
-    this.mistakeInfo[pos][atr].push(value);
-  }
-
-  getValueFromMistakeObj(atr: string, pos: number) {
-    if (this.mistakeInfo[pos][atr]) {
-      return this.mistakeInfo[pos][atr];
+  getValueFromMistakeObj(atr: string, pos: number, parId: number) {
+    if (this.mistakeInfo[parId][pos][atr]) {
+      return this.mistakeInfo[parId][pos][atr];
     }
   }
 
   resetMistakesCol() {
-    this.mistakeInfo = {};
-    $('.mistakes-container').empty();
+    let isEmpty: boolean = true;
+    Object.values(this.mistakeInfo).forEach((val) => {
+      if (Object.keys(val).length > 0) isEmpty = false;
+    });
+    if (isEmpty) {
+      $('#fix-all').hide();
+      $('.mistakes').empty();
+    }
   }
 
-  createFixHandler(chunk, token, pos) {
-    $(`#${pos}-fix`).on('click', () => {
-      const correction = this.getValueFromMistakeObj('corrections', pos)[0];
-      $(token).addClass('pk-token-correction-fixed');
-      delete this.mistakeInfo[pos];
-      this.fixMistake(chunk, correction.id, correction.rules);
+  fix(chunk, token, pos, parId) {
+    $(`#${pos}-${parId}`).remove();
+    if (!$(token).text()) {
+      $(token).text(chunk.getToken(pos).text());
+    }
+    const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0];
+    this.mistakeInfo[parId] = _.omit(this.mistakeInfo[parId], pos);
+    $(token).removeClass('pk-token-correction');
+    $(token).addClass('pk-token-correction-fixed');
+    this.removeMistakeHighlight(pos, token, parId);
+    this.fixMistake(chunk, correction.id, correction.rules);
+  }
+
+  createFixHandler(chunk, pos, parId) {
+    $(`#${pos}-${parId}`).on('click', () => {
+      this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       config.proofreader.process();
     });
   }
 
-  setHovers(token, pos) {
-    $(token).mouseenter(() => {
-      $(`#${pos}`).addClass('selected');
-    });
-
-    $(`#${pos}`).mouseenter(() => {
-      $(`#${pos}`).addClass('selected');
-      $(token).addClass('hovered');
-    });
-
-    $(`#${pos}`).mouseleave(() => {
-      $(`#${pos}`).removeClass('selected');
-      $(token).removeClass('hovered');
-    });
-
-    $(token).mouseleave(() => {
-      $(`#${pos}`).removeClass('selected');
+  createFixAllHandler(chunk: HtmlParagraphChunk, parId) {
+    $(`#fix-all`).on('click', () => {
+      for (const pos in this.mistakeInfo[parId]) {
+        this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
+      }
+      $(`#fix-all`).hide();
+      config.proofreader.process();
     });
   }
 
-  createCard(pos: number) {
+  setHovers(token, pos, parId) {
+    $(token).mouseenter(() => {
+      $(`#${pos}-${parId}`).addClass('selected');
+    });
+
+    $(`#${pos}-${parId}`).mouseenter(() => {
+      $(`#${pos}-${parId}`).addClass('selected');
+      $(token).addClass('hovered');
+    });
+
+    $(`#${pos}-${parId}`).mouseleave(() => {
+      this.removeMistakeHighlight(pos, token, parId);
+    });
+
+    $(token).mouseleave(() => {
+      $(`#${pos}-${parId}`).removeClass('selected');
+    });
+  }
+
+  removeMistakeHighlight(pos: number, token: string, parId: number) {
+    $(`#${pos}-${parId}`).removeClass('selected');
+    $(token).removeClass('hovered');
+  }
+
+  createCard(pos: number, parId: number) {
     if (
-      this.getValueFromMistakeObj('mistake', pos) === this.getValueFromMistakeObj('corrections', pos)[0]['rules'][pos]
+      $(`#${pos}-${parId}`).length ||
+      this.getValueFromMistakeObj('token', pos, parId) ===
+        this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
     ) {
       return;
     }
-    return `<div id="${pos}" class="mistake">
-    <h4>${this.getValueFromMistakeObj('description', pos)}</h4>
-    <p>${this.getValueFromMistakeObj('mistake', pos)} -> ${
-      this.getValueFromMistakeObj('corrections', pos)[0]['rules'][pos]
+    return `<div id="${pos}-${parId}" class="mistake">
+    <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
+    <p>${this.getValueFromMistakeObj('token', pos, parId)} -> ${
+      this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
     }</p>
-    <button id="${pos}-fix" type="button" class="btn btn-primary">Fix</button>
+    <button id="${pos}-${parId}-fix" type="button" class="btn btn-primary">Fix</button>
     </div>`;
   }
 

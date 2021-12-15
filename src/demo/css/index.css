@@ -5,7 +5,6 @@ body {
 }
 
 .main-container {
-  margin: 1rem;
   padding: 2rem;
 }
 
@@ -25,12 +24,20 @@ body {
   margin: 1rem 1rem 1rem 0;
 }
 
-.mistakes-container {
+#fix-all {
   display: none;
+}
+
+.mistakes {
+  max-height: 78vh;
+  overflow: scroll;
+  background-color: #ededed;
 }
 
 .mistake {
   padding: 1rem;
+  margin: 1rem;
+  background-color: white;
 }
 
 .selected {
@@ -40,3 +47,11 @@ body {
 /* .tox-tinymce {
   border: 0px !important;
 } */
+
+pre {
+  white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+  white-space: -pre-wrap; /* Opera */
+  white-space: -o-pre-wrap; /* Opera */
+  white-space: pre-wrap; /* CSS3 - Text module (Candidate Recommendation) http://www.w3.org/TR/css3-text/#white-space */
+  word-wrap: break-word; /* IE 5.5+ */
+}
