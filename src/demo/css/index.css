@@ -44,9 +44,31 @@ body {
   border: 1px solid red;
 }
 
-/* .tox-tinymce {
-  border: 0px !important;
-} */
+.popover {
+  top: 35px !important;
+  left: 33px !important;
+}
+
+.popover-body {
+  display: flex;
+  align-items: center;
+  padding: 0.2rem;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.icon:hover {
+  background-color: rgb(218, 214, 214);
+  border-radius: 100%;
+}
+
+.popover-text {
+  margin-left: 0.5rem;
+  margin-right: 1rem;
+}
 
 pre {
   white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */

@@ -106,7 +106,9 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     $('.mistakes').append(this.createCard(pos, parId));
-    this.createFixHandler(chunk, pos, parId);
+    this.createFixHandler(chunk, token, pos, parId);
+    this.createIgnoreHandler(chunk, token, pos, parId);
+    this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
 
     $(token).click((e) => {
@@ -236,7 +238,7 @@ export class TinyMceGui extends ProofreaderGui {
         });
       });
     }
-
+    this.setValueToMistakeObj('id', mistake.getId(), pos, parId);
     this.setValueToMistakeObj('helperText', helperText, pos, parId);
     this.setValueToMistakeObj('description', mistake.getDescription(), pos, parId);
 
@@ -272,6 +274,7 @@ export class TinyMceGui extends ProofreaderGui {
     }
     if (!this.mistakeInfo[parId].hasOwnProperty(pos)) {
       this.mistakeInfo[parId][pos] = {
+        id: '',
         token: token,
         helperText: '',
         description: '',
@@ -282,7 +285,7 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   setValueToMistakeObj(atr: string, value: any, pos: number, parId: number) {
-    if (!this.isValueSet('atr', pos, parId)) {
+    if (!this.isValueSet(atr, pos, parId)) {
       this.mistakeInfo[parId][pos][atr] = value;
     }
   }
@@ -308,34 +311,85 @@ export class TinyMceGui extends ProofreaderGui {
     }
   }
 
-  fix(chunk, token, pos, parId) {
+  fix(chunk, token, pos, parId, isIgnore = false) {
+    if (!this.mistakeInfo[parId][pos]) return;
     $(`#${pos}-${parId}`).remove();
     if (!$(token).text()) {
       $(token).text(chunk.getToken(pos).text());
     }
     const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0];
+    const id = this.getValueFromMistakeObj('id', pos, parId);
     this.mistakeInfo[parId] = _.omit(this.mistakeInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
-    $(token).addClass('pk-token-correction-fixed');
+    if (!isIgnore) $(token).addClass('pk-token-correction-fixed');
     this.removeMistakeHighlight(pos, token, parId);
-    this.fixMistake(chunk, correction.id, correction.rules);
+    if (isIgnore) {
+      this.ignoreMistake(chunk, id);
+    } else {
+      this.fixMistake(chunk, correction.id, correction.rules);
+    }
   }
 
-  createFixHandler(chunk, pos, parId) {
-    $(`#${pos}-${parId}`).on('click', () => {
+  createFixHandler(chunk, token, pos, parId) {
+    $(document).on('click', `#${pos}-${parId}-fix`, () => {
+      this.closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       config.proofreader.process();
     });
   }
 
+  createIgnoreHandler(chunk, token, pos, parId) {
+    $(document).on('click', `#${pos}-${parId}-ignore`, () => {
+      this.closePopover(token);
+      this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, true);
+    });
+  }
+
+  closePopover(token) {
+    ($(token) as any).popover('hide');
+    ($(token) as any).popover('disable');
+    $('.popover').remove();
+  }
+
   createFixAllHandler(chunk: HtmlParagraphChunk, parId) {
     $(`#fix-all`).on('click', () => {
       for (const pos in this.mistakeInfo[parId]) {
+        this.closePopover(chunk.getToken(Number(pos)));
         this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       }
       $(`#fix-all`).hide();
       config.proofreader.process();
     });
+  }
+
+  setPopover(token, pos, parId) {
+    $(token).attr({
+      'data-toggle': 'popover',
+      'data-placement': 'bottom',
+      'data-content': this.createPopoverContent(pos, parId),
+    });
+
+    ($(token) as any)
+      .popover({
+        trigger: 'manual',
+        animation: true,
+        html: true,
+      })
+      .on('mouseenter', function () {
+        var _this = this;
+        ($(this) as any).popover('show');
+        $('.popover').on('mouseleave', function () {
+          ($(_this) as any).popover('hide');
+        });
+      })
+      .on('mouseleave', function () {
+        var _this = this;
+        setTimeout(function () {
+          if (!$('.popover:hover').length) {
+            ($(_this) as any).popover('hide');
+          }
+        }, 100);
+      });
   }
 
   setHovers(token, pos, parId) {
@@ -363,21 +417,38 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number, parId: number) {
-    if (
-      $(`#${pos}-${parId}`).length ||
-      this.getValueFromMistakeObj('token', pos, parId) ===
-        this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
-    ) {
-      return;
-    }
-    return `<div id="${pos}-${parId}" class="mistake">
-    <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
-    <p>${this.getValueFromMistakeObj('token', pos, parId)} -> ${
+    if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
+
+    return `
+    <div id="${pos}-${parId}" class="mistake">
+      <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
+      <p>${this.getValueFromMistakeObj('token', pos, parId)} -> ${
       this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
     }</p>
-    <button id="${pos}-${parId}-fix" type="button" class="btn btn-primary">Fix</button>
-    </div>`;
+      <button id="${pos}-${parId}-fix" type="button" class="btn btn-primary">Opravit</button>
+      <button id="${pos}-${parId}-ignore" type="button" class="btn btn-primary">Neopravovat</button>
+    </div>
+    `;
   }
 
-  //
+  createPopoverContent(pos, parId) {
+    if (this.isCorrection(pos, parId)) return;
+
+    return `
+    <div id="${pos}-${parId}-pop" class="popover-body">
+      <span class="popover-text" type="button">${
+        this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
+      }</span>
+      <img id="${pos}-${parId}-fix" class="check icon" src="../../assets/icons/check2.svg" alt="Check">
+      <img id="${pos}-${parId}-ignore" class="cancel icon" src="../../assets/icons/x.svg" alt="Check"> 
+    </div>
+  `;
+  }
+
+  isCorrection(pos, parId) {
+    return (
+      this.getValueFromMistakeObj('token', pos, parId) ===
+      this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
+    );
+  }
 }
