@@ -1,15 +1,15 @@
-import { Correction } from 'plinkorektor-core/lib/correction/Correction';
+import { Mistake } from 'plinkorektor-core/lib/correction/Mistake';
 
-export type MistakeType = {
+export type TokenInfo = {
   [key: number]: {
-    id: string;
     token: string;
+    isDisabled: boolean;
+    htmlToken: string;
     helperText: string;
-    description: string;
-    corrections: Correction[];
+    mistakes: Mistake[];
   };
 };
 
-export type MistakeInfo = {
-  [key: number]: MistakeType;
+export type TokensInfo = {
+  [key: number]: TokenInfo;
 };

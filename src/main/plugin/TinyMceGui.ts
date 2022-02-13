@@ -1,13 +1,13 @@
 import * as $ from 'jquery';
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from 'plinkorektor-core';
-import { MistakeInfo } from 'src/demo/ts/models';
+import { TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 import * as _ from 'lodash';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
 
-  public mistakeInfo: MistakeInfo = {};
+  public tokensInfo: TokensInfo = {};
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
@@ -40,6 +40,10 @@ export class TinyMceGui extends ProofreaderGui {
     content.each((i, p) => {
       chunks.push(new HtmlParagraphChunk(p));
     });
+    if (!this.editor.getContent()) {
+      this.tokensInfo = {};
+      this.resetMistakesCol();
+    }
     return chunks;
   }
 
@@ -80,7 +84,7 @@ export class TinyMceGui extends ProofreaderGui {
     const currentMistakes = [];
     let suggestionRulebook = {};
 
-    if (!this.initMistake(chunk.getToken(pos).text(), token, pos, parId)) {
+    if (!this.initToken(chunk.getToken(pos).text(), token, pos, parId)) {
       return;
     }
     this.createFixAllHandler(chunk, parId);
@@ -89,7 +93,17 @@ export class TinyMceGui extends ProofreaderGui {
     config.mistakes.getMistakes(chunk.getLastHash()).forEach((mistake) => {
       if (!mistake.getTokens().includes(pos)) {
         return;
-      } // <-- continue;
+      }
+      this.getTokenInfo(pos, parId).mistakes.forEach((oldMistake) => {
+        if (oldMistake?.getId() === mistake.getId()) {
+          return;
+        }
+      });
+
+      const helperText = chunk.getContext(mistake);
+
+      this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
+      this.setValueToTokensInfo('helperText', helperText, pos, parId);
 
       const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
 
@@ -198,8 +212,6 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     mistakes.forEach((correction) => {
-      this.pushValueToMistakeObj('corrections', correction, pos, parId);
-
       partialRulebook[correction.getId()] = correction.getRules();
       suggestions.push(
         {
@@ -238,9 +250,6 @@ export class TinyMceGui extends ProofreaderGui {
         });
       });
     }
-    this.setValueToMistakeObj('id', mistake.getId(), pos, parId);
-    this.setValueToMistakeObj('helperText', helperText, pos, parId);
-    this.setValueToMistakeObj('description', mistake.getDescription(), pos, parId);
 
     return { suggestions, partialRulebook };
   }
@@ -258,51 +267,75 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   isValueSet(atr: string, pos: number, parId: number) {
-    if (Array.isArray(this.mistakeInfo[parId][pos][atr])) {
-      return this.mistakeInfo[parId][pos][atr].length > 0;
+    if (Array.isArray(this.tokensInfo[parId][pos][atr])) {
+      return this.tokensInfo[parId][pos][atr].length > 0;
     } else {
-      return !!this.mistakeInfo[parId][pos][atr];
+      return !!this.tokensInfo[parId][pos][atr];
     }
   }
 
-  initMistake(token, htmlToken, pos: number, parId: number): boolean {
-    if (!this.mistakeInfo.hasOwnProperty(parId)) {
-      this.mistakeInfo[parId] = {};
+  initToken(token, htmlToken, pos: number, parId: number): boolean {
+    if (!this.tokensInfo.hasOwnProperty(parId)) {
+      this.tokensInfo[parId] = {};
     }
     if ($(htmlToken).hasClass('pk-token-correction-fixed') || !$(htmlToken).hasClass('pk-token-correction')) {
       return false;
     }
-    if (!this.mistakeInfo[parId].hasOwnProperty(pos)) {
-      this.mistakeInfo[parId][pos] = {
-        id: '',
+    if (this.tokensInfo[parId].hasOwnProperty(pos) && this.tokensInfo[parId][pos].isDisabled) {
+      this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
+    }
+    if (!this.tokensInfo[parId].hasOwnProperty(pos)) {
+      this.tokensInfo[parId][pos] = {
         token: token,
+        isDisabled: false,
+        htmlToken: htmlToken,
         helperText: '',
-        description: '',
-        corrections: [],
+        mistakes: [],
       };
     }
+
     return true;
   }
 
-  setValueToMistakeObj(atr: string, value: any, pos: number, parId: number) {
+  setValueToTokensInfo(atr: string, value: any, pos: number, parId: number) {
     if (!this.isValueSet(atr, pos, parId)) {
-      this.mistakeInfo[parId][pos][atr] = value;
+      this.tokensInfo[parId][pos][atr] = value;
     }
   }
 
-  pushValueToMistakeObj(atr: string, value: any, pos: number, parId: number) {
-    this.mistakeInfo[parId][pos][atr].push(value);
+  pushValueToTokensInfo(atr: string, value: any, pos: number, parId: number) {
+    this.tokensInfo[parId][pos][atr].push(value);
+  }
+
+  getTokenInfo(pos: number, parId: number) {
+    return this.tokensInfo[parId][pos];
+  }
+
+  getValueFromTokensInfo(atr: string, pos: number, parId: number) {
+    if (this.tokensInfo[parId][pos][atr]) {
+      return this.tokensInfo[parId][pos][atr];
+    }
   }
 
   getValueFromMistakeObj(atr: string, pos: number, parId: number) {
-    if (this.mistakeInfo[parId][pos][atr]) {
-      return this.mistakeInfo[parId][pos][atr];
+    if (this.tokensInfo[parId][pos].mistakes[0][atr]) {
+      return this.tokensInfo[parId][pos].mistakes[0][atr];
     }
+  }
+
+  getAllMistakesIds(pos: number, parId: number) {
+    const ids: string[] = [];
+    if (this.tokensInfo[parId][pos].mistakes[0]) {
+      this.tokensInfo[parId][pos].mistakes.forEach((mistake) => {
+        ids.push(mistake.getId());
+      });
+    }
+    return ids;
   }
 
   resetMistakesCol() {
     let isEmpty: boolean = true;
-    Object.values(this.mistakeInfo).forEach((val) => {
+    Object.values(this.tokensInfo).forEach((val) => {
       if (Object.keys(val).length > 0) isEmpty = false;
     });
     if (isEmpty) {
@@ -312,25 +345,42 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   fix(chunk, token, pos, parId, isIgnore = false) {
-    if (!this.mistakeInfo[parId][pos]) return;
+    if (!this.tokensInfo[parId][pos]) return;
     $(`#${pos}-${parId}`).remove();
     if (!$(token).text()) {
       $(token).text(chunk.getToken(pos).text());
     }
     const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0];
-    const id = this.getValueFromMistakeObj('id', pos, parId);
-    this.mistakeInfo[parId] = _.omit(this.mistakeInfo[parId], pos);
+    const ids = this.getAllMistakesIds(pos, parId);
+    this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
     if (!isIgnore) $(token).addClass('pk-token-correction-fixed');
     this.removeMistakeHighlight(pos, token, parId);
     if (isIgnore) {
-      this.ignoreMistake(chunk, id);
+      for (const id of ids) {
+        this.ignoreMistake(chunk, id);
+      }
+      this.disableOtherTokens($(token).text());
     } else {
       this.fixMistake(chunk, correction.id, correction.rules);
     }
+    if ($('.mistakes').children().length === 0) $(`#fix-all`).hide();
+  }
+
+  disableOtherTokens(tokenString: string) {
+    Object.entries(this.tokensInfo).forEach(([parId, par]) => {
+      Object.entries(par).forEach(([pos, info]) => {
+        if (info.token === tokenString) {
+          this.closePopover(info.htmlToken);
+          this.tokensInfo[parId][pos].isDisabled = true;
+          $(`#${pos}-${parId}`).remove();
+        }
+      });
+    });
   }
 
   createFixHandler(chunk, token, pos, parId) {
+    $(document).off('click', `#${pos}-${parId}-fix`);
     $(document).on('click', `#${pos}-${parId}-fix`, () => {
       this.closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
@@ -339,6 +389,7 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createIgnoreHandler(chunk, token, pos, parId) {
+    $(document).off('click', `#${pos}-${parId}-ignore`);
     $(document).on('click', `#${pos}-${parId}-ignore`, () => {
       this.closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, true);
@@ -352,8 +403,9 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createFixAllHandler(chunk: HtmlParagraphChunk, parId) {
+    $(`#fix-all`).off('click');
     $(`#fix-all`).on('click', () => {
-      for (const pos in this.mistakeInfo[parId]) {
+      for (const pos in this.tokensInfo[parId]) {
         this.closePopover(chunk.getToken(Number(pos)));
         this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       }
@@ -417,12 +469,17 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number, parId: number) {
+    if (this.tokensInfo[parId][pos].isDisabled) {
+      $(`#${pos}-${parId}`).remove();
+      return;
+    }
+
     if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
 
     return `
     <div id="${pos}-${parId}" class="mistake">
       <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
-      <p>${this.getValueFromMistakeObj('token', pos, parId)} -> ${
+      <p>${this.getValueFromTokensInfo('token', pos, parId)} -> ${
       this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
     }</p>
       <button id="${pos}-${parId}-fix" type="button" class="btn btn-primary">Opravit</button>
