@@ -75,20 +75,45 @@ export class TinyMceGui extends ProofreaderGui {
     return '<span style="' + cssMistakeBadValue + '">' + chunk.getTokenText(tokenId) + '</span>';
   }
 
+  deleteOldTokens(chunk, parId) {
+    const posToDelete = [];
+    if (!this.tokensInfo[parId]) return;
+    const tokenCorrections = $(chunk.getElement()).find('.pk-token-correction');
+    Object.entries(this.tokensInfo[parId]).forEach(([pos, info]) => {
+      let exist = false;
+      $.each(tokenCorrections, function (key, value) {
+        if (value.textContent === info.token) {
+          exist = true;
+          return false;
+        }
+      });
+      if (!exist) {
+        posToDelete.push(pos);
+      }
+    });
+    if (posToDelete.length > 0) {
+      posToDelete.forEach((pos) => {
+        this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
+        $(`#${pos}-${parId}`).remove();
+      });
+    }
+  }
+
   public visualizeMistakes(chunk: HtmlParagraphChunk, pos: number, token) {
     const parId = this.getParId(chunk);
-    this.resetMistakesCol();
+    this.deleteOldTokens(chunk, parId);
+
     // Removes original left-click triggers on tokens
     $(token).off('click');
     // Create dialog itself
     const currentMistakes = [];
     let suggestionRulebook = {};
 
-    if (!this.initToken(chunk.getToken(pos).text(), token, pos, parId)) {
+    if (!this.initToken(chunk.getToken(pos).text(), token, pos, parId, chunk)) {
       return;
     }
-    this.createFixAllHandler(chunk, parId);
-    $(`#fix-all`).show();
+    this.createFixAllHandler();
+    this.onListChanged();
 
     config.mistakes.getMistakes(chunk.getLastHash()).forEach((mistake) => {
       if (!mistake.getTokens().includes(pos)) {
@@ -120,10 +145,12 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     $('.mistakes').append(this.createCard(pos, parId));
+    this.sort();
     this.createFixHandler(chunk, token, pos, parId);
     this.createIgnoreHandler(chunk, token, pos, parId);
     this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
+    this.onListChanged();
 
     $(token).click((e) => {
       e.preventDefault();
@@ -150,6 +177,19 @@ export class TinyMceGui extends ProofreaderGui {
           this.editor.windowManager.close();
         },
       });
+    });
+  }
+
+  sort() {
+    const mylist = $('.mistakes');
+    const listitems = mylist.children('div').get();
+    listitems.sort(function (a, b) {
+      const compA = Number($(a).attr('id').split('-')[1]);
+      const compB = Number($(b).attr('id').split('-')[1]);
+      return compA < compB ? -1 : compA > compB ? 1 : 0;
+    });
+    $.each(listitems, function (idx, itm) {
+      mylist.append(itm);
     });
   }
 
@@ -274,7 +314,7 @@ export class TinyMceGui extends ProofreaderGui {
     }
   }
 
-  initToken(token, htmlToken, pos: number, parId: number): boolean {
+  initToken(token, htmlToken, pos: number, parId: number, chunk): boolean {
     if (!this.tokensInfo.hasOwnProperty(parId)) {
       this.tokensInfo[parId] = {};
     }
@@ -286,6 +326,7 @@ export class TinyMceGui extends ProofreaderGui {
     }
     if (!this.tokensInfo[parId].hasOwnProperty(pos)) {
       this.tokensInfo[parId][pos] = {
+        chunk: chunk,
         token: token,
         isDisabled: false,
         htmlToken: htmlToken,
@@ -293,7 +334,6 @@ export class TinyMceGui extends ProofreaderGui {
         mistakes: [],
       };
     }
-
     return true;
   }
 
@@ -339,8 +379,8 @@ export class TinyMceGui extends ProofreaderGui {
       if (Object.keys(val).length > 0) isEmpty = false;
     });
     if (isEmpty) {
-      $('#fix-all').hide();
       $('.mistakes').empty();
+      this.onListChanged();
     }
   }
 
@@ -364,7 +404,7 @@ export class TinyMceGui extends ProofreaderGui {
     } else {
       this.fixMistake(chunk, correction.id, correction.rules);
     }
-    if ($('.mistakes').children().length === 0) $(`#fix-all`).hide();
+    this.onListChanged();
   }
 
   disableOtherTokens(tokenString: string) {
@@ -374,6 +414,7 @@ export class TinyMceGui extends ProofreaderGui {
           this.closePopover(info.htmlToken);
           this.tokensInfo[parId][pos].isDisabled = true;
           $(`#${pos}-${parId}`).remove();
+          this.onListChanged();
         }
       });
     });
@@ -386,6 +427,15 @@ export class TinyMceGui extends ProofreaderGui {
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       config.proofreader.process();
     });
+  }
+
+  onListChanged() {
+    const size = $('.mistakes').children().length;
+    if (size === 0) {
+      $('#fix-all').hide();
+    } else {
+      $(`#fix-all`).show();
+    }
   }
 
   createIgnoreHandler(chunk, token, pos, parId) {
@@ -402,14 +452,17 @@ export class TinyMceGui extends ProofreaderGui {
     $('.popover').remove();
   }
 
-  createFixAllHandler(chunk: HtmlParagraphChunk, parId) {
+  createFixAllHandler() {
     $(`#fix-all`).off('click');
     $(`#fix-all`).on('click', () => {
-      for (const pos in this.tokensInfo[parId]) {
-        this.closePopover(chunk.getToken(Number(pos)));
-        this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
+      for (const parId in this.tokensInfo) {
+        for (const pos in this.tokensInfo[parId]) {
+          const token = this.tokensInfo[parId][pos].htmlToken;
+          this.closePopover(token);
+          this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
+        }
       }
-      $(`#fix-all`).hide();
+      this.onListChanged();
       config.proofreader.process();
     });
   }
@@ -446,7 +499,15 @@ export class TinyMceGui extends ProofreaderGui {
 
   setHovers(token, pos, parId) {
     $(token).mouseenter(() => {
+      const position = $(`#${pos}-${parId}`).position();
+      if (!position) return;
       $(`#${pos}-${parId}`).addClass('selected');
+      $('.mistakes').animate(
+        {
+          scrollTop: position.top,
+        },
+        300,
+      );
     });
 
     $(`#${pos}-${parId}`).mouseenter(() => {
@@ -477,13 +538,14 @@ export class TinyMceGui extends ProofreaderGui {
     if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
 
     return `
-    <div id="${pos}-${parId}" class="mistake">
+    <div id="${pos}-${parId}" class="mistake p-3 mb-5 bg-white rounded">
       <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
-      <p>${this.getValueFromTokensInfo('token', pos, parId)} -> ${
-      this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
-    }</p>
-      <button id="${pos}-${parId}-fix" type="button" class="btn btn-primary">Opravit</button>
-      <button id="${pos}-${parId}-ignore" type="button" class="btn btn-primary">Neopravovat</button>
+      <hr/>
+      ${this.createMistakePart(this.getValueFromTokensInfo('token', pos, parId))}
+      <span class="correct-text">${this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]}</span>
+    <div class=action-buttons>
+      <button id="${pos}-${parId}-fix" type="button" class="button">Opravit</button>
+      <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
     </div>
     `;
   }
@@ -500,6 +562,18 @@ export class TinyMceGui extends ProofreaderGui {
       <img id="${pos}-${parId}-ignore" class="cancel icon" src="../../assets/icons/x.svg" alt="Check"> 
     </div>
   `;
+  }
+
+  createMistakePart(stringToken: string) {
+    if (!stringToken.trim() || stringToken === '.' || stringToken === ',') return '';
+
+    return `${
+      stringToken.length > 1
+        ? `<span class="mistake-text"><strike>${stringToken}</strike></span>`
+        : `<span class="mistake-text">${stringToken}</span>`
+    }
+    <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow">
+    `;
   }
 
   isCorrection(pos, parId) {

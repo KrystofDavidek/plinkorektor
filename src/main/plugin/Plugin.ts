@@ -21,6 +21,18 @@ export default () => {
     editor.on('remove', function () {
       proofreader.destroy();
     });
+    editor.on('focus', function () {
+      if (!catching) {
+        bounceProtect('focus');
+        formatMce('focus');
+      }
+    });
+    editor.on('blur', function () {
+      if (!catching) {
+        bounceProtect('blur');
+        formatMce('blur');
+      }
+    });
     editor.ui.registry.addButton('reporterror', {
       text: 'Nahlásit chybu',
       onAction: function (_) {
@@ -107,6 +119,29 @@ export default () => {
   });
   tinymce.DOM.addStyle(themeCustomization);
 };
+
+function formatMce(state) {
+  if (state == 'focus') {
+    $('#mceControl').addClass('editor_active').removeClass('editor_inactive');
+  } else {
+    $('#mceControl').addClass('editor_inactive').removeClass('editor_active');
+  }
+}
+
+function bounceProtect(src) {
+  catching = true;
+  setTimeout(function () {
+    catching = false;
+  }, 250);
+}
+
+var catching = false;
+
+$(document).ready(function () {
+  $('INPUT,TEXTAREA,BUTTON').focus(function () {
+    formatMce('blur');
+  });
+});
 
 function realBackgroundColor(elem) {
   var transparent = 'rgba(0, 0, 0, 0)';

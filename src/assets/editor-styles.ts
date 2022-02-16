@@ -34,13 +34,12 @@ export const cssMainStylesheet = `
 
 
     html[data-pk-processing]::before {
-        margin-right: 0.2rem;
-        top: 0;
+        top: -20px;
         font-size: 50px;
         display: block;
         content: '●';
         position: fixed;
-        right: 0.2rem;
+        right: 0;
         color: rgb(192, 57, 43);
         animation-name: processing;
         animation-duration: 0.7s;
@@ -49,16 +48,15 @@ export const cssMainStylesheet = `
     }
 
     html[data-pk-processing-finished]::before {
-        margin-right: 0.2rem;
-    top: 0;
-    font-size: 50px;
-    content: '●';
-    position: fixed;
-    right: 0.2rem;
-    color: #92d384;
-    display: block;
-    animation: fade-out 5s;
-  	opacity: 0;
+        top: -20px;
+        font-size: 50px;
+        content: '●';
+        position: fixed;
+        right: 0;
+        color: #92d384;
+        display: block;
+        animation: fade-out 5s;
+  	    opacity: 0;
 
     }
 

@@ -20,15 +20,18 @@
     <main class="container-fluid main-container">
       <div class="row">
         <div class="col-12 col-md-8">
-          <textarea class="tinymce">
-            <p>Testovacý věta, dost hrubá chiba. Tohle je mé město brno. Tohle je take hruba chiba?</p>
+          <div id="mceControl">
+            <textarea class="tinymce">
+              <p>Testovacý věta, dost hrubá chiba. Tohle je mé město brno. Tohle je take hruba chiba? Testovacý věta, dost hrubá chiba. Tohle je mé město brno. Tohle je take hruba chiba?</p>
             <p>Mladíí děvče. Staršíí klik. Tohle je taky chiba.</p>
-          </textarea>
-          <button id="copy" type="button" class="btn btn-primary copy-button">Kopírovat</button>
+          </textarea
+            >
+          </div>
+          <button id="copy" type="button" class="button copy-button">Kopírovat</button>
         </div>
         <div class="col-12 col-md-4">
-          <h1>Opravy</h1>
-          <button id="fix-all" type="button" class="btn btn-primary copy-button">Opravit vše</button>
+          <h1>Návrhy na opravu</h1>
+          <button id="fix-all" type="button" class="button fix-all-button">Opravit vše</button>
           <div class="mistakes"></div>
         </div>
       </div>

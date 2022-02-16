@@ -6,6 +6,7 @@ export type TokenInfo = {
     isDisabled: boolean;
     htmlToken: string;
     helperText: string;
+    chunk: any;
     mistakes: Mistake[];
   };
 };
