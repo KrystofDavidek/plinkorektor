@@ -34,8 +34,8 @@ export const cssMainStylesheet = `
 
 
     html[data-pk-processing]::before {
-        top: -20px;
-        font-size: 50px;
+        top: -15px;
+        font-size: 40px;
         display: block;
         content: '●';
         position: fixed;
@@ -48,8 +48,8 @@ export const cssMainStylesheet = `
     }
 
     html[data-pk-processing-finished]::before {
-        top: -20px;
-        font-size: 50px;
+        top: -15px;
+        font-size: 40px;
         content: '●';
         position: fixed;
         right: 0;

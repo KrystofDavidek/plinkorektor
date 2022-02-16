@@ -163,6 +163,7 @@ hr {
 }
 
 .arrow-icon {
+  margin: 0 0.2rem;
   width: 20px;
   height: 20px;
 }

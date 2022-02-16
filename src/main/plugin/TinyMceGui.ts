@@ -1,6 +1,6 @@
 import * as $ from 'jquery';
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from 'plinkorektor-core';
-import { TokensInfo } from 'src/demo/ts/models';
+import { About, TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 import * as _ from 'lodash';
 
@@ -397,10 +397,10 @@ export class TinyMceGui extends ProofreaderGui {
     if (!isIgnore) $(token).addClass('pk-token-correction-fixed');
     this.removeMistakeHighlight(pos, token, parId);
     if (isIgnore) {
+      this.disableOtherTokens($(token).text());
       for (const id of ids) {
         this.ignoreMistake(chunk, id);
       }
-      this.disableOtherTokens($(token).text());
     } else {
       this.fixMistake(chunk, correction.id, correction.rules);
     }
@@ -535,22 +535,42 @@ export class TinyMceGui extends ProofreaderGui {
       return;
     }
 
-    if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
+    const isCorrection = this.correctionExists(pos, parId);
+
+    if (isCorrection) {
+      if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
+    }
+
+    const token = this.getValueFromTokensInfo('token', pos, parId);
+    const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
+    const mainDesc = mistakes[0].getDescription();
+    const mistakenPart = this.createMistakePart(token);
+    let mainCorrectionPart = '';
+    let secondaryDesc = '';
+    if (isCorrection) {
+      mainCorrectionPart = mistakes[0]['corrections'][0]['rules'][pos];
+      secondaryDesc = mistakes[0]['corrections'][0]['description'];
+    }
+    const abouts: About[] = mistakes[0].getAbout();
 
     return `
     <div id="${pos}-${parId}" class="mistake p-3 mb-5 bg-white rounded">
-      <h4>${this.getValueFromMistakeObj('description', pos, parId)}</h4>
-      <hr/>
-      ${this.createMistakePart(this.getValueFromTokensInfo('token', pos, parId))}
-      <span class="correct-text">${this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]}</span>
+      ${mainDesc ? `<h4>${mainDesc}</h4><hr/>` : ''}
+      ${
+        mistakenPart && mainCorrectionPart
+          ? `${mistakenPart}
+          <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow"><span class="correct-text">${mainCorrectionPart}</span>`
+          : `${secondaryDesc ? `<p>${secondaryDesc}</p>` : ''}`
+      }
     <div class=action-buttons>
-      <button id="${pos}-${parId}-fix" type="button" class="button">Opravit</button>
+      ${isCorrection ? `<button id="${pos}-${parId}-fix" type="button" class="button">Opravit</button>` : ''} 
       <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
     </div>
     `;
   }
 
   createPopoverContent(pos, parId) {
+    if (!this.correctionExists(pos, parId)) return;
     if (this.isCorrection(pos, parId)) return;
 
     return `
@@ -558,22 +578,14 @@ export class TinyMceGui extends ProofreaderGui {
       <span class="popover-text" type="button">${
         this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
       }</span>
-      <img id="${pos}-${parId}-fix" class="check icon" src="../../assets/icons/check2.svg" alt="Check">
-      <img id="${pos}-${parId}-ignore" class="cancel icon" src="../../assets/icons/x.svg" alt="Check"> 
+      <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="../../assets/icons/check2.svg" alt="Check">
+      <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="../../assets/icons/x.svg" alt="Check"> 
     </div>
   `;
   }
 
   createMistakePart(stringToken: string) {
-    if (!stringToken.trim() || stringToken === '.' || stringToken === ',') return '';
-
-    return `${
-      stringToken.length > 1
-        ? `<span class="mistake-text"><strike>${stringToken}</strike></span>`
-        : `<span class="mistake-text">${stringToken}</span>`
-    }
-    <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow">
-    `;
+    return stringToken.trim().length > 3 ? `<span class="mistake-text"><strike>${stringToken}</strike></span>` : '';
   }
 
   isCorrection(pos, parId) {
@@ -581,5 +593,9 @@ export class TinyMceGui extends ProofreaderGui {
       this.getValueFromMistakeObj('token', pos, parId) ===
       this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
     );
+  }
+
+  correctionExists(pos, parId) {
+    return this.getValueFromMistakeObj('corrections', pos, parId).length > 0;
   }
 }

@@ -14,3 +14,8 @@ export type TokenInfo = {
 export type TokensInfo = {
   [key: number]: TokenInfo;
 };
+
+export type About = {
+  url: string;
+  label: string;
+};
