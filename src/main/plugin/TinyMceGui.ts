@@ -48,6 +48,9 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public wrapTokens(chunk: HtmlParagraphChunk, tokens: string[], tokenPos: { from: number; to: number }[]) {
+    const parId = this.getParId(chunk);
+    // after specific paragraph is processed, remove corresponding cards
+    $(`[id$="-${parId}"]`).remove();
     let parsedHtml: ParsedHtml = parseEl($(chunk.getElement()));
     tokens.forEach(function (token, index) {
       parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token);
@@ -102,7 +105,6 @@ export class TinyMceGui extends ProofreaderGui {
   public visualizeMistakes(chunk: HtmlParagraphChunk, pos: number, token) {
     const parId = this.getParId(chunk);
     this.deleteOldTokens(chunk, parId);
-
     // Removes original left-click triggers on tokens
     $(token).off('click');
     // Create dialog itself
@@ -119,11 +121,10 @@ export class TinyMceGui extends ProofreaderGui {
       if (!mistake.getTokens().includes(pos)) {
         return;
       }
-      this.getTokenInfo(pos, parId).mistakes.forEach((oldMistake) => {
-        if (oldMistake?.getId() === mistake.getId()) {
-          return;
-        }
-      });
+
+      if (_.find(this.getTokenInfo(pos, parId).mistakes, ['id', mistake.getId()])) {
+        return;
+      }
 
       const helperText = chunk.getContext(mistake);
 
@@ -151,7 +152,6 @@ export class TinyMceGui extends ProofreaderGui {
     if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
     this.onListChanged();
-    console.log(this.tokensInfo);
 
     $(token).click((e) => {
       e.preventDefault();
@@ -197,6 +197,7 @@ export class TinyMceGui extends ProofreaderGui {
   protected fixMistake(chunk: HtmlParagraphChunk, mistakeId: string, correctionRules) {
     Object.entries(correctionRules).forEach(([target, correctValue]: [any, string]) => {
       // TODO SMARTER WAY TO REPLACE TOKENS (USE ENGINE FOR PARSING)
+      if (!$(chunk.getToken(target))[0]) return;
       let originalContent: string = $(chunk.getToken(target))[0].innerHTML;
       let contentParts = originalContent.replace(/(<[^(><.)]+>)/g, '|<>|$1|<>|').split('|<>|');
       let modifiedContentParts = contentParts.map((part) => {
@@ -325,16 +326,14 @@ export class TinyMceGui extends ProofreaderGui {
     if (this.tokensInfo[parId].hasOwnProperty(pos) && this.tokensInfo[parId][pos].isDisabled) {
       this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     }
-    if (!this.tokensInfo[parId].hasOwnProperty(pos)) {
-      this.tokensInfo[parId][pos] = {
-        chunk: chunk,
-        token: token,
-        isDisabled: false,
-        htmlToken: htmlToken,
-        helperText: '',
-        mistakes: [],
-      };
-    }
+    this.tokensInfo[parId][pos] = {
+      chunk: chunk,
+      token: token,
+      isDisabled: false,
+      htmlToken: htmlToken,
+      helperText: '',
+      mistakes: [],
+    };
     return true;
   }
 

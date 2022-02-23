@@ -1,7 +1,7 @@
-import { config } from "../Config";
+import { config } from '../Config';
 // import { message as msg } from "../utilities/Message";
-import * as md5 from "md5";
-import { Mistake } from "./Mistake";
+import * as md5 from 'md5';
+import { Mistake } from './Mistake';
 
 export abstract class TextChunk {
   protected processing: boolean;
@@ -44,7 +44,6 @@ export abstract class TextChunk {
     // msg('Building new highlights on paragraph "' + this.lastHash + '".');
     mistakes.forEach((mistake) => {
       const highlights = mistake.getTokens();
-
       highlights.forEach((tokenId) => {
         const token = this.getToken(tokenId);
         this.markTokenForCorrection(token);
@@ -118,7 +117,7 @@ export abstract class TextChunk {
     const maximalBoundary = Math.min(maximalToken + 21, this.getTokenCount());
 
     // Display highlighted tokens and suitable context
-    let helperText = "";
+    let helperText = '';
     for (let j = minimalBoundary; j < maximalBoundary; j++) {
       if (mistake.getTokens().includes(j)) {
         helperText += config.gui.wrapMistakeContext(this, j);
@@ -129,10 +128,10 @@ export abstract class TextChunk {
 
     // Add ellipsis (…) if context is not matching start or end of the paragraph
     if (minimalBoundary > 0) {
-      helperText = "…" + helperText.trim();
+      helperText = '…' + helperText.trim();
     }
     if (maximalBoundary < this.getTokenCount()) {
-      helperText = helperText.trim() + "…";
+      helperText = helperText.trim() + '…';
     }
 
     return helperText;

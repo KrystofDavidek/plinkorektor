@@ -1,12 +1,12 @@
-import * as md5 from "md5";
+import * as md5 from 'md5';
 // import { message as msg } from "./utilities/Message";
 // import { MessageImportance as MI } from "./types/MessageImportance";
 
-import { MistakeManager } from "./correction/MistakeManager";
-import { Config } from "./types/Config";
+import { MistakeManager } from './correction/MistakeManager';
+import { Config } from './types/Config';
 
-import { processApiCall } from "./process/ApiCall";
-import { ProofreaderGui } from "./gui/ProofreaderGui";
+import { processApiCall } from './process/ApiCall';
+import { ProofreaderGui } from './gui/ProofreaderGui';
 
 export class Proofreader {
   config: Config;
