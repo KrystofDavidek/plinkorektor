@@ -1,5 +1,5 @@
 import * as $ from 'jquery';
-import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from 'plinkorektor-core';
+import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from '../core';
 import { About, TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
 import * as _ from 'lodash';
@@ -148,9 +148,10 @@ export class TinyMceGui extends ProofreaderGui {
     this.sort();
     this.createFixHandler(chunk, token, pos, parId);
     this.createIgnoreHandler(chunk, token, pos, parId);
-    this.setPopover(token, pos, parId);
+    if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
     this.onListChanged();
+    console.log(this.tokensInfo);
 
     $(token).click((e) => {
       e.preventDefault();
@@ -534,9 +535,7 @@ export class TinyMceGui extends ProofreaderGui {
       $(`#${pos}-${parId}`).remove();
       return;
     }
-
     const isCorrection = this.correctionExists(pos, parId);
-
     if (isCorrection) {
       if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
     }
@@ -562,9 +561,24 @@ export class TinyMceGui extends ProofreaderGui {
           <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow"><span class="correct-text">${mainCorrectionPart}</span>`
           : `${secondaryDesc ? `<p>${secondaryDesc}</p>` : ''}`
       }
-    <div class=action-buttons>
-      ${isCorrection ? `<button id="${pos}-${parId}-fix" type="button" class="button">Opravit</button>` : ''} 
-      <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
+      <div class=action-buttons>
+        ${
+          isCorrection
+            ? `<button id="${pos}-${parId}-fix" type="button" class="button fix-button">Opravit</button>`
+            : ''
+        } 
+        <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
+      </div>
+      <button type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" class="btn btn-link show-more">Zobrazit více</button>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+           ${
+             abouts.length > 0
+               ? `<p><span class="correct-text">${abouts[0].label}: </span><a href="${abouts[0].url}">${abouts[0].url}</a></p>`
+               : ''
+           }
+        </div>
+      </div>
     </div>
     `;
   }
@@ -579,13 +593,15 @@ export class TinyMceGui extends ProofreaderGui {
         this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
       }</span>
       <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="../../assets/icons/check2.svg" alt="Check">
-      <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="../../assets/icons/x.svg" alt="Check"> 
+      <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="../../assets/icons/trash.svg" alt="Remove"> 
     </div>
   `;
   }
 
   createMistakePart(stringToken: string) {
-    return stringToken.trim().length > 3 ? `<span class="mistake-text"><strike>${stringToken}</strike></span>` : '';
+    return stringToken && stringToken.trim().length > 2
+      ? `<span class="mistake-text"><strike>${stringToken}</strike></span>`
+      : '';
   }
 
   isCorrection(pos, parId) {

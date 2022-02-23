@@ -2,6 +2,11 @@ html,
 body {
   height: 100%;
   width: 100%;
+  margin: 0 !important;
+}
+
+.tinymce {
+  margin: 0 !important;
 }
 
 .main-container {
@@ -104,6 +109,14 @@ hr {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+.show-more {
+  color: black;
+}
+
+.show-more:hover {
+  color: #01a746;
+}
+
 .button {
   width: 140px;
   height: 45px;
@@ -121,6 +134,13 @@ hr {
   outline: none;
 }
 
+.fix-button {
+  background-color: #2ee59d;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  color: #fff;
+  border: none;
+}
+
 .button:hover {
   background-color: #2ee59d;
   box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
@@ -130,6 +150,8 @@ hr {
 }
 
 .action-buttons {
+  display: flex;
+  gap: 1rem;
   margin: 2rem 0 2rem 0;
 }
 
@@ -171,6 +193,12 @@ hr {
 .icon {
   width: 20px;
   height: 20px;
+  margin: 0 0.2rem;
+}
+
+.cancel {
+  width: 15px;
+  height: 15px;
 }
 
 .icon:hover {
