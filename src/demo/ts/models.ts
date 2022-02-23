@@ -1,4 +1,4 @@
-import { Mistake } from 'plinkorektor-core/lib/correction/Mistake';
+import { Mistake } from '../../main/core';
 
 export type TokenInfo = {
   [key: number]: {
