@@ -33,6 +33,8 @@ export class HtmlParagraphChunk extends TextChunk {
     if (!processing) {
       this.p.removeAttribute('data-pk-processing');
     } else {
+      // This removes highlights when chunk is processing
+      this.removeOldHighlights();
       this.p.setAttribute('data-pk-processing', 'true');
     }
   }
@@ -91,7 +93,6 @@ export class HtmlParagraphChunk extends TextChunk {
 
   public removeOldHighlights() {
     // msg('Clearing old highlights on paragraph "' + this.lastHash + '".');
-    console.log(this.p);
     $(this.p).find('.pk-token').removeClass('pk-token-correction');
     $(this.p).find('.pk-token').off('click');
   }

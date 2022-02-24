@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
-
-  public tokensInfo: TokensInfo = {};
+  private processingPars: number[] = [];
+  private tokensInfo: TokensInfo = {};
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
@@ -30,6 +30,19 @@ export class TinyMceGui extends ProofreaderGui {
     this.processing = processing;
   }
 
+  public setProcessingChunk(chunk: HtmlParagraphChunk) {
+    // after specific paragraph is starting to process, remove corresponding cards
+    const parId = this.getParId(chunk);
+    $(`[id$="-${parId}"]`).remove();
+    this.processingPars.push(parId);
+    this.onListChanged();
+  }
+
+  public setProcessingFinishedChunk(chunk: HtmlParagraphChunk) {
+    const parId = this.getParId(chunk);
+    this.processingPars = this.processingPars.filter((par) => par !== parId);
+  }
+
   public isProcessing(): boolean {
     return this.processing;
   }
@@ -48,9 +61,6 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public wrapTokens(chunk: HtmlParagraphChunk, tokens: string[], tokenPos: { from: number; to: number }[]) {
-    const parId = this.getParId(chunk);
-    // after specific paragraph is processed, remove corresponding cards
-    $(`[id$="-${parId}"]`).remove();
     let parsedHtml: ParsedHtml = parseEl($(chunk.getElement()));
     tokens.forEach(function (token, index) {
       parsedHtml.wrapToken(tokenPos[index].from, tokenPos[index].to, token);
@@ -145,7 +155,9 @@ export class TinyMceGui extends ProofreaderGui {
     if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
     this.onListChanged();
-    console.log(this.tokensInfo);
+    // console.log(this.tokensInfo[parId][pos].token);
+    // console.log(this.tokensInfo[parId][pos].mistakes);
+    // console.log('---');
 
     $(token).click((e) => {
       e.preventDefault();
@@ -445,10 +457,12 @@ export class TinyMceGui extends ProofreaderGui {
     $(`#fix-all`).off('click');
     $(`#fix-all`).on('click', () => {
       for (const parId in this.tokensInfo) {
-        for (const pos in this.tokensInfo[parId]) {
-          const token = this.tokensInfo[parId][pos].htmlToken;
-          this.closePopover(token);
-          this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
+        if (!this.processingPars.includes(Number(parId))) {
+          for (const pos in this.tokensInfo[parId]) {
+            const token = this.tokensInfo[parId][pos].htmlToken;
+            this.closePopover(token);
+            this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
+          }
         }
       }
       this.onListChanged();

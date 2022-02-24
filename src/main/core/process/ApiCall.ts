@@ -62,6 +62,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
           chunk.highlightTokens();
         }
         chunk.setProcessing(false);
+        config.gui.setProcessingFinishedChunk(chunk);
       } catch (e) {
         chunk.setFailed(true);
       }
@@ -82,7 +83,6 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
       if (index > -1) {
         ajaxCalls.splice(index, 1);
       }
-      console.log('RETURNING', ajaxCalls.length);
       if (ajaxCalls.length === 0) {
         config.gui.setProcessing(false);
       }
