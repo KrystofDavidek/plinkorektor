@@ -1,22 +1,22 @@
-import * as $ from "jquery";
-import { config } from "../Config";
+import * as $ from 'jquery';
+import { config } from '../Config';
 // import { message as msg } from "../utilities/Message";
 // import { MessageImportance as MI } from "../types/MessageImportance";
 
-import { Mistake } from "../correction/Mistake";
-import { Correction } from "../correction/Correction";
-import { processRegexHighlight } from "./RegexProcess";
-import { TextChunk } from "../correction/TextChunk";
+import { Mistake } from '../correction/Mistake';
+import { Correction } from '../correction/Correction';
+import { processRegexHighlight } from './RegexProcess';
+import { TextChunk } from '../correction/TextChunk';
 
-const API_PATH = "https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi";
+const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
 
 const ajaxCalls = [];
 
 export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
   // Calling the corrector API
   const call = $.ajax({
-    type: "POST",
-    dataType: "json",
+    type: 'POST',
+    dataType: 'json',
     url: API_PATH,
     data: {
       text: chunk.getText(), //
@@ -45,6 +45,11 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
             if (m.about) {
               mistake.setAbout(m.about);
             }
+            if (m.flags) {
+              mistake.setFlags(m.flags);
+            }
+            mistake.setModule(m.module);
+            mistake.setType(m.type);
             m.corrections.forEach((c) => {
               const correction = new Correction();
               correction.setDescription(c.description);
@@ -77,7 +82,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
       if (index > -1) {
         ajaxCalls.splice(index, 1);
       }
-      console.log("RETURNING", ajaxCalls.length);
+      console.log('RETURNING', ajaxCalls.length);
       if (ajaxCalls.length === 0) {
         config.gui.setProcessing(false);
       }

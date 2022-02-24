@@ -122,14 +122,7 @@ export class TinyMceGui extends ProofreaderGui {
         return;
       }
 
-      if (_.find(this.getTokenInfo(pos, parId).mistakes, ['id', mistake.getId()])) {
-        return;
-      }
-
-      const helperText = chunk.getContext(mistake);
-
       this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
-      this.setValueToTokensInfo('helperText', helperText, pos, parId);
 
       const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
 
@@ -146,12 +139,13 @@ export class TinyMceGui extends ProofreaderGui {
     });
 
     $('.mistakes').append(this.createCard(pos, parId));
-    this.sort();
+    this.sortCards();
     this.createFixHandler(chunk, token, pos, parId);
     this.createIgnoreHandler(chunk, token, pos, parId);
     if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
     this.onListChanged();
+    console.log(this.tokensInfo);
 
     $(token).click((e) => {
       e.preventDefault();
@@ -181,7 +175,7 @@ export class TinyMceGui extends ProofreaderGui {
     });
   }
 
-  sort() {
+  sortCards() {
     const mylist = $('.mistakes');
     const listitems = mylist.children('div').get();
     listitems.sort(function (a, b) {
@@ -320,18 +314,14 @@ export class TinyMceGui extends ProofreaderGui {
     if (!this.tokensInfo.hasOwnProperty(parId)) {
       this.tokensInfo[parId] = {};
     }
+    // Not create new info when token is corrected
     if ($(htmlToken).hasClass('pk-token-correction-fixed') || !$(htmlToken).hasClass('pk-token-correction')) {
       return false;
-    }
-    if (this.tokensInfo[parId].hasOwnProperty(pos) && this.tokensInfo[parId][pos].isDisabled) {
-      this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     }
     this.tokensInfo[parId][pos] = {
       chunk: chunk,
       token: token,
-      isDisabled: false,
       htmlToken: htmlToken,
-      helperText: '',
       mistakes: [],
     };
     return true;
@@ -412,7 +402,6 @@ export class TinyMceGui extends ProofreaderGui {
       Object.entries(par).forEach(([pos, info]) => {
         if (info.token === tokenString) {
           this.closePopover(info.htmlToken);
-          this.tokensInfo[parId][pos].isDisabled = true;
           $(`#${pos}-${parId}`).remove();
           this.onListChanged();
         }
@@ -530,10 +519,6 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number, parId: number) {
-    if (this.tokensInfo[parId][pos].isDisabled) {
-      $(`#${pos}-${parId}`).remove();
-      return;
-    }
     const isCorrection = this.correctionExists(pos, parId);
     if (isCorrection) {
       if ($(`#${pos}-${parId}`).length || this.isCorrection(pos, parId)) return;
@@ -557,7 +542,8 @@ export class TinyMceGui extends ProofreaderGui {
       ${
         mistakenPart && mainCorrectionPart
           ? `${mistakenPart}
-          <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow"><span class="correct-text">${mainCorrectionPart}</span>`
+          <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow">
+          <span class="correct-text">${mainCorrectionPart}</span>`
           : `${secondaryDesc ? `<p>${secondaryDesc}</p>` : ''}`
       }
       <div class=action-buttons>
@@ -568,8 +554,8 @@ export class TinyMceGui extends ProofreaderGui {
         } 
         <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
       </div>
-      <button type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" class="btn btn-link show-more">Zobrazit více</button>
-      <div class="collapse" id="collapseExample">
+      <button type="button" data-toggle="collapse" data-target="#collapse${pos}-${parId}" aria-expanded="false"  aria-controls="collapse${pos}-${parId}" class="btn btn-link show-more">Zobrazit více</button>
+      <div class="collapse" id="collapse${pos}-${parId}">
         <div class="card card-body">
            ${
              abouts.length > 0

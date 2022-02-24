@@ -3,9 +3,7 @@ import { Mistake } from '../../main/core';
 export type TokenInfo = {
   [key: number]: {
     token: string;
-    isDisabled: boolean;
     htmlToken: string;
-    helperText: string;
     chunk: any;
     mistakes: Mistake[];
   };
