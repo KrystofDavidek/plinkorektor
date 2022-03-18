@@ -24,6 +24,10 @@ export class HtmlParagraphChunk extends TextChunk {
     return this.p;
   }
 
+  public setText(text: string) {
+    return (this.p.innerText = text);
+  }
+
   public getText(): string {
     return decode(this.p.textContent.trim());
   }

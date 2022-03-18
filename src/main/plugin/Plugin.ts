@@ -27,6 +27,9 @@ export default () => {
         formatMce('focus');
       }
     });
+    editor.on('keyup', function (e) {
+      tinyMceChange(e.key, editor.selection);
+    });
     editor.on('blur', function () {
       if (!catching) {
         bounceProtect('blur');
@@ -119,6 +122,24 @@ export default () => {
   });
   tinymce.DOM.addStyle(themeCustomization);
 };
+
+function tinyMceChange(value: string, selection) {
+  if (value === '"') {
+    const position = selection.getRng().startOffset - 1;
+    const element = selection.getNode();
+    let innerText = element.innerText.slice();
+    const chars = Array.from(innerText);
+    if (!innerText[position - 1] || innerText[position - 1] === ' ') {
+      chars[position] = '„';
+    } else {
+      chars[position] = '“';
+    }
+    innerText = chars.join('');
+    element.innerText = innerText;
+    // Dont know why but only in this case it cursor works correctly
+    selection.setCursorLocation(element, 1);
+  }
+}
 
 function formatMce(state) {
   if (state == 'focus') {

@@ -197,11 +197,6 @@ hr {
   margin: 0 0.2rem;
 }
 
-.cancel {
-  width: 15px;
-  height: 15px;
-}
-
 .icon:hover {
   background-color: rgb(218, 214, 214);
   border-radius: 100%;

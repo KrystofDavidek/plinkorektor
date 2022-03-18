@@ -3,6 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "target": "es5",
+    "downlevelIteration": true,
     "module": "es2015",
     "importHelpers": true,
     "lib": ["es2015", "dom"],
