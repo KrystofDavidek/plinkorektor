@@ -1,10 +1,7 @@
 import { copy } from './utils';
 import Plugin from '../../main/plugin/Plugin';
-import * as $ from 'jquery';
 
 declare let tinymce: any;
-declare var window: any;
-window.$ = window.jQuery = $;
 
 Plugin();
 

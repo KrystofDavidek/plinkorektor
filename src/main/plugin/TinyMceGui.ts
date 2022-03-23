@@ -1,7 +1,6 @@
-import * as $ from 'jquery';
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from '../core';
 import { About, TokensInfo } from 'src/demo/ts/models';
-import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../assets/editor-styles';
+import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../../assets/editor-styles';
 import * as _ from 'lodash';
 
 export class TinyMceGui extends ProofreaderGui {
@@ -556,7 +555,7 @@ export class TinyMceGui extends ProofreaderGui {
       ${
         mistakenPart && mainCorrectionPart
           ? `${mistakenPart}
-          <img class="arrow-icon" src="../../assets/icons/arrow-right.svg" alt="Arrow">
+          <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
           <span class="correct-text">${mainCorrectionPart}</span>`
           : `${secondaryDesc ? `<p>${secondaryDesc}</p>` : ''}`
       }
@@ -591,8 +590,8 @@ export class TinyMceGui extends ProofreaderGui {
       <span class="popover-text" type="button">${
         this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
       }</span>
-      <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="../../assets/icons/check2.svg" alt="Check">
-      <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="../../assets/icons/x.svg" alt="Remove"> 
+      <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="assets/icons/check2.svg" alt="Check">
+      <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove"> 
     </div>
   `;
   }

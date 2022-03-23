@@ -13,5 +13,12 @@
     "outDir": "lib",
     "baseUrl": "."
   },
-  "include": ["src/demo/ts", "src/main/ts", "src/test/ts", "node_modules/@ephox/**/*/api/Main.d.ts", "src/main/plugin"]
+  "include": [
+    "src/demo/ts",
+    "src/main/ts",
+    "src/test/ts",
+    "node_modules/@ephox/**/*/api/Main.d.ts",
+    "src/main/plugin",
+    "src/main/Main.ts"
+  ]
 }
