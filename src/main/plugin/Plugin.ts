@@ -8,6 +8,10 @@ export const MISTAKE_BG_COLOR = 'rgb(255, 255, 0)';
 
 export default () => {
   tinymce.PluginManager.add('plinkorektor', (editor) => {
+    window.onload = () => {
+      const content = localStorage.getItem('content') || '<p></p>';
+      editor.setContent(content);
+    };
     // msg('Pre-initialization.');
     let proofreader = new Proofreader(config);
     editor.on('init', function () {
@@ -27,7 +31,8 @@ export default () => {
       }
     });
     editor.on('keyup', function (e) {
-      tinyMceChange(e.key, editor.selection);
+      fixQuotes(e.key, editor.selection);
+      localStorage.setItem('content', editor.getContent());
     });
     editor.on('blur', function () {
       if (!catching) {
@@ -122,7 +127,7 @@ export default () => {
   tinymce.DOM.addStyle(themeCustomization);
 };
 
-function tinyMceChange(value: string, selection) {
+function fixQuotes(value: string, selection) {
   if (value === '"') {
     const position = selection.getRng().startOffset - 1;
     const element = selection.getNode();

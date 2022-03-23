@@ -30,9 +30,12 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   public setProcessingChunk(chunk: HtmlParagraphChunk) {
-    // after specific paragraph is starting to process, remove corresponding cards
+    // after specific paragraph is starting to process, remove corresponding cards and popovers
     const parId = this.getParId(chunk);
     $(`[id$="-${parId}"]`).remove();
+    chunk.getTokens().forEach((token) => {
+      this.closePopover(token);
+    });
     this.processingPars.push(parId);
     this.onListChanged();
   }
@@ -133,18 +136,18 @@ export class TinyMceGui extends ProofreaderGui {
 
       this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
 
-      const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
+      // const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
 
-      suggestionRulebook = {
-        ...suggestionRulebook,
-        ...dialogOutput.partialRulebook,
-      };
-      currentMistakes.push({
-        type: 'panel',
-        direction: 'column',
-        align: 'stretch',
-        items: dialogOutput.suggestions,
-      });
+      // suggestionRulebook = {
+      //   ...suggestionRulebook,
+      //   ...dialogOutput.partialRulebook,
+      // };
+      // currentMistakes.push({
+      //   type: 'panel',
+      //   direction: 'column',
+      //   align: 'stretch',
+      //   items: dialogOutput.suggestions,
+      // });
     });
 
     $('.mistakes').append(this.createCard(pos, parId));
@@ -154,12 +157,10 @@ export class TinyMceGui extends ProofreaderGui {
     if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
     this.setHovers(token, pos, parId);
     this.onListChanged();
-    // console.log(this.tokensInfo[parId][pos].token);
-    // console.log(this.tokensInfo[parId][pos].mistakes);
-    // console.log('---');
 
     $(token).click((e) => {
       e.preventDefault();
+      return;
 
       this.editor.windowManager.open({
         title: 'Návrh na opravu',
@@ -222,6 +223,8 @@ export class TinyMceGui extends ProofreaderGui {
 
     // Remove mistake record to hide it afterwards.
     config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
+    // Save current content of editor
+    localStorage.setItem('content', this.editor.getContent());
   }
 
   private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number, parId: number) {

@@ -3,7 +3,15 @@ import Plugin from '../../main/plugin/Plugin';
 
 declare let tinymce: any;
 
+// Delete in production
 Plugin();
+
+if (!localStorage.getItem('content')) {
+  localStorage.setItem(
+    'content',
+    '<p>Testovacý věta, dost hrubá chiba. Tohle je mé město brno. Tohle je take hruba chiba?</p>',
+  );
+}
 
 tinymce.init({
   selector: 'textarea.tinymce',
