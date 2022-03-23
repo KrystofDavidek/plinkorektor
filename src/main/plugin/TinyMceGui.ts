@@ -2,6 +2,7 @@ import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistak
 import { About, TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../../assets/editor-styles';
 import * as _ from 'lodash';
+import { getRawEditorContent } from './Plugin';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
@@ -33,9 +34,9 @@ export class TinyMceGui extends ProofreaderGui {
     // after specific paragraph is starting to process, remove corresponding cards and popovers
     const parId = this.getParId(chunk);
     $(`[id$="-${parId}"]`).remove();
-    chunk.getTokens().forEach((token) => {
-      this.closePopover(token);
-    });
+    // chunk.getTokens().forEach((token) => {
+    //   this.closePopover(token);
+    // });
     this.processingPars.push(parId);
     this.onListChanged();
   }
@@ -224,7 +225,7 @@ export class TinyMceGui extends ProofreaderGui {
     // Remove mistake record to hide it afterwards.
     config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
     // Save current content of editor
-    localStorage.setItem('content', this.editor.getContent());
+    localStorage.setItem('content', getRawEditorContent(this.editor));
   }
 
   private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number, parId: number) {
@@ -437,7 +438,7 @@ export class TinyMceGui extends ProofreaderGui {
     if (size === 0) {
       $('#fix-all').hide();
     } else {
-      $(`#fix-all`).show();
+      $(`#fix-all`).show().css('display', 'block');
     }
   }
 

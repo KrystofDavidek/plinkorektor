@@ -79,7 +79,7 @@ export class Proofreader {
       this.config.gui.setProcessingChunk(chunk);
 
       // Applying original highlights until the new api-call resolves itself.
-      // chunk.highlightTokens();
+      chunk.highlightTokens();
       // Caling processing
       processApiCall(hash, chunk);
     });

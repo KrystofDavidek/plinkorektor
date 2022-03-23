@@ -30,9 +30,9 @@ export default () => {
         formatMce('focus');
       }
     });
-    editor.on('keyup', function (e) {
+    editor.on('keyup', function (e: { key: string }) {
       fixQuotes(e.key, editor.selection);
-      localStorage.setItem('content', editor.getContent());
+      localStorage.setItem('content', getRawEditorContent(editor));
     });
     editor.on('blur', function () {
       if (!catching) {
@@ -180,3 +180,11 @@ function realBackgroundColor(elem) {
     return bg;
   }
 }
+
+export const getRawEditorContent = (editor) => {
+  return editor
+    .getContent({ format: 'text' })
+    .split('\n')
+    .filter((par: string) => par.length > 1)
+    .map((par: string) => `<p>${par}<p/>`);
+};

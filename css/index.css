@@ -12,6 +12,24 @@ body {
   margin: 0 !important;
 }
 
+.suggestions {
+  padding-left: 0;
+}
+
+.suggestions__title {
+  margin-left: 1rem;
+  margin-top: -8px;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  transition: all 0.3s ease 0s;
+}
+
+.navbar-brand:hover {
+  transform: translateY(-7px);
+}
+
 .navbar-toggler:hover {
   border-color: var(--green);
 }
@@ -30,6 +48,7 @@ body {
 }
 
 .navbar-nav li {
+  font-size: 1.2rem;
   transition: all 0.3s ease 0s;
 }
 
@@ -51,7 +70,7 @@ a:hover {
 
 .navbar {
   padding: 1rem 2rem;
-  box-shadow: 0px 0.1px 30px var(--shadow-green);
+  box-shadow: 0px 5px 40px var(--shadow-green);
   height: 10vh;
 }
 
@@ -60,9 +79,12 @@ a:hover {
 }
 
 .main-container {
-  height: 90vh;
+  height: 90vh !important;
   padding: 2rem;
+  padding-top: 4rem;
   overflow: hidden;
+  background: rgb(176, 255, 224);
+  background: linear-gradient(0deg, rgba(176, 255, 224, 1) 0%, rgba(255, 255, 255, 1) 5%, rgba(254, 254, 254, 1) 100%);
 }
 
 .editor {
@@ -85,7 +107,7 @@ a:hover {
 }
 
 .copy-button {
-  margin: 1rem 1rem 1rem 0;
+  margin: 1rem 1rem 2rem 0;
   border: none;
   border-radius: 45px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
@@ -102,7 +124,7 @@ a:hover {
 
 .mistakes {
   margin-top: 2rem;
-  max-height: 78vh;
+  max-height: 55vh;
   position: relative;
   overflow: scroll;
 }
@@ -166,7 +188,7 @@ hr {
 }
 
 .show-more:hover {
-  color: var(--green);
+  color: var(--font-green);
 }
 
 .button {
@@ -221,10 +243,9 @@ hr {
 }
 
 .popover {
-  box-shadow: 0px 15px 20px var(--grey) !important;
-  top: 110px !important;
-  left: 35px !important;
-
+  box-shadow: 0px 10px 20px var(--shadow-green) !important;
+  top: 150px !important;
+  left: 160px !important;
   border: none !important;
 }
 
@@ -279,5 +300,38 @@ pre {
 
   .navbar {
     height: fit-content;
+  }
+
+  .popover {
+    top: 135px !important;
+  }
+}
+
+@media screen and (max-width: 760px) {
+  .main-container {
+    height: fit-content;
+    overflow: auto;
+  }
+}
+
+@media screen and (max-width: 1300px) {
+  .popover {
+    left: 43px !important;
+  }
+}
+
+@media screen and (min-width: 1300px) {
+  .navbar {
+    padding-right: 5rem;
+    padding-left: 10rem;
+  }
+
+  .suggestions {
+    padding-left: 3rem;
+  }
+
+  main {
+    padding-right: 10rem !important;
+    padding-left: 10rem !important;
   }
 }
