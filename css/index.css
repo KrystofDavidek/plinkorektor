@@ -3,6 +3,12 @@
   --green: #2ee59d;
   --shadow-green: rgba(46, 229, 157, 0.4);
   --grey: rgba(0, 0, 0, 0.1);
+  --nav-h: 80px;
+  --main-p: 32px;
+  --main-p-t: 64px;
+  --main-p-l-extra: 160px;
+  --pop-top: calc(var(--nav-h) + var(--main-p-t));
+  --pop-left: calc(var(--main-p-l-extra));
 }
 
 html,
@@ -10,6 +16,10 @@ body {
   height: 100vh;
   width: 100vw;
   margin: 0 !important;
+}
+
+.editor-container {
+  padding: 0;
 }
 
 .suggestions {
@@ -71,7 +81,7 @@ a:hover {
 .navbar {
   padding: 1rem 2rem;
   box-shadow: 0px 5px 40px var(--shadow-green);
-  height: 10vh;
+  height: var(--nav-h);
 }
 
 .gap-1 {
@@ -79,9 +89,10 @@ a:hover {
 }
 
 .main-container {
-  height: 90vh !important;
-  padding: 2rem;
-  padding-top: 4rem;
+  /* height: -o-calc(100% - var(--nav-h)); opera */
+  height: -webkit-calc(100% - var(--nav-h)); /* google, safari */
+  /* height: -moz-calc(100% - var(--nav-h)); firefox */
+  padding: var(--main-p-t) var(--main-p) var(--main-p) var(--main-p);
   overflow: hidden;
   background: rgb(176, 255, 224);
   background: linear-gradient(0deg, rgba(176, 255, 224, 1) 0%, rgba(255, 255, 255, 1) 5%, rgba(254, 254, 254, 1) 100%);
@@ -244,8 +255,8 @@ hr {
 
 .popover {
   box-shadow: 0px 10px 20px var(--shadow-green) !important;
-  top: 155px !important;
-  left: 160px !important;
+  top: var(--pop-top) !important;
+  left: var(--pop-left) !important;
   border: none !important;
   margin: 0;
 }
@@ -302,22 +313,18 @@ pre {
   .navbar {
     height: fit-content;
   }
-
-  .popover {
-    top: 140px !important;
-  }
 }
 
 @media screen and (max-width: 760px) {
   .main-container {
-    height: fit-content;
+    height: 100%;
     overflow: auto;
   }
 }
 
 @media screen and (max-width: 1300px) {
   .popover {
-    left: 43px !important;
+    left: var(--main-p) !important;
   }
 }
 
@@ -331,8 +338,8 @@ pre {
     padding-left: 3rem;
   }
 
-  main {
-    padding-right: 10rem !important;
-    padding-left: 10rem !important;
+  .main-container {
+    padding-right: var(--main-p-l-extra) !important;
+    padding-left: var(--main-p-l-extra) !important;
   }
 }

@@ -186,5 +186,6 @@ export const getRawEditorContent = (editor) => {
     .getContent({ format: 'text' })
     .split('\n')
     .filter((par: string) => par.length > 1)
-    .map((par: string) => `<p>${par}<p/>`);
+    .map((par: string) => `<p>${par}<p/>`)
+    .join('');
 };

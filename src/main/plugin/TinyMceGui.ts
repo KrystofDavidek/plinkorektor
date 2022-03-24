@@ -504,7 +504,7 @@ export class TinyMceGui extends ProofreaderGui {
             ($(_this) as any).popover('hide');
             removeMistakeHighlight(pos, token, parId);
           }
-        }, 100);
+        }, 1);
       });
   }
 
@@ -564,9 +564,7 @@ export class TinyMceGui extends ProofreaderGui {
 
     return `
     <div id="${pos}-${parId}-pop" class="popover-body">
-      <span class="popover-text" type="button">${
-        this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
-      }</span>
+      <span class="popover-text">${this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]}</span>
       <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="assets/icons/check2.svg" alt="Check">
       <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove"> 
     </div>
