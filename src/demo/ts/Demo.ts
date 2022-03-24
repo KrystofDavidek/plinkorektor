@@ -1,4 +1,4 @@
-import { copy } from './utils';
+import { copy } from './interface-utils';
 import Plugin from '../../main/plugin/Plugin';
 
 declare let tinymce: any;
@@ -21,7 +21,7 @@ tinymce.init({
   },
   content_style:
     "@import url('https://fonts.googleapis.com/css2?family=Varta&display=swap'); body { font-family: Varta; };",
-  plugins: 'code plinkorektor autoresize',
+  plugins: 'code plinkorektor',
   autoresize_bottom_margin: 10,
   width: '100%',
   min_height: 427,

@@ -1,3 +1,4 @@
+import { closePopover } from './../../plugin/utils';
 import * as $ from 'jquery';
 import { decode } from 'html-entities';
 // import { message as msg } from "../utilities/Message";
@@ -98,7 +99,7 @@ export class HtmlParagraphChunk extends TextChunk {
   public removeOldHighlights() {
     // msg('Clearing old highlights on paragraph "' + this.lastHash + '".');
     $(this.p).find('.pk-token').removeClass('pk-token-correction');
-    $(this.p).find('.pk-token').off('click');
+    // $(this.p).find('.pk-token').off('click');
   }
 
   public markTokenForCorrection(token) {

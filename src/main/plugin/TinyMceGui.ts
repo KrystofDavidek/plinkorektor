@@ -3,6 +3,7 @@ import { About, TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../../assets/editor-styles';
 import * as _ from 'lodash';
 import { getRawEditorContent } from './Plugin';
+import { addMistakeHighlight, closePopover, removeMistakeHighlight, setHovers } from './utils';
 
 export class TinyMceGui extends ProofreaderGui {
   private editor;
@@ -35,7 +36,7 @@ export class TinyMceGui extends ProofreaderGui {
     const parId = this.getParId(chunk);
     $(`[id$="-${parId}"]`).remove();
     // chunk.getTokens().forEach((token) => {
-    //   this.closePopover(token);
+    //   closePopover(token);
     // });
     this.processingPars.push(parId);
     this.onListChanged();
@@ -121,8 +122,8 @@ export class TinyMceGui extends ProofreaderGui {
     // Removes original left-click triggers on tokens
     $(token).off('click');
     // Create dialog itself
-    const currentMistakes = [];
-    let suggestionRulebook = {};
+    // const currentMistakes = [];
+    // let suggestionRulebook = {};
 
     if (!this.initToken(chunk.getToken(pos).text(), token, pos, parId, chunk)) {
       return;
@@ -155,36 +156,40 @@ export class TinyMceGui extends ProofreaderGui {
     this.sortCards();
     this.createFixHandler(chunk, token, pos, parId);
     this.createIgnoreHandler(chunk, token, pos, parId);
-    if (chunk.getToken(pos).text().length > 1) this.setPopover(token, pos, parId);
-    this.setHovers(token, pos, parId);
+    if (chunk.getToken(pos).text().length > 1) {
+      this.setPopover(token, pos, parId);
+      setHovers(token, pos, parId, true);
+    } else {
+      setHovers(token, pos, parId, false);
+    }
     this.onListChanged();
 
     $(token).click((e) => {
       e.preventDefault();
       return;
 
-      this.editor.windowManager.open({
-        title: 'Návrh na opravu',
-        body: {
-          type: 'panel',
-          items: currentMistakes,
-        },
-        buttons: [],
-        onAction: (instance, trigger) => {
-          // Get mistake and correction information from the triger name.
-          const [actionType, mistakeId, correctionId] = trigger.name.split('-');
-          if (actionType == 'correction') {
-            this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
-            config.proofreader.process();
-          } else if (actionType == 'ignore') {
-            this.ignoreMistake(chunk, mistakeId);
-          } else if (actionType == 'allcorrection') {
-            this.fixAll(chunk, mistakeId, suggestionRulebook[correctionId]);
-            config.proofreader.process();
-          }
-          this.editor.windowManager.close();
-        },
-      });
+      // this.editor.windowManager.open({
+      //   title: 'Návrh na opravu',
+      //   body: {
+      //     type: 'panel',
+      //     items: currentMistakes,
+      //   },
+      //   buttons: [],
+      //   onAction: (instance, trigger) => {
+      //     // Get mistake and correction information from the triger name.
+      //     const [actionType, mistakeId, correctionId] = trigger.name.split('-');
+      //     if (actionType == 'correction') {
+      //       this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
+      //       config.proofreader.process();
+      //     } else if (actionType == 'ignore') {
+      //       this.ignoreMistake(chunk, mistakeId);
+      //     } else if (actionType == 'allcorrection') {
+      //       this.fixAll(chunk, mistakeId, suggestionRulebook[correctionId]);
+      //       config.proofreader.process();
+      //     }
+      //     this.editor.windowManager.close();
+      //   },
+      // });
     });
   }
 
@@ -400,7 +405,7 @@ export class TinyMceGui extends ProofreaderGui {
     this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
     if (!isIgnore) $(token).addClass('pk-token-correction-fixed');
-    this.removeMistakeHighlight(pos, token, parId);
+    removeMistakeHighlight(pos, token, parId);
     if (isIgnore) {
       this.disableOtherTokens($(token).text());
       for (const id of ids) {
@@ -416,7 +421,7 @@ export class TinyMceGui extends ProofreaderGui {
     Object.entries(this.tokensInfo).forEach(([parId, par]) => {
       Object.entries(par).forEach(([pos, info]) => {
         if (info.token === tokenString) {
-          this.closePopover(info.htmlToken);
+          closePopover(info.htmlToken);
           $(`#${pos}-${parId}`).remove();
           this.onListChanged();
         }
@@ -427,7 +432,7 @@ export class TinyMceGui extends ProofreaderGui {
   createFixHandler(chunk, token, pos, parId) {
     $(document).off('click', `#${pos}-${parId}-fix`);
     $(document).on('click', `#${pos}-${parId}-fix`, () => {
-      this.closePopover(token);
+      closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
       config.proofreader.process();
     });
@@ -445,15 +450,9 @@ export class TinyMceGui extends ProofreaderGui {
   createIgnoreHandler(chunk, token, pos, parId) {
     $(document).off('click', `#${pos}-${parId}-ignore`);
     $(document).on('click', `#${pos}-${parId}-ignore`, () => {
-      this.closePopover(token);
+      closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, true);
     });
-  }
-
-  closePopover(token) {
-    ($(token) as any).popover('hide');
-    ($(token) as any).popover('disable');
-    $('.popover').remove();
   }
 
   createFixAllHandler() {
@@ -463,7 +462,7 @@ export class TinyMceGui extends ProofreaderGui {
         if (!this.processingPars.includes(Number(parId))) {
           for (const pos in this.tokensInfo[parId]) {
             const token = this.tokensInfo[parId][pos].htmlToken;
-            this.closePopover(token);
+            closePopover(token);
             this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
           }
         }
@@ -487,52 +486,26 @@ export class TinyMceGui extends ProofreaderGui {
         html: true,
       })
       .on('mouseenter', function () {
-        var _this = this;
+        // Cases when highlights are removed when multiple corrections are performed
+        if (!$(token).hasClass('pk-token-correction')) return;
+
+        const _this = this;
         ($(this) as any).popover('show');
+        addMistakeHighlight(pos, token, parId);
         $('.popover').on('mouseleave', function () {
           ($(_this) as any).popover('hide');
+          removeMistakeHighlight(pos, token, parId);
         });
       })
       .on('mouseleave', function () {
-        var _this = this;
+        const _this = this;
         setTimeout(function () {
           if (!$('.popover:hover').length) {
             ($(_this) as any).popover('hide');
+            removeMistakeHighlight(pos, token, parId);
           }
         }, 100);
       });
-  }
-
-  setHovers(token, pos, parId) {
-    $(token).mouseenter(() => {
-      const position = $(`#${pos}-${parId}`).position();
-      if (!position) return;
-      $(`#${pos}-${parId}`).addClass('selected');
-      $('.mistakes').animate(
-        {
-          scrollTop: position.top,
-        },
-        300,
-      );
-    });
-
-    $(`#${pos}-${parId}`).mouseenter(() => {
-      $(`#${pos}-${parId}`).addClass('selected');
-      $(token).addClass('hovered');
-    });
-
-    $(`#${pos}-${parId}`).mouseleave(() => {
-      this.removeMistakeHighlight(pos, token, parId);
-    });
-
-    $(token).mouseleave(() => {
-      $(`#${pos}-${parId}`).removeClass('selected');
-    });
-  }
-
-  removeMistakeHighlight(pos: number, token: string, parId: number) {
-    $(`#${pos}-${parId}`).removeClass('selected');
-    $(token).removeClass('hovered');
   }
 
   createCard(pos: number, parId: number) {
