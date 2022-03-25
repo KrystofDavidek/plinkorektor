@@ -35,6 +35,7 @@ export class TinyMceGui extends ProofreaderGui {
     // after specific paragraph is starting to process, remove corresponding cards and popovers
     const parId = this.getParId(chunk);
     $(`[id$="-${parId}"]`).remove();
+    // Disable closing popovers when par is processing
     // chunk.getTokens().forEach((token) => {
     //   closePopover(token);
     // });
@@ -459,12 +460,13 @@ export class TinyMceGui extends ProofreaderGui {
     $(`#fix-all`).off('click');
     $(`#fix-all`).on('click', () => {
       for (const parId in this.tokensInfo) {
-        if (!this.processingPars.includes(Number(parId))) {
-          for (const pos in this.tokensInfo[parId]) {
-            const token = this.tokensInfo[parId][pos].htmlToken;
-            closePopover(token);
-            this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
-          }
+        // Disable fix all to already processing par
+        // if (!this.processingPars.includes(Number(parId))) {
+        // }
+        for (const pos in this.tokensInfo[parId]) {
+          const token = this.tokensInfo[parId][pos].htmlToken;
+          closePopover(token);
+          this.fix(this.tokensInfo[parId][pos].chunk, token, pos, parId);
         }
       }
       this.onListChanged();
