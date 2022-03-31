@@ -20,6 +20,11 @@ export default () => {
       });
       proofreader.initialize(gui);
     });
+    editor.on('redo undo', function (e) {
+      // Set content without highlights
+      editor.setContent(getRawEditorContent(editor));
+      $('.mistakes').empty();
+    });
     // Autocorrect triggered by editor change
     editor.on('remove', function () {
       proofreader.destroy();

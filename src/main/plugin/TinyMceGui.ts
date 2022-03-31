@@ -23,9 +23,13 @@ export class TinyMceGui extends ProofreaderGui {
       // msg('Processing indicator displayed.');
       $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing-finished');
       $(this.editor.dom.select('html')[0]).attr('data-pk-processing', 'true');
+      $('.tox-tbtn').prop('disabled', true);
+      $('.tox-tbtn').removeClass('tox-tbtn--active');
     } else {
       $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing');
       $(this.editor.dom.select('html')[0]).attr('data-pk-processing-finished', 'true');
+      $('.tox-tbtn').prop('disabled', false);
+      $('.tox-tbtn').addClass('tox-tbtn--active');
       // msg('Processing indicator hidden.');
     }
     this.processing = processing;
@@ -435,6 +439,7 @@ export class TinyMceGui extends ProofreaderGui {
     $(document).on('click', `#${pos}-${parId}-fix`, () => {
       closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
+      this.editor.undoManager.add();
       config.proofreader.process();
     });
   }
@@ -470,6 +475,7 @@ export class TinyMceGui extends ProofreaderGui {
         }
       }
       this.onListChanged();
+      this.editor.undoManager.add();
       config.proofreader.process();
     });
   }

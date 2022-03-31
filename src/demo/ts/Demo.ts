@@ -1,4 +1,4 @@
-import { copy } from './interface-utils';
+import { copy, deleteContent } from './interface-utils';
 import Plugin from '../../main/plugin/Plugin';
 
 declare let tinymce: any;
@@ -13,6 +13,10 @@ if (!localStorage.getItem('content')) {
   );
 }
 
+// if (!localStorage.getItem('content')) {
+//   localStorage.setItem('content', '<p></p>');
+// }
+
 tinymce.init({
   selector: 'textarea.tinymce',
   keep_styles: false, // prevent class copy on p
@@ -26,7 +30,7 @@ tinymce.init({
   width: '100%',
   min_height: 427,
   menubar: 'korektor',
-  toolbar: 'none',
+  toolbar: 'undo redo',
   menu: {
     korektor: { title: 'Korektor', items: 'pk-tagger pk-spellchecker' },
   },
@@ -36,4 +40,5 @@ tinymce.init({
 
 $(() => {
   copy(tinymce);
+  deleteContent(tinymce);
 });

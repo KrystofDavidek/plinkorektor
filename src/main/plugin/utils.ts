@@ -15,11 +15,15 @@ export const closePopover = (token) => {
 };
 
 export const setHovers = (token, pos, parId, isPopover) => {
+  let isInTime;
   $(token).mouseenter(() => {
+    isInTime = true;
     const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     if (width > 770) {
-      const cardElement = $(`#${pos}-${parId}`).get()[0];
-      if (cardElement) cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const cardElement = $(`#${pos}-${parId}`).get()[0];
+        if (cardElement && isInTime) cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 750);
     }
     $(`#${pos}-${parId}`).addClass('selected');
   });
@@ -28,11 +32,13 @@ export const setHovers = (token, pos, parId, isPopover) => {
     addMistakeHighlight(pos, token, parId);
   });
 
-  if (!isPopover) {
-    $(token).mouseleave(() => {
+  $(token).mouseleave(() => {
+    isInTime = false;
+    if (!isPopover) {
       removeMistakeHighlight(pos, token, parId);
-    });
-  }
+    }
+  });
+
   $(`#${pos}-${parId}`).mouseleave(() => {
     removeMistakeHighlight(pos, token, parId);
   });

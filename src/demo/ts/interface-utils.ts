@@ -15,3 +15,10 @@ export const copy = (tinymce) => {
     copyToClipboard(tinymce.activeEditor.getContent({ format: 'text' }));
   });
 };
+
+export const deleteContent = (tinymce) => {
+  $('#delete-content').on('click', () => {
+    localStorage.setItem('content', '<p></p>');
+    tinymce.activeEditor.setContent('<p><p/>');
+  });
+};
