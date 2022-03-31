@@ -3,7 +3,7 @@
   --green: #2ee59d;
   --shadow-green: rgba(46, 229, 157, 0.4);
   --grey: rgba(0, 0, 0, 0.1);
-  --nav-h: 10%;
+  --nav-h: 10vh;
   --main-p: 5%;
   --main-p-t: 5%;
   --main-p-l-extra: 10%;
@@ -98,8 +98,9 @@ a:hover {
 
 .main-container {
   /* height: -o-calc(100% - var(--nav-h)); opera */
-  height: -webkit-calc(100% - var(--nav-h)); /* google, safari */
+  /* height: -webkit-calc(100vh - var(--nav-h) ); google, safari */
   /* height: -moz-calc(100% - var(--nav-h)); firefox */
+  height: calc(100vh - var(--nav-h) - 1.2vh); /* google, safari */
   padding: var(--main-p-t) var(--main-p) var(--main-p) var(--main-p);
   overflow: hidden;
   background: rgb(176, 255, 224);
@@ -266,10 +267,9 @@ hr {
 
 .popover {
   box-shadow: 0px 10px 20px var(--shadow-green) !important;
-  top: var(--pop-top) !important;
-  left: var(--pop-left) !important;
   border: none !important;
   margin: 0;
+  background: white !important;
 }
 
 .arrow {
@@ -278,20 +278,27 @@ hr {
 
 .popover-body {
   display: flex;
+  justify-content: space-between !important;
   align-items: center;
-  padding: 0.2rem;
+  padding: 0.3rem !important;
+}
+
+.popover-icons {
+  margin-left: 1rem !important;
+  display: flex;
+  padding: -0.3rem !important;
 }
 
 .arrow-icon {
-  margin: 0 0.2rem;
   width: 20px;
   height: 20px;
+  margin: 0 0.2rem;
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
-  margin: 0 0.2rem;
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 0.2rem !important;
 }
 
 .icon:hover {
@@ -330,12 +337,6 @@ pre {
   .main-container {
     height: 100%;
     overflow: auto;
-  }
-}
-
-@media screen and (max-width: 1300px) {
-  .popover {
-    left: var(--main-p) !important;
   }
 }
 
