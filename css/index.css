@@ -7,8 +7,6 @@
   --main-p: 5%;
   --main-p-t: 5%;
   --main-p-l-extra: 10%;
-  --pop-top: calc(var(--nav-h) + var(--main-p-t));
-  --pop-left: calc(var(--main-p-l-extra));
 }
 
 html,
@@ -90,6 +88,7 @@ a:hover {
   padding: 1rem 2rem;
   box-shadow: 0px 5px 40px var(--shadow-green);
   height: var(--nav-h);
+  margin: 0 !important;
 }
 
 .gap-1 {
@@ -97,10 +96,13 @@ a:hover {
 }
 
 .main-container {
-  /* height: -o-calc(100% - var(--nav-h)); opera */
-  /* height: -webkit-calc(100vh - var(--nav-h) ); google, safari */
-  /* height: -moz-calc(100% - var(--nav-h)); firefox */
-  height: calc(100vh - var(--nav-h) - 1.2vh); /* google, safari */
+  /* opera */
+  height: -o-calc(100vh - var(--nav-h));
+  /* google, safari */
+  height: -webkit-calc(100vh - var(--nav-h));
+  /* firefox */
+  height: -moz-calc(100vh - var(--nav-h));
+  height: calc(100vh - var(--nav-h));
   padding: var(--main-p-t) var(--main-p) var(--main-p) var(--main-p);
   overflow: hidden;
   background: rgb(176, 255, 224);
