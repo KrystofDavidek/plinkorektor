@@ -570,6 +570,8 @@ export class TinyMceGui extends ProofreaderGui {
   createPopoverContent(pos, parId) {
     if (!this.correctionExists(pos, parId)) return;
     if (this.isCorrection(pos, parId)) return;
+    // Check if exists correction with same position in par
+    if (!this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]) return;
 
     return `
     <div id="${pos}-${parId}-pop" class="popover-body">
@@ -589,10 +591,11 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   isCorrection(pos, parId) {
-    return (
-      this.getValueFromMistakeObj('token', pos, parId) ===
-      this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]
-    );
+    const token = this.getValueFromMistakeObj('token', pos, parId);
+    const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos];
+
+    if (!token || !correction) return false;
+    return token === correction;
   }
 
   correctionExists(pos, parId) {
