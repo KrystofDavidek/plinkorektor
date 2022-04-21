@@ -5,7 +5,7 @@ export class Mistake {
   protected tokens: number[]; // Tokens to be highlighted.
   protected description: string; // Description of the mistake.
   protected corrections: Correction[]; // List of possible corrections.
-  protected about: { url: string; label: string }[]; // List of possible corrections.
+  protected about: { url: string; label: string }[]; // List of possible links.
   protected flags: []; // List of possible flags.
   protected module: string;
   protected type: string;
