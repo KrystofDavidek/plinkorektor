@@ -49,17 +49,47 @@
       </div>
     </nav>
     <main class="container-fluid main-container">
-      <div class="row">
+      <div class="row content-container">
         <div class="col-12 col-md-7 editor-container">
           <div id="mceControl">
             <textarea class="tinymce"><p></p></textarea>
           </div>
-          <button id="delete-content" type="button" class="button copy-button">Vymazat obsah</button>
-          <button id="copy" type="button" class="button copy-button">Kopírovat</button>
+          <div class="editor-buttons">
+            <button id="copy" type="button" class="button editor-button">Kopírovat</button>
+            <button type="button" class="button editor-button" data-toggle="modal" data-target="#deleteModal">
+              Vymazat obsah
+            </button>
+          </div>
+          <!-- Modal -->
+          <div
+            class="modal"
+            id="deleteModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="Delete Modal"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="Delete Modal">Opravdu chcete vymazat celý obsah?</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-footer m-2 mt-4">
+                  <button id="delete-content" type="button" class="button button-red" data-dismiss="modal">Ano</button>
+                  <button type="button" class="button button-green" data-dismiss="modal">Ne</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="suggestions col-12 col-md-5">
-          <h1 class="suggestions__title">Návrhy na opravu</h1>
-          <button id="fix-all" type="button" class="button fix-all-button">Opravit vše</button>
+          <div class="suggestions-header">
+            <h1>Návrhy oprav</h1>
+            <button id="fix-all" type="button" class="button">Opravit vše</button>
+          </div>
           <div class="mistakes"></div>
         </div>
       </div>

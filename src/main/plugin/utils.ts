@@ -22,7 +22,8 @@ export const setHovers = (token, pos, parId, isPopover) => {
     if (width > 770) {
       setTimeout(() => {
         const cardElement = $(`#${pos}-${parId}`).get()[0];
-        if (cardElement && isInTime) cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (cardElement && isInTime)
+          cardElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       }, 750);
     }
     $(`#${pos}-${parId}`).addClass('selected');

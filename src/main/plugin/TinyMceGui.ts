@@ -1,6 +1,6 @@
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from '../core';
 import { About, TokensInfo } from 'src/demo/ts/models';
-import { cssMistakeBadValue, cssMistakeDescription, cssMistakeNoCorrection } from '../../../assets/editor-styles';
+import { cssMistakeBadValue } from '../../../assets/editor-styles';
 import * as _ from 'lodash';
 import { getRawEditorContent } from './Plugin';
 import { addMistakeHighlight, closePopover, removeMistakeHighlight, setHovers } from './utils';
@@ -11,11 +11,10 @@ export class TinyMceGui extends ProofreaderGui {
   private tokensInfo: TokensInfo = {};
   private tokensToIgnore: string[] = [];
 
-  constructor(editor, stylesheetLoader: () => void = () => {}) {
+  constructor(editor) {
     super();
     this.editor = editor;
     this.processing = $(this.editor.dom.select('html')[0]).attr('data-pk-processing');
-    stylesheetLoader();
   }
 
   public setProcessing(processing: boolean) {
@@ -130,12 +129,6 @@ export class TinyMceGui extends ProofreaderGui {
 
     const parId = this.getParId(chunk);
     this.deleteOldTokens(chunk, parId);
-    // Removes original left-click triggers on tokens
-    $(token).off('click');
-    // Create dialog itself
-    // const currentMistakes = [];
-    // let suggestionRulebook = {};
-
     if (!this.initToken(chunk.getToken(pos).text(), token, pos, parId, chunk)) {
       return;
     }
@@ -146,21 +139,7 @@ export class TinyMceGui extends ProofreaderGui {
       if (!mistake.getTokens().includes(pos)) {
         return;
       }
-
       this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
-
-      // const dialogOutput = this.buildSuggestionDialog(chunk, mistake, pos, parId);
-
-      // suggestionRulebook = {
-      //   ...suggestionRulebook,
-      //   ...dialogOutput.partialRulebook,
-      // };
-      // currentMistakes.push({
-      //   type: 'panel',
-      //   direction: 'column',
-      //   align: 'stretch',
-      //   items: dialogOutput.suggestions,
-      // });
     });
 
     $('.mistakes').append(this.createCard(pos, parId));
@@ -174,34 +153,6 @@ export class TinyMceGui extends ProofreaderGui {
       setHovers(token, pos, parId, false);
     }
     this.onListChanged();
-
-    $(token).click((e) => {
-      e.preventDefault();
-      return;
-
-      // this.editor.windowManager.open({
-      //   title: 'Návrh na opravu',
-      //   body: {
-      //     type: 'panel',
-      //     items: currentMistakes,
-      //   },
-      //   buttons: [],
-      //   onAction: (instance, trigger) => {
-      //     // Get mistake and correction information from the triger name.
-      //     const [actionType, mistakeId, correctionId] = trigger.name.split('-');
-      //     if (actionType == 'correction') {
-      //       this.fixMistake(chunk, mistakeId, suggestionRulebook[correctionId]);
-      //       config.proofreader.process();
-      //     } else if (actionType == 'ignore') {
-      //       this.ignoreMistake(chunk, mistakeId);
-      //     } else if (actionType == 'allcorrection') {
-      //       this.fixAll(chunk, mistakeId, suggestionRulebook[correctionId]);
-      //       config.proofreader.process();
-      //     }
-      //     this.editor.windowManager.close();
-      //   },
-      // });
-    });
   }
 
   sortCards() {
@@ -242,83 +193,6 @@ export class TinyMceGui extends ProofreaderGui {
     config.mistakes.removeMistake(chunk.getLastHash(), mistakeId);
     // Save current content of editor
     localStorage.setItem('content', getRawEditorContent(this.editor));
-  }
-
-  private buildSuggestionDialog(chunk: HtmlParagraphChunk, mistake: Mistake, pos: number, parId: number) {
-    const partialRulebook = {};
-    const helperText = chunk.getContext(mistake);
-
-    // Display mistake context
-    const suggestions: any[] = [
-      {
-        type: 'htmlpanel',
-        html:
-          '<p style="text-align: center">' +
-          helperText +
-          '</p><p style="' +
-          cssMistakeDescription +
-          '">' +
-          mistake.getDescription() +
-          '</p>',
-      },
-    ];
-
-    // Display suggested corrections
-    const mistakes = mistake.getCorrections();
-    if (!mistakes.length) {
-      suggestions.push({
-        type: 'htmlpanel',
-        html: '<p style="' + cssMistakeNoCorrection + '">Žádné návrhy</p>',
-      });
-    }
-    suggestions.push({
-      type: 'button',
-      name: 'ignore-' + mistake.getId(),
-      text: 'Ignorovat chybu',
-      borderless: true,
-    });
-
-    mistakes.forEach((correction) => {
-      partialRulebook[correction.getId()] = correction.getRules();
-      suggestions.push(
-        {
-          type: 'htmlpanel',
-          html: correction.getDescription(),
-        },
-        {
-          type: 'grid',
-          columns: 2,
-          items: [
-            {
-              type: 'button',
-              name: 'correction-' + mistake.getId() + '-' + correction.getId(),
-              text: 'Opravit jen tady',
-              borderless: true,
-            },
-            {
-              type: 'button',
-              name: 'allcorrection-' + mistake.getId() + '-' + correction.getId(),
-              text: 'Opravit všude',
-              borderless: true,
-            },
-          ],
-        },
-      );
-    });
-    if (mistake.getAbout().length) {
-      suggestions.push({
-        type: 'htmlpanel',
-        html: '<h4">Další informace</h4>',
-      });
-      mistake.getAbout().forEach((item) => {
-        suggestions.push({
-          type: 'htmlpanel',
-          html: '<a href="' + item.url + '" target="_blank" rel="noopener noreferrer">' + item.label + '</h4>',
-        });
-      });
-    }
-
-    return { suggestions, partialRulebook };
   }
 
   getParId(chunk: HtmlParagraphChunk): number {
@@ -378,9 +252,9 @@ export class TinyMceGui extends ProofreaderGui {
     }
   }
 
-  getValueFromMistakeObj(atr: string, pos: number, parId: number) {
-    if (this.tokensInfo[parId][pos].mistakes[0][atr]) {
-      return this.tokensInfo[parId][pos].mistakes[0][atr];
+  getValueFromMistakeObj(atr: string, pos: number, parId: number, mistakeIndex: number) {
+    if (this.tokensInfo[parId][pos].mistakes[mistakeIndex][atr]) {
+      return this.tokensInfo[parId][pos].mistakes[mistakeIndex][atr];
     }
   }
 
@@ -411,7 +285,8 @@ export class TinyMceGui extends ProofreaderGui {
     if (!$(token).text()) {
       $(token).text(chunk.getToken(pos).text());
     }
-    const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0];
+    // ! Has to change index to fix
+    const correction = this.getValueFromMistakeObj('corrections', pos, parId, 0)[0];
     const ids = this.getAllMistakesIds(pos, parId);
     this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
@@ -530,28 +405,28 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number, parId: number) {
-    const isCorrection = this.correctionExists(pos, parId);
-    if (isCorrection) {
-      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId)) return;
-    }
     const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
-    if (this.cardWithSameMistakeIdExists(mistakes[0].getId())) return;
+    // primaryMistakeIndex;
+    const i = this.getPrimaryMistakeIndex(mistakes);
+    const isCorrection = this.correctionExists(pos, parId, i);
+    if (isCorrection) {
+      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, i)) return;
+    }
+    if (this.cardWithSameMistakeIdExists(mistakes[i].getId())) return;
 
-    console.log(mistakes);
-
-    const mainDesc = mistakes[0].getDescription();
+    const mainDesc = mistakes[i].getDescription();
     const token = this.getValueFromTokensInfo('token', pos, parId);
     const mistakenPart = this.createMistakePart(token);
     let mainCorrectionPart = '';
     let secondaryDesc = '';
     if (isCorrection) {
-      mainCorrectionPart = mistakes[0]['corrections'][0]['rules'][pos];
-      secondaryDesc = mistakes[0]['corrections'][0]['description'];
+      mainCorrectionPart = mistakes[i]['corrections'][0]['rules'][pos];
+      secondaryDesc = mistakes[i]['corrections'][0]['description'];
     }
-    const abouts: About[] = mistakes[0].getAbout();
+    const abouts: About[] = mistakes[i].getAbout();
 
     return `
-    <div id="${pos}-${parId}" data-id=${mistakes[0].getId()} class="mistake p-3 mb-5 bg-white rounded">
+    <div id="${pos}-${parId}" data-id=${mistakes[i].getId()} class="mistake p-3 mb-5 bg-white rounded">
       ${mainDesc ? `<h4>${mainDesc}</h4><hr/>` : ''}
       ${
         mistakenPart && mainCorrectionPart
@@ -582,15 +457,34 @@ export class TinyMceGui extends ProofreaderGui {
     `;
   }
 
+  getPrimaryMistakeIndex(mistakes: Mistake[]) {
+    if (mistakes.length > 1) {
+      let counter = 0;
+      for (const mistake of mistakes) {
+        if (mistake.getType() && !mistake.getType().startsWith('spelling')) {
+          return counter;
+        }
+        counter++;
+      }
+    }
+    return 0;
+  }
+
   createPopoverContent(pos, parId) {
-    if (!this.correctionExists(pos, parId)) return;
-    if (this.isTokenEqualToCorrection(pos, parId)) return;
+    const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
+    const i = this.getPrimaryMistakeIndex(mistakes);
+
+    if (!this.correctionExists(pos, parId, i)) return;
+    if (this.isTokenEqualToCorrection(pos, parId, i)) return;
+
     // Check if exists correction with same position in par
-    if (!this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]) return;
+    if (!this.getValueFromMistakeObj('corrections', pos, parId, i)[0]['rules'][pos]) return;
 
     return `
     <div id="${pos}-${parId}-pop" class="popover-body">
-      <div class="popover-text">${this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos]}</div>
+      <div id="${pos}-${parId}-fix" class="popover-text">${
+      this.getValueFromMistakeObj('corrections', pos, parId, i)[0]['rules'][pos]
+    }</div>
       <div class="popover-icons">
         <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="assets/icons/check2.svg" alt="Check">
         <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove">
@@ -605,16 +499,16 @@ export class TinyMceGui extends ProofreaderGui {
       : '';
   }
 
-  isTokenEqualToCorrection(pos, parId) {
-    const token = this.getValueFromMistakeObj('token', pos, parId);
-    const correction = this.getValueFromMistakeObj('corrections', pos, parId)[0]['rules'][pos];
+  isTokenEqualToCorrection(pos, parId, mistakeIndex) {
+    const token = this.getValueFromMistakeObj('token', pos, parId, mistakeIndex);
+    const correction = this.getValueFromMistakeObj('corrections', pos, parId, mistakeIndex)[0]['rules'][pos];
 
     if (!token || !correction) return false;
     return token === correction;
   }
 
-  correctionExists(pos, parId) {
-    return this.getValueFromMistakeObj('corrections', pos, parId).length > 0;
+  correctionExists(pos, parId, mistakeIndex) {
+    return this.getValueFromMistakeObj('corrections', pos, parId, mistakeIndex).length > 0;
   }
 
   cardWithSameMistakeIdExists(id) {

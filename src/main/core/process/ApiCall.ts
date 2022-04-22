@@ -54,6 +54,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
               const correction = new Correction();
               correction.setDescription(c.description);
               correction.setRules(c.rules);
+              correction.setAction(c.action);
               mistake.addCorrection(correction);
             });
 
