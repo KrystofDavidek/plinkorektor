@@ -1,4 +1,46 @@
 export const cssMainStylesheet = `
+    :root {
+        --font-green: #01a746;
+        --green: #2ee59d;
+        --dark-green: #13be79;
+        --shadow-green: rgba(46, 229, 157, 0.4);
+        --grey: rgba(0, 0, 0, 0.1);
+        --light-red: rgb(251, 160, 160);
+        --nav-h: 10vh;
+        --main-p: 5%;
+        --main-p-t: 5%;
+        --main-p-l-extra: 10%;
+        }
+
+    html {
+        overflow: hidden !important;
+    }
+        
+    html:hover {
+        overflow-y: auto !important;
+    }
+        
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+        
+    /* Track */
+    ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px rgb(183, 181, 181);
+        border-radius: 10px;
+    }
+        
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: var(--shadow-green);
+        border-radius: 10px;
+    }
+        
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--dark-green);
+    }
+
     @import url('https://fonts.googleapis.com/css2?family=Varta&display=swap');
 
     body { font-family: Varta; }

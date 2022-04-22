@@ -1,3 +1,4 @@
+import { cssMainStylesheet, themeCustomization } from '../../../assets/editor-styles';
 import { TinyMceGui } from './TinyMceGui';
 import { config, Proofreader, ProofreaderGui, message as msg } from '../core';
 
@@ -14,7 +15,9 @@ export default () => {
     // msg('Pre-initialization.');
     let proofreader = new Proofreader(config);
     editor.on('init', function () {
-      let gui: ProofreaderGui = new TinyMceGui(editor);
+      let gui: ProofreaderGui = new TinyMceGui(editor, () => {
+        editor.dom.addStyle(cssMainStylesheet);
+      });
       proofreader.initialize(gui);
     });
     editor.on('redo undo', function (e) {
@@ -126,6 +129,7 @@ export default () => {
       },
     });
   });
+  tinymce.DOM.addStyle(themeCustomization);
 };
 
 function fixQuotes(value: string, selection) {

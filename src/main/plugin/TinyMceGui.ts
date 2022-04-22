@@ -11,10 +11,11 @@ export class TinyMceGui extends ProofreaderGui {
   private tokensInfo: TokensInfo = {};
   private tokensToIgnore: string[] = [];
 
-  constructor(editor) {
+  constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
     this.editor = editor;
     this.processing = $(this.editor.dom.select('html')[0]).attr('data-pk-processing');
+    stylesheetLoader();
   }
 
   public setProcessing(processing: boolean) {
