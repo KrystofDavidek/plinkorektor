@@ -1,3 +1,4 @@
+import { Correction } from './../core/correction/Correction';
 import { ProofreaderGui, HtmlParagraphChunk, parseEl, ParsedHtml, config, Mistake } from '../core';
 import { About, TokensInfo } from 'src/demo/ts/models';
 import { cssMistakeBadValue } from '../../../assets/editor-styles';
@@ -248,13 +249,19 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   getValueFromTokensInfo(atr: string, pos: number, parId: number) {
-    if (this.tokensInfo[parId][pos][atr]) {
+    if (this.tokensInfo[parId] && this.tokensInfo[parId][pos] && this.tokensInfo[parId][pos][atr]) {
       return this.tokensInfo[parId][pos][atr];
+    } else {
+      return undefined;
     }
   }
 
   getValueFromMistakeObj(atr: string, pos: number, parId: number, mistakeIndex: number) {
-    if (this.tokensInfo[parId][pos].mistakes[mistakeIndex][atr]) {
+    if (
+      this.tokensInfo[parId][pos].mistakes &&
+      this.tokensInfo[parId][pos].mistakes[mistakeIndex] &&
+      this.tokensInfo[parId][pos].mistakes[mistakeIndex][atr]
+    ) {
       return this.tokensInfo[parId][pos].mistakes[mistakeIndex][atr];
     }
   }
@@ -280,14 +287,14 @@ export class TinyMceGui extends ProofreaderGui {
     }
   }
 
-  fix(chunk, token, pos, parId, isIgnore = false) {
+  fix(chunk, token, pos, parId, isIgnore = false, mistakeId = 0, correctionId = 0) {
     if (!this.tokensInfo[parId][pos]) return;
     $(`#${pos}-${parId}`).remove();
     if (!$(token).text()) {
       $(token).text(chunk.getToken(pos).text());
     }
-    // ! Has to change index to fix
-    const correction = this.getValueFromMistakeObj('corrections', pos, parId, 0)[0];
+    const corrections = this.getValueFromMistakeObj('corrections', pos, parId, mistakeId);
+    const correction = corrections?.length > 0 ? corrections[correctionId] : undefined;
     const ids = this.getAllMistakesIds(pos, parId);
     this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
@@ -324,9 +331,12 @@ export class TinyMceGui extends ProofreaderGui {
 
   createFixHandler(chunk, token, pos, parId) {
     $(document).off('click', `#${pos}-${parId}-fix`);
-    $(document).on('click', `#${pos}-${parId}-fix`, () => {
+    $(document).on('click', `#${pos}-${parId}-fix`, (e) => {
+      const [mistakeId, correctionId] = $(e.target).attr('data-mistakeId-correctionId')
+        ? $(e.target).attr('data-mistakeId-correctionId').split('-')
+        : [0, 0];
       closePopover(token);
-      this.fix(chunk, chunk.getToken(Number(pos)), pos, parId);
+      this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, false, Number(mistakeId), Number(correctionId));
       this.editor.undoManager.add();
       config.proofreader.process();
     });
@@ -334,11 +344,19 @@ export class TinyMceGui extends ProofreaderGui {
 
   onListChanged() {
     const size = $('.mistakes').children().length;
-    if (size === 0) {
-      $('#fix-all').hide();
-    } else {
-      $(`#fix-all`).show().css('display', 'block');
+    let shown = false;
+    if (size > 0) {
+      $('.mistakes')
+        .children()
+        .each((i, itm) => {
+          if ($(itm).find('.correction-part').length > 0) {
+            $(`#fix-all`).show().css('display', 'block');
+            shown = true;
+            return false;
+          }
+        });
     }
+    if (!shown) $('#fix-all').hide();
   }
 
   createIgnoreHandler(chunk, token, pos, parId) {
@@ -407,62 +425,76 @@ export class TinyMceGui extends ProofreaderGui {
 
   createCard(pos: number, parId: number) {
     const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
-    // primaryMistakeIndex;
     const i = this.getPrimaryMistakeIndex(mistakes);
+    if (!mistakes || !mistakes[i] || this.cardWithSameMistakeIdExists(mistakes[i]?.getId())) return;
+
+    let mainCorrectionPart = '';
+
     const isCorrection = this.correctionExists(pos, parId, i);
     if (isCorrection) {
-      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, i)) return;
+      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, i)) {
+        return;
+      } else {
+        mainCorrectionPart = this.getCorrectionPart(mistakes[i]['corrections'][0], pos, parId);
+      }
     }
-    if (this.cardWithSameMistakeIdExists(mistakes[i].getId())) return;
 
-    const mainDesc = mistakes[i].getDescription();
-    const token = this.getValueFromTokensInfo('token', pos, parId);
-    const mistakenPart = this.createMistakePart(token);
-    let mainCorrectionPart = '';
-    let secondaryDesc = '';
-    if (isCorrection) {
-      mainCorrectionPart = mistakes[i]['corrections'][0]['rules'][pos];
-      secondaryDesc = mistakes[i]['corrections'][0]['description'];
-    }
+    const mistakeDescription = `<span>${mistakes[i].getDescription()}</span>`;
     const abouts: About[] = mistakes[i].getAbout();
 
     return `
-    <div id="${pos}-${parId}" data-id=${mistakes[i].getId()} class="mistake p-3 mb-5 bg-white rounded">
-      ${mainDesc ? `<h4>${mainDesc}</h4><hr/>` : ''}
-      ${
-        mistakenPart && mainCorrectionPart
-          ? `${mistakenPart}
-          <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
-          <span class="correct-text">${mainCorrectionPart}</span>`
-          : `${secondaryDesc ? `<p>${secondaryDesc}</p>` : ''}`
-      }
-      <div class=action-buttons>
-        ${
-          isCorrection
-            ? `<button id="${pos}-${parId}-fix" type="button" class="button fix-button">Opravit</button>`
-            : ''
-        } 
-        <button id="${pos}-${parId}-ignore" type="button" class="button">Neopravovat</button>
+    <div id="${pos}-${parId}" data-id=${mistakes[i].getId()} class="mistake bg-white rounded">
+      <div class="main-content-container">
+        <img id="${pos}-${parId}-ignore" class="card-cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat"  src="assets/icons/x.svg" alt="Remove">
+        ${mainCorrectionPart ? mainCorrectionPart : ''}
+        <div class="desc-container">
+          <div class="main-mistake-desc">
+          ${mistakeDescription ? mistakeDescription : ''}
+          </div>
+          <button type="button" data-toggle="collapse" data-target="#collapse${pos}-${parId}" aria-expanded="false"  aria-controls="collapse${pos}-${parId}" class="btn btn-link show-more">Zobrazit více</button>
+        </div>
       </div>
-      <button type="button" data-toggle="collapse" data-target="#collapse${pos}-${parId}" aria-expanded="false"  aria-controls="collapse${pos}-${parId}" class="btn btn-link show-more">Zobrazit více</button>
       <div class="collapse" id="collapse${pos}-${parId}">
         <div class="card card-body">
-           ${
-             abouts.length > 0
-               ? `<p><span class="correct-text">${abouts[0].label}: </span><a href="${abouts[0].url}">${abouts[0].url}</a></p>`
-               : ''
-           }
+          ${
+            abouts.length > 0
+              ? `<p><span class="correct-text">${abouts[0].label}: </span><a href="${abouts[0].url}">${abouts[0].url}</a></p>`
+              : ''
+          }
         </div>
       </div>
     </div>
     `;
   }
 
+  getCorrectionPart(correction: Correction, pos: number, parId: number): string {
+    if (!correction.getAction()) return '';
+    let correctionPart = '';
+    const value = correction.getAction().value;
+
+    switch (correction.getAction().type) {
+      case 'description':
+        correctionPart = `<span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix">${value}</span>`;
+        break;
+      case 'remove':
+        correctionPart = `<span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="mistake-text with-tooltip to-fix-strike"><strike>${value}</strike></span>`;
+        break;
+      case 'change':
+        correctionPart = `
+        <span class="mistake-text"><strike>${value[0]}</strike></span>
+        <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
+        <span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix">${value[1]}</span>
+        `;
+        break;
+    }
+    return `<div class="correction-part">${correctionPart}</div><hr/>`;
+  }
+
   getPrimaryMistakeIndex(mistakes: Mistake[]) {
-    if (mistakes.length > 1) {
+    if (mistakes?.length > 1) {
       let counter = 0;
       for (const mistake of mistakes) {
-        if (mistake.getType() && !mistake.getType().startsWith('spelling')) {
+        if (mistake.getType() && !mistake.getType().startsWith('capitals')) {
           return counter;
         }
         counter++;
@@ -471,27 +503,70 @@ export class TinyMceGui extends ProofreaderGui {
     return 0;
   }
 
+  sortMistakes(mistakes: Mistake[]) {
+    if (mistakes?.length > 1) {
+      for (const mistake of mistakes) {
+        if (mistake.getType() && !mistake.getType().startsWith('capitals')) {
+          const fromIndex = mistakes.indexOf(mistake);
+          const primaryMistake = mistakes.splice(fromIndex, 1)[0];
+          mistakes.splice(0, 0, primaryMistake);
+          return mistakes;
+        }
+      }
+    }
+    return mistakes;
+  }
+
   createPopoverContent(pos, parId) {
-    const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
-    const i = this.getPrimaryMistakeIndex(mistakes);
+    let mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
+    if (!mistakes) return;
+    mistakes = this.sortMistakes(mistakes);
+    const maxRow = 5;
+    let counter = 0;
+    const rows = { htmlParts: [], corrections: [] };
 
-    if (!this.correctionExists(pos, parId, i)) return;
-    if (this.isTokenEqualToCorrection(pos, parId, i)) return;
+    console.log(mistakes);
 
-    // Check if exists correction with same position in par
-    if (!this.getValueFromMistakeObj('corrections', pos, parId, i)[0]['rules'][pos]) return;
+    for (const mistakeId of mistakes.keys()) {
+      if (!this.correctionExists(pos, parId, mistakeId)) break;
+      if (this.isTokenEqualToCorrection(pos, parId, mistakeId)) break;
 
+      correctionsLoop: for (const correctionId of mistakes[mistakeId]['corrections'].keys()) {
+        if (counter === maxRow - 1) break;
+        // Check if exists correction with same position in par
+        if (!this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId]['rules'][pos])
+          continue correctionsLoop;
+        const correction = this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId]['rules'][
+          pos
+        ];
+        if (rows.corrections.includes(correction)) {
+          continue correctionsLoop;
+        }
+        rows.corrections.push(correction);
+        rows.htmlParts.push(this.createPopRow(pos, parId, correction, mistakeId, correctionId));
+        counter++;
+      }
+    }
+    // <img id="${pos}-${parId}-ignore" class="cancel-popover icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove">
     return `
     <div id="${pos}-${parId}-pop" class="popover-body">
-      <div id="${pos}-${parId}-fix" class="popover-text">${
-      this.getValueFromMistakeObj('corrections', pos, parId, i)[0]['rules'][pos]
-    }</div>
-      <div class="popover-icons">
-        <img id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="assets/icons/check2.svg" alt="Check">
-        <img id="${pos}-${parId}-ignore" class="cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove">
-      </div>
+      ${rows.htmlParts.join('')}
     </div>
   `;
+  }
+
+  createPopRow(pos, parId, correction, mistakeId, correctionId) {
+    // idTag has to be everywhere because of click handler
+    const idTag = mistakeId + '-' + correctionId;
+    return `
+      <div data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="popover-row">
+        <div data-mistakeId-correctionId="${idTag}" class="popover-text">
+        ${correction}
+        </div>
+        <div class="popover-icons" data-mistakeId-correctionId="${idTag}">
+          <img data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" class="check icon" data-toggle="tooltip" data-placement="top" title="Opravit" src="assets/icons/check2.svg" alt="Check">
+        </div>
+      </div>`;
   }
 
   createMistakePart(stringToken: string) {
@@ -509,7 +584,7 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   correctionExists(pos, parId, mistakeIndex) {
-    return this.getValueFromMistakeObj('corrections', pos, parId, mistakeIndex).length > 0;
+    return this.getValueFromMistakeObj('corrections', pos, parId, mistakeIndex)?.length > 0;
   }
 
   cardWithSameMistakeIdExists(id) {

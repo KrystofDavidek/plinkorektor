@@ -6,8 +6,8 @@
   --grey: rgba(0, 0, 0, 0.1);
   --light-red: rgb(251, 160, 160);
   --nav-h: 10vh;
-  --main-p: 5%;
-  --main-p-t: 5%;
+  --main-p: 2.5%;
+  --main-p-t: 2.5%;
   --main-p-l-extra: 10%;
 }
 
@@ -17,6 +17,10 @@ body {
   width: 100vw;
   margin: 0 !important;
   overflow: hidden;
+}
+
+footer {
+  height: 5%;
 }
 
 ::-webkit-scrollbar {
@@ -64,6 +68,7 @@ body {
 
 .suggestions-header {
   margin-left: 1rem;
+  margin-bottom: 1rem;
   margin-top: -8px;
   display: flex;
   align-items: center;
@@ -93,11 +98,11 @@ body {
 }
 
 a {
-  color: black !important;
+  color: var(--font-green) !important;
 }
 
 a:hover {
-  color: var(--font-green) !important;
+  color: var(--dark-green) !important;
 }
 
 .tinymce {
@@ -106,7 +111,7 @@ a:hover {
 
 .navbar {
   padding: 1rem 2rem;
-  box-shadow: 0px 5px 40px var(--shadow-green);
+  box-shadow: 0px 1px 20px var(--shadow-green);
   height: var(--nav-h) !important;
   position: sticky !important;
   top: 0 !important;
@@ -186,15 +191,92 @@ a:hover {
 }
 
 .mistakes {
-  margin-top: 2rem;
-  max-height: 55vh;
+  max-height: 70vh;
   position: relative;
   overflow: hidden;
   width: 100%;
 }
 
 .mistakes:hover {
-  overflow-y: auto;
+  overflow-y: overlay;
+}
+
+.btn-link {
+  padding: 0 !important;
+}
+
+.to-fix {
+  cursor: pointer;
+  color: white;
+  background-color: var(--dark-green);
+  padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+  border-radius: 5px;
+}
+
+.to-fix:hover {
+  background-color: var(--green);
+}
+
+.to-fix-strike {
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.to-fix-strike:hover {
+  cursor: pointer;
+  background-color: var(--green);
+  padding: 0rem 0.2rem 0rem 0.2rem;
+  border-radius: 5px;
+}
+
+.correction-part {
+  font-size: larger;
+}
+
+.with-ignore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.with-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.with-tooltip .tooltiptext {
+  visibility: visible;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 99999;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.with-tooltip .tooltiptext::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 100;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.with-tooltip:hover .tooltiptext {
+  z-index: 100;
+  visibility: visible;
+  opacity: 1;
 }
 
 del,
@@ -206,8 +288,8 @@ strike {
     left top,
     left bottom,
     from(transparent),
-    color-stop(0.63em, transparent),
-    color-stop(0.63em, #ff0000),
+    color-stop(0.6em, transparent),
+    color-stop(0.6em, #ff0000),
     color-stop(0.7em, #ff0000),
     color-stop(0.7em, transparent),
     to(transparent)
@@ -215,8 +297,8 @@ strike {
   background-image: -webkit-linear-gradient(
     top,
     transparent 0em,
-    transparent 0.63em,
-    #ff0000 0.63em,
+    transparent 0.6em,
+    #ff0000 0.6em,
     #ff0000 0.7em,
     transparent 0.7em,
     transparent 1.4em
@@ -224,8 +306,8 @@ strike {
   background-image: -o-linear-gradient(
     top,
     transparent 0em,
-    transparent 0.63em,
-    #ff0000 0.63em,
+    transparent 0.6em,
+    #ff0000 0.6em,
     #ff0000 0.7em,
     transparent 0.7em,
     transparent 1.4em
@@ -233,8 +315,8 @@ strike {
   background-image: linear-gradient(
     to bottom,
     transparent 0em,
-    transparent 0.63em,
-    #ff0000 0.63em,
+    transparent 0.6em,
+    #ff0000 0.6em,
     #ff0000 0.7em,
     transparent 0.7em,
     transparent 1.4em
@@ -245,8 +327,8 @@ strike {
 }
 
 hr {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   border: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -257,11 +339,11 @@ hr {
 }
 
 .show-more {
-  color: black;
+  color: var(--font-green);
 }
 
 .show-more:hover {
-  color: var(--font-green);
+  color: var(--dark-green);
 }
 
 .button {
@@ -299,11 +381,19 @@ hr {
   margin: 2rem 0 2rem 0;
 }
 
+.desc-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
 .mistake {
   margin: 1rem;
   box-shadow: 0px 8px 15px var(--grey);
   background-color: white;
   transition: all 0.3s ease 0s;
+  position: relative;
 }
 
 .selected {
@@ -324,9 +414,20 @@ hr {
 
 .popover-body {
   display: flex;
+  flex-direction: column;
+}
+
+.popover-row {
+  display: flex;
   justify-content: space-between !important;
   align-items: center;
-  padding: 0.3rem !important;
+  padding: 0.5rem !important;
+  transition: 0.2s ease-in-out;
+}
+
+.popover-row:hover {
+  background-color: #efefef;
+  cursor: pointer;
 }
 
 .popover-icons {
@@ -346,6 +447,14 @@ hr {
   margin: 0 0.2rem !important;
 }
 
+.cancel-popover {
+  width: 20px !important;
+  height: 20px !important;
+  position: absolute !important;
+  top: 1px;
+  left: 80px;
+}
+
 .icon:hover {
   background-color: var(--grey);
   border-radius: 100%;
@@ -356,9 +465,26 @@ hr {
   padding-right: 1rem !important;
 }
 
-.popover-text:hover {
-  color: var(--font-green);
-  cursor: pointer;
+.card-cancel {
+  width: 30px !important;
+  height: 30px !important;
+  position: absolute;
+  top: 15px;
+  left: 90%;
+}
+
+.card {
+  border: none;
+}
+
+.card-body {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.main-content-container {
+  padding: 1rem;
+  padding-right: 2rem;
 }
 
 pre {
@@ -419,5 +545,11 @@ pre {
   .main-container {
     padding-right: var(--main-p-l-extra) !important;
     padding-left: var(--main-p-l-extra) !important;
+  }
+}
+
+@media screen and (min-width: 1600px) {
+  .main-content-container {
+    padding-right: 4rem !important;
   }
 }

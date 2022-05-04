@@ -1,4 +1,3 @@
-import { closePopover } from './../../plugin/utils';
 import * as $ from 'jquery';
 import { decode } from 'html-entities';
 // import { message as msg } from "../utilities/Message";
