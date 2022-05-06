@@ -19,6 +19,7 @@ export type MistakeCoords = {
 };
 export abstract class ProofreaderGui {
   protected processing;
+  public wasAPICalled;
 
   abstract isProcessing(): boolean;
   abstract setProcessing(processing: boolean): void;
@@ -94,9 +95,9 @@ export abstract class ProofreaderGui {
     sameMistakes.forEach((coord: MistakeCoords) => {
       config.mistakes.removeMistake(coord.chunk.getLastHash(), coord.mistakeId);
     });
-    allChunks.forEach((currentChunk: TextChunk) => {
-      currentChunk.highlightTokens();
-    });
+    // allChunks.forEach((currentChunk: TextChunk) => {
+    //   currentChunk.highlightTokens();
+    // });
   }
 
   protected fixAll(chunk: TextChunk, mistakeId: string, correctionRules) {

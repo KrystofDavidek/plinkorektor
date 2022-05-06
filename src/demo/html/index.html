@@ -19,7 +19,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-sm navbar-light bg-white rounded justify-content-between">
-      <a class="navbar-brand" href="/src/demo/html/index.html">Opravidlo</a>
+      <a class="navbar-brand active" href="/src/demo/html/index.html">Opravidlo</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -33,9 +33,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav mobile-nav gap-1 ml-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/src/demo/html/index.html">Editor<span class="sr-only">(current)</span></a>
-          </li>
           <li class="nav-item">
             <a class="nav-link" href="/src/demo/html/help.html">Nápověda</a>
           </li>
@@ -48,6 +45,7 @@
         </ul>
       </div>
     </nav>
+
     <main class="container-fluid main-container">
       <div class="row content-container">
         <div class="col-12 col-md-7 editor-container">
@@ -55,8 +53,16 @@
             <textarea class="tinymce"><p></p></textarea>
           </div>
           <div class="editor-buttons">
-            <button id="copy" type="button" class="button editor-button">Kopírovat</button>
-            <button type="button" class="button editor-button" data-toggle="modal" data-target="#deleteModal">
+            <button id="process" type="button" class="button to-disable editor-button button-green">
+              Spustit korektor
+            </button>
+            <button id="copy" type="button" class="button to-disable editor-button">Kopírovat</button>
+            <button
+              type="button"
+              class="button to-disable editor-button"
+              data-toggle="modal"
+              data-target="#deleteModal"
+            >
               Vymazat obsah
             </button>
           </div>
@@ -88,6 +94,7 @@
         <div class="suggestions col-12 col-md-5">
           <div class="suggestions-header">
             <h2>Návrhy oprav</h2>
+            <div class="mistakes-counter"></div>
             <button id="fix-all" type="button" class="button fix-all-button">Opravit vše</button>
           </div>
           <div class="mistakes"></div>

@@ -5,7 +5,7 @@ import { config } from '../Config';
 
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
-import { processRegexHighlight } from './RegexProcess';
+import { isMistakeToIgnore, processRegexHighlight } from './RegexProcess';
 import { TextChunk } from '../correction/TextChunk';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
@@ -57,8 +57,9 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
               correction.setAction(c.action);
               mistake.addCorrection(correction);
             });
-
-            config.mistakes.addMistake(hash, mistake);
+            if (!isMistakeToIgnore(mistake)) {
+              config.mistakes.addMistake(hash, mistake);
+            }
           });
           chunk.highlightTokens();
         }

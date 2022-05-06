@@ -5,6 +5,7 @@
   --shadow-green: rgba(46, 229, 157, 0.4);
   --grey: rgba(0, 0, 0, 0.1);
   --light-red: rgb(251, 160, 160);
+  --red: #f61d1d;
   --nav-h: 10vh;
   --main-p: 2.5%;
   --main-p-t: 2.5%;
@@ -72,7 +73,7 @@ footer {
   margin-top: -8px;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .navbar-brand {
@@ -87,14 +88,21 @@ footer {
   filter: invert(40%) sepia(94%) saturate(1696%) hue-rotate(119deg) brightness(91%) contrast(99%);
 }
 
-.navbar-nav li.active > a {
-  transition: all 0.3s ease 0s;
+a.active {
   color: var(--font-green) !important;
+  border-bottom: 2px solid var(--font-green);
+  padding-bottom: 0.25rem !important;
 }
 
 .navbar-nav li {
   transition: all 0.3s ease 0s;
   font-size: 1.2rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.navbar-nav li > a {
+  padding: 0 !important;
 }
 
 a {
@@ -124,6 +132,7 @@ a:hover {
 }
 
 .main-container {
+  padding: 2rem !important;
   /* opera */
   height: -o-calc(100vh - var(--nav-h));
   /* google, safari */
@@ -177,12 +186,12 @@ a:hover {
 }
 
 .button-green {
-  background: var(--green) !important;
+  background: var(--dark-green) !important;
   color: white !important;
 }
 
 .button-green:hover {
-  background: var(--dark-green) !important;
+  background: var(--green) !important;
   box-shadow: 0px 15px 20px var(--shadow-green) !important;
 }
 
@@ -193,12 +202,8 @@ a:hover {
 .mistakes {
   max-height: 70vh;
   position: relative;
-  overflow: hidden;
-  width: 100%;
-}
-
-.mistakes:hover {
   overflow-y: overlay;
+  width: 100%;
 }
 
 .btn-link {
@@ -231,6 +236,12 @@ a:hover {
 
 .correction-part {
   font-size: larger;
+}
+
+.modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .with-ignore {
@@ -331,6 +342,8 @@ hr {
   margin-bottom: 0.5rem;
   border: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .modal-footer {
@@ -361,6 +374,26 @@ hr {
   transition: all 0.3s ease 0s;
   cursor: pointer;
   outline: none;
+}
+
+.disable {
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: var(--grey) !important;
+  color: black !important;
+}
+
+.mistakes-counter {
+  display: none;
+  color: white;
+  background-color: var(--dark-green);
+  padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+  border-radius: 5px;
+}
+
+.mistake-quotes {
+  color: var(--red);
+  font-weight: 500;
 }
 
 .fix-button {
@@ -404,6 +437,7 @@ hr {
 .popover {
   box-shadow: 0px 10px 20px var(--shadow-green) !important;
   border: none !important;
+  border-radius: 10px !important;
   margin: 0;
   background: white !important;
 }
@@ -427,6 +461,7 @@ hr {
 
 .popover-row:hover {
   background-color: #efefef;
+  border-radius: 10px !important;
   cursor: pointer;
 }
 
@@ -519,6 +554,10 @@ pre {
   .navbar {
     height: fit-content !important;
   }
+
+  .editor-container {
+    margin-bottom: 8rem !important;
+  }
 }
 
 @media screen and (max-width: 760px) {
@@ -529,6 +568,10 @@ pre {
 
   .editor-container {
     margin-bottom: 3rem;
+  }
+
+  .navbar-nav li {
+    margin: 0;
   }
 }
 

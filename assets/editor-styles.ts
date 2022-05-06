@@ -10,15 +10,13 @@ export const cssMainStylesheet = `
         --main-p: 5%;
         --main-p-t: 5%;
         --main-p-l-extra: 10%;
+        --loader-grey: #868686;
         }
 
-    html {
-        overflow: hidden !important;
-    }
-        
-    html:hover {
-        overflow-y: auto !important;
-    }
+        .disable-overflow {
+             overflow: hidden !important;
+        }
+
         
     ::-webkit-scrollbar {
         width: 10px;
@@ -74,33 +72,45 @@ export const cssMainStylesheet = `
         opacity : 1;
     }
 
-
-    html[data-pk-processing]::before {
-        top: -15px;
-        font-size: 40px;
-        display: block;
-        content: '●';
-        position: fixed;
-        right: 0;
-        color: rgb(192, 57, 43);
-        animation-name: processing;
-        animation-duration: 0.7s;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
+    .disable-editor {
+            filter: blur(1px);
+             -webkit-filter: blur(1px);
+            cursor: not-allowed;
+            pointer-events: none;     
     }
 
-    html[data-pk-processing-finished]::before {
-        top: -15px;
-        font-size: 40px;
-        content: '●';
-        position: fixed;
-        right: 0;
-        color: #92d384;
-        display: block;
-        animation: fade-out 5s;
-  	    opacity: 0;
-
+    .loader-container {
+        position: absolute;
+        height: 100%;
+        width: 100%;
     }
+
+    .loader {
+     position: absolute;
+    top: 30%;
+    left: 40%;
+    border: 16px solid var(--loader-grey);
+    border-top: 16px solid var(--green);
+    border-radius: 50%;
+    width: 8rem;
+    height: 8rem;
+    animation: spin 2s linear infinite;
+}
+
+@media screen and (max-width: 500px) {
+  .loader {
+    width: 4rem;
+    height: 4rem;
+}
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+   
 
     .pk-token-correction {
         background-image: linear-gradient(120deg, rgba(192, 57, 43, 1) 0%, rgba(192, 57, 43, 1) 100%);
@@ -116,18 +126,16 @@ export const cssMainStylesheet = `
         border-radius: 0.2em;
     }
 
-    .pk-token-correction-fixed {
-        background-image: linear-gradient(120deg, rgba(76, 206, 76, 1) 0%, rgba(76, 206, 76, 1) 100%);
-        background-repeat: no-repeat;
-        background-size: 100% 0.25em;
-        background-position: 0 95%;
-        transition: background-size 0.25s ease-in;
+     @keyframes fixed {
+         from {  background-color: rgba(76, 206, 76, 1); }
+        to {   background-color: white;}
     }
 
-    .pk-token-correction-fixed:hover, .pk-token-correction-fixed.hovered {
-        background-image: linear-gradient(120deg, rgba(76, 206, 76, .3) 0%, rgba(76, 206, 76, .3) 100%);
-        background-size: 100% 100%;
+
+    .pk-token-correction-fixed {
         border-radius: 0.2em;
+        animation-name: fixed;
+        animation-duration: 4s;
     }
 `;
 

@@ -16,25 +16,59 @@ export class TinyMceGui extends ProofreaderGui {
     super();
     this.editor = editor;
     this.processing = $(this.editor.dom.select('html')[0]).attr('data-pk-processing');
+    $(document).on('click', '#process', () => {
+      config.proofreader.process();
+      if (!this.wasAPICalled) this.showToast();
+    });
+    // setTimeout(() => {
+    //   config.proofreader.process();
+    // }, 500);
     stylesheetLoader();
   }
 
+  public showToast() {}
+
   public setProcessing(processing: boolean) {
+    const $editor = $(this.editor.dom.select('html')[0]);
     if (processing) {
       this.resetMistakesCol();
       // msg('Processing indicator displayed.');
-      $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing-finished');
-      $(this.editor.dom.select('html')[0]).attr('data-pk-processing', 'true');
-      $('.tox-tbtn').prop('disabled', true);
-      $('.tox-tbtn').removeClass('tox-tbtn--active');
+      $editor.removeAttr('data-pk-processing-finished');
+      $editor.attr('data-pk-processing', 'true');
+      $editor.animate({ scrollTop: 0 }, 500);
+      $editor.addClass('disable-overflow');
+      if ($editor.children('.loader-container').length === 0) {
+        $('<div class="loader-container"><div class="loader"></div></div>').hide().prependTo($editor).fadeIn(500);
+      }
+      $editor.children('.mce-content-body').addClass('disable-editor');
+      this.editor.setMode('readonly');
+      this.setDisabling(true);
     } else {
-      $(this.editor.dom.select('html')[0]).removeAttr('data-pk-processing');
-      $(this.editor.dom.select('html')[0]).attr('data-pk-processing-finished', 'true');
-      $('.tox-tbtn').prop('disabled', false);
-      $('.tox-tbtn').addClass('tox-tbtn--active');
-      // msg('Processing indicator hidden.');
+      $editor.children('.loader-container').fadeOut(500, function () {
+        $(this).remove();
+      });
+      $editor.children('.mce-content-body').removeClass('disable-editor');
+      $editor.removeAttr('data-pk-processing');
+      $editor.attr('data-pk-processing-finished', 'true');
+      $editor.removeClass('disable-overflow');
+      this.editor.setMode('design');
+      this.setDisabling(false);
     }
     this.processing = processing;
+  }
+
+  private setDisabling(isDisable: boolean) {
+    if (isDisable) {
+      $('.to-disable').addClass('disable');
+      $('.mistakes').hide(500);
+      $('.tox-tbtn').removeClass('tox-tbtn--active');
+    } else {
+      $('.to-disable').removeClass('disable');
+      $('.mistakes').show(500);
+      $('.tox-tbtn').addClass('tox-tbtn--active');
+    }
+    $('.tox-tbtn').prop('disabled', isDisable);
+    $('#process').prop('disabled', isDisable);
   }
 
   public setProcessingChunk(chunk: HtmlParagraphChunk) {
@@ -293,8 +327,11 @@ export class TinyMceGui extends ProofreaderGui {
     if (!$(token).text()) {
       $(token).text(chunk.getToken(pos).text());
     }
-    const corrections = this.getValueFromMistakeObj('corrections', pos, parId, mistakeId);
+
+    const mistakes = this.sortMistakes(this.getValueFromTokensInfo('mistakes', pos, parId));
+    const corrections = mistakes[mistakeId].corrections;
     const correction = corrections?.length > 0 ? corrections[correctionId] : undefined;
+
     const ids = this.getAllMistakesIds(pos, parId);
     this.tokensInfo[parId] = _.omit(this.tokensInfo[parId], pos);
     $(token).removeClass('pk-token-correction');
@@ -335,10 +372,11 @@ export class TinyMceGui extends ProofreaderGui {
       const [mistakeId, correctionId] = $(e.target).attr('data-mistakeId-correctionId')
         ? $(e.target).attr('data-mistakeId-correctionId').split('-')
         : [0, 0];
+
       closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, false, Number(mistakeId), Number(correctionId));
       this.editor.undoManager.add();
-      config.proofreader.process();
+      // config.proofreader.process();
     });
   }
 
@@ -346,15 +384,18 @@ export class TinyMceGui extends ProofreaderGui {
     const size = $('.mistakes').children().length;
     let shown = false;
     if (size > 0) {
+      $('.mistakes-counter').show().text(size);
       $('.mistakes')
         .children()
         .each((i, itm) => {
           if ($(itm).find('.correction-part').length > 0) {
-            $(`#fix-all`).show().css('display', 'block');
+            $(`#fix-all`).show(100).css('display', 'block');
             shown = true;
             return false;
           }
         });
+    } else {
+      $('.mistakes-counter').hide(500);
     }
     if (!shown) $('#fix-all').hide();
   }
@@ -382,7 +423,7 @@ export class TinyMceGui extends ProofreaderGui {
       }
       this.onListChanged();
       this.editor.undoManager.add();
-      config.proofreader.process();
+      // config.proofreader.process();
     });
   }
 
@@ -424,26 +465,31 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createCard(pos: number, parId: number) {
-    const mistakes: Mistake[] = this.getValueFromTokensInfo('mistakes', pos, parId);
-    const i = this.getPrimaryMistakeIndex(mistakes);
-    if (!mistakes || !mistakes[i] || this.cardWithSameMistakeIdExists(mistakes[i]?.getId())) return;
-
+    const mistakes = this.sortMistakes(this.getValueFromTokensInfo('mistakes', pos, parId));
+    if (!mistakes || !mistakes[0] || this.cardWithSameMistakeIdExists(mistakes[0]?.getId())) return;
     let mainCorrectionPart = '';
-
-    const isCorrection = this.correctionExists(pos, parId, i);
+    const isCorrection = this.correctionExists(pos, parId, 0);
     if (isCorrection) {
-      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, i)) {
+      if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, 0)) {
         return;
       } else {
-        mainCorrectionPart = this.getCorrectionPart(mistakes[i]['corrections'][0], pos, parId);
+        mainCorrectionPart = this.getCorrectionPart(
+          pos,
+          parId,
+          this.getValueFromMistakeObj('corrections', pos, parId, 0)[0],
+          0,
+          0,
+          true,
+        );
       }
     }
 
-    const mistakeDescription = `<span>${mistakes[i].getDescription()}</span>`;
-    const abouts: About[] = mistakes[i].getAbout();
+    const mistakeDescription = this.formatDescription(mistakes[0].getDescription());
+    const abouts: About[] = mistakes[0].getAbout();
+    const showDetails = mistakes.length > 1 || abouts.length > 0 || mistakes[0].corrections.length > 1;
 
     return `
-    <div id="${pos}-${parId}" data-id=${mistakes[i].getId()} class="mistake bg-white rounded">
+    <div id="${pos}-${parId}" data-id=${mistakes[0].getId()} class="mistake bg-white rounded">
       <div class="main-content-container">
         <img id="${pos}-${parId}-ignore" class="card-cancel icon" data-toggle="tooltip" data-placement="top" title="Neopravovat"  src="assets/icons/x.svg" alt="Remove">
         ${mainCorrectionPart ? mainCorrectionPart : ''}
@@ -451,14 +497,19 @@ export class TinyMceGui extends ProofreaderGui {
           <div class="main-mistake-desc">
           ${mistakeDescription ? mistakeDescription : ''}
           </div>
-          <button type="button" data-toggle="collapse" data-target="#collapse${pos}-${parId}" aria-expanded="false"  aria-controls="collapse${pos}-${parId}" class="btn btn-link show-more">Zobrazit více</button>
+          ${
+            showDetails
+              ? `<button type="button" data-toggle="modal" data-target="#modal${pos}-${parId}" class="btn btn-link show-more">Zobrazit více</button>
+              ${this.createModal(mistakes, pos, parId)}`
+              : ''
+          }
         </div>
       </div>
       <div class="collapse" id="collapse${pos}-${parId}">
         <div class="card card-body">
           ${
             abouts.length > 0
-              ? `<p><span class="correct-text">${abouts[0].label}: </span><a href="${abouts[0].url}">${abouts[0].url}</a></p>`
+              ? `<p><span class="correct-text">${abouts[0].label}: </span><a href="${abouts[0].url}" target="_blank">${abouts[0].url}</a></p>`
               : ''
           }
         </div>
@@ -467,27 +518,49 @@ export class TinyMceGui extends ProofreaderGui {
     `;
   }
 
-  getCorrectionPart(correction: Correction, pos: number, parId: number): string {
-    if (!correction.getAction()) return '';
-    let correctionPart = '';
-    const value = correction.getAction().value;
+  isToStrike(string) {
+    if (string.length > 1) return true;
+    return /^[\da-z]+$/i.test(string);
+  }
 
-    switch (correction.getAction().type) {
-      case 'description':
-        correctionPart = `<span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix">${value}</span>`;
-        break;
-      case 'remove':
-        correctionPart = `<span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="mistake-text with-tooltip to-fix-strike"><strike>${value}</strike></span>`;
-        break;
-      case 'change':
-        correctionPart = `
-        <span class="mistake-text"><strike>${value[0]}</strike></span>
+  getCorrectionPart(pos, parId, correction: Correction, mistakeId, correctionId, isLine = true): string {
+    if (!correction.getAction()) return '';
+    const idTag = mistakeId + '-' + correctionId;
+    let value = correction.getAction().value;
+    let correctionPart = '';
+
+    if (correction.getAction().type === 'change' && this.isToStrike(value[0])) {
+      correctionPart = `
+        <span><strike>${value[0]}</strike></span>
         <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
-        <span id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix">${value[1]}</span>
+        <span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value[1]}</span>
         `;
-        break;
+    } else if (correction.getAction().type === 'remove') {
+      correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="with-tooltip to-fix-strike" data-dismiss="modal"><strike>${value}</strike></span>`;
+    } else {
+      if (Array.isArray(value)) {
+        value = value[1];
+      }
+      correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value}</span>`;
     }
-    return `<div class="correction-part">${correctionPart}</div><hr/>`;
+    // switch (correction.getAction().type) {
+    //   case 'description':
+    //     correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value}</span>`;
+    //     break;
+    //   case 'remove':
+    //     correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="with-tooltip to-fix-strike" data-dismiss="modal"><strike>${value}</strike></span>`;
+    //     break;
+    //   case 'change':
+    //     correctionPart = `
+    //     <span><strike>${value[0]}</strike></span>
+    //     <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
+    //     <span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value[1]}</span>
+    //     `;
+    //     break;
+    // }
+    return isLine
+      ? `<div class="correction-part">${correctionPart}</div><hr/>`
+      : `<div class="correction-part">${correctionPart}</div>`;
   }
 
   getPrimaryMistakeIndex(mistakes: Mistake[]) {
@@ -506,15 +579,128 @@ export class TinyMceGui extends ProofreaderGui {
   sortMistakes(mistakes: Mistake[]) {
     if (mistakes?.length > 1) {
       for (const mistake of mistakes) {
-        if (mistake.getType() && !mistake.getType().startsWith('capitals')) {
-          const fromIndex = mistakes.indexOf(mistake);
-          const primaryMistake = mistakes.splice(fromIndex, 1)[0];
-          mistakes.splice(0, 0, primaryMistake);
-          return mistakes;
+        const mistakeType = mistake.getType();
+        if (mistakeType) {
+          if (mistakeType.startsWith('commas')) {
+            return this.putElementToStart(mistakes, mistake);
+          } else if (mistakeType.startsWith('capitals')) {
+            return this.putElementToEnd(mistakes, mistake);
+          }
         }
       }
     }
     return mistakes;
+  }
+
+  putElementToStart(array, element) {
+    const fromIndex = array.indexOf(element);
+    const selectedElement = array.splice(fromIndex, 1)[0];
+    array.splice(0, 0, selectedElement);
+    return array;
+  }
+
+  putElementToEnd(array, element) {
+    array.push(array.splice(array.indexOf(element), 1)[0]);
+    return array;
+  }
+
+  createAboutLinks(mistake: Mistake) {
+    const htmlLinks = mistake
+      .getAbout()
+      .map(
+        (about) =>
+          ` <p>
+              <span class="correct-text">${about.label}: </span>
+              <a href="${about.url}" target="_blank">${about.url}</a>
+              </p>`,
+      )
+      .join('');
+    return `<div>${htmlLinks}<hr/></div>`;
+  }
+
+  createModal(mistakes: Mistake[], pos, parId) {
+    const rows = { htmlParts: [] };
+
+    for (const mistakeId of mistakes.keys()) {
+      let correctionsCounter = 0;
+      let isLastCorrection = false;
+      if (!this.correctionExists(pos, parId, mistakeId)) {
+        if (mistakes[mistakeId].getAbout().length > 0) {
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span>`);
+          rows.htmlParts.push(this.createAboutLinks(mistakes[mistakeId]));
+        } else {
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span><hr/>`);
+        }
+      }
+
+      correctionsLoop: for (const correctionId of mistakes[mistakeId]['corrections'].keys()) {
+        // Check if exists correction with same position in par
+        if (!this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId]['rules'][pos])
+          continue correctionsLoop;
+
+        if (correctionsCounter === 0)
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span>`);
+        if (correctionsCounter + 1 === mistakes[mistakeId]['corrections'].length) isLastCorrection = true;
+        if (this.isTokenEqualToCorrection(pos, parId, mistakeId)) continue correctionsLoop;
+        if (isLastCorrection && mistakes[mistakeId].getAbout().length > 0) {
+          rows.htmlParts.push(
+            this.getCorrectionPart(
+              pos,
+              parId,
+              this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId],
+              mistakeId,
+              correctionId,
+              false,
+            ),
+          );
+          rows.htmlParts.push(this.createAboutLinks(mistakes[mistakeId]));
+        } else {
+          rows.htmlParts.push(
+            this.getCorrectionPart(
+              pos,
+              parId,
+              this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId],
+              mistakeId,
+              correctionId,
+              true,
+            ),
+          );
+        }
+
+        correctionsCounter++;
+      }
+    }
+
+    return `
+          <div
+            class="modal"
+            id="modal${pos}-${parId}"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="Details Modal"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="Details Modal">Detailní informace</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                 <div class="modal-body modal-details">
+                    ${rows.htmlParts.join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+    `;
+  }
+
+  formatDescription(description: string) {
+    let newDesc = description.replace(/„/g, '<span class="mistake-quotes">');
+    newDesc = newDesc.replace(/“/g, '</span>');
+    return newDesc;
   }
 
   createPopoverContent(pos, parId) {
@@ -524,8 +710,6 @@ export class TinyMceGui extends ProofreaderGui {
     const maxRow = 5;
     let counter = 0;
     const rows = { htmlParts: [], corrections: [] };
-
-    console.log(mistakes);
 
     for (const mistakeId of mistakes.keys()) {
       if (!this.correctionExists(pos, parId, mistakeId)) break;
@@ -555,7 +739,7 @@ export class TinyMceGui extends ProofreaderGui {
   `;
   }
 
-  createPopRow(pos, parId, correction, mistakeId, correctionId) {
+  createPopRow(pos, parId, correction: string, mistakeId, correctionId) {
     // idTag has to be everywhere because of click handler
     const idTag = mistakeId + '-' + correctionId;
     return `
@@ -570,9 +754,7 @@ export class TinyMceGui extends ProofreaderGui {
   }
 
   createMistakePart(stringToken: string) {
-    return stringToken && stringToken.trim().length > 2
-      ? `<span class="mistake-text"><strike>${stringToken}</strike></span>`
-      : '';
+    return stringToken && stringToken.trim().length > 2 ? `<span"><strike>${stringToken}</strike></span>` : '';
   }
 
   isTokenEqualToCorrection(pos, parId, mistakeIndex) {

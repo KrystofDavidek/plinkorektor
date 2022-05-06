@@ -23,9 +23,9 @@ export class Proofreader {
     this.config.gui = gui;
     // msg("Proofreader was initialized.", MI.INFO);
     // Autocorrect periodically triggered
-    this.autocorrectTrigger = setInterval(() => {
-      this.process();
-    }, 1000);
+    // this.autocorrectTrigger = setInterval(() => {
+    //   this.process();
+    // }, 1000);
   }
 
   report(selection: string, context: string, note: string) {
@@ -37,6 +37,7 @@ export class Proofreader {
    */
   process() {
     // Looping through paragraphs
+    let wasAPICalled = false;
     this.config.gui.getChunks().forEach((chunk) => {
       if (chunk.isProcessing()) {
         // msg("Already processing. Processing skipped.");
@@ -63,7 +64,7 @@ export class Proofreader {
         chunk.setLastHash(hash);
         chunk.setChanged(true);
         // msg('Paragraph with changed hash "' + hash + '" si still changing. Processing skipped.');
-        return;
+        // return;
       }
 
       // Skipping unchanged paragraph
@@ -79,10 +80,12 @@ export class Proofreader {
       this.config.gui.setProcessingChunk(chunk);
 
       // Applying original highlights until the new api-call resolves itself.
-      chunk.highlightTokens();
+      // chunk.highlightTokens();
       // Caling processing
       processApiCall(hash, chunk);
+      wasAPICalled = true;
     });
+    this.config.gui.wasAPICalled = wasAPICalled;
   }
 
   destroy() {

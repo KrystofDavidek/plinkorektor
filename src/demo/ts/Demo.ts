@@ -30,6 +30,7 @@ tinymce.init({
   resize: false,
   width: '100%',
   height: '100%',
+  statusbar: false,
   menubar: 'korektor',
   toolbar: 'undo redo',
   menu: {
