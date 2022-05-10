@@ -17,6 +17,12 @@ export const cssMainStylesheet = `
              overflow: hidden !important;
         }
 
+    [contenteditable] ~ grammarly-extension,
+    input ~ grammarly-extension,
+    textarea ~ grammarly-extension {
+      display: none;
+    }
+
         
     ::-webkit-scrollbar {
         width: 10px;

@@ -24,7 +24,7 @@ export abstract class TextChunk {
   abstract getTokenCount(): number;
   abstract getTokens(): any[];
   abstract removeOldHighlights(): void;
-  abstract markTokenForCorrection(token: any): void;
+  abstract markTokenForCorrection(token: any, mistakeId?): void;
   abstract isMarkedForCorrection(token: any): boolean;
 
   /**
@@ -46,7 +46,7 @@ export abstract class TextChunk {
       const highlights = mistake.getTokens();
       highlights.forEach((tokenId) => {
         const token = this.getToken(tokenId);
-        this.markTokenForCorrection(token);
+        this.markTokenForCorrection(token, mistake.getId());
       });
     });
     // Binds tokens to corresponding correction dialogs

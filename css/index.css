@@ -12,6 +12,12 @@
   --main-p-l-extra: 10%;
 }
 
+[contenteditable] ~ grammarly-extension,
+input ~ grammarly-extension,
+textarea ~ grammarly-extension {
+  display: none;
+}
+
 html,
 body {
   height: 100vh;
@@ -22,6 +28,11 @@ body {
 
 footer {
   height: 5%;
+}
+
+.logo {
+  width: 10rem;
+  margin-bottom: 0.1rem;
 }
 
 ::-webkit-scrollbar {
@@ -91,7 +102,7 @@ footer {
 a.active {
   color: var(--font-green) !important;
   border-bottom: 2px solid var(--font-green);
-  padding-bottom: 0.25rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 .navbar-nav li {
@@ -103,6 +114,7 @@ a.active {
 
 .navbar-nav li > a {
   padding: 0 !important;
+  padding-bottom: 0.5rem !important;
 }
 
 a {
@@ -425,13 +437,13 @@ hr {
   margin: 1rem;
   box-shadow: 0px 8px 15px var(--grey);
   background-color: white;
-  transition: all 0.3s ease 0s;
+  border-color: var(--green);
   position: relative;
 }
 
 .selected {
   box-shadow: 0px 15px 20px var(--shadow-green);
-  transition: all 0.3s ease 0s;
+  border: 2px solid var(--green);
 }
 
 .popover {
@@ -456,6 +468,7 @@ hr {
   justify-content: space-between !important;
   align-items: center;
   padding: 0.5rem !important;
+  padding-left: 1rem !important;
   transition: 0.2s ease-in-out;
 }
 
@@ -520,6 +533,7 @@ hr {
 .main-content-container {
   padding: 1rem;
   padding-right: 2rem;
+  border-radius: 10px;
 }
 
 pre {
@@ -574,11 +588,10 @@ pre {
     margin: 0;
   }
 }
-
 @media screen and (min-width: 1300px) {
   .navbar {
     padding-right: 5rem;
-    padding-left: 10rem;
+    padding-left: var(--main-p-l-extra);
   }
 
   .suggestions {
@@ -587,7 +600,11 @@ pre {
 
   .main-container {
     padding-right: var(--main-p-l-extra) !important;
-    padding-left: var(--main-p-l-extra) !important;
+    padding-left: calc(var(--main-p-l-extra)) !important;
+  }
+
+  .main-container-with-editor {
+    padding-left: calc(var(--main-p-l-extra) + 1rem) !important;
   }
 }
 

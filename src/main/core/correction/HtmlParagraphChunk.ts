@@ -101,9 +101,12 @@ export class HtmlParagraphChunk extends TextChunk {
     // $(this.p).find('.pk-token').off('click');
   }
 
-  public markTokenForCorrection(token) {
+  public markTokenForCorrection(token, mistakeId?) {
     // msg('Added error class on token "' + token[0].innerText + '" of hash "' + this.lastHash + '".');
-    if (token[0]) token[0].classList.add('pk-token-correction');
+    if (token[0]) {
+      token[0].classList.add('pk-token-correction');
+      token[0].setAttribute('data-id', mistakeId);
+    }
   }
 
   public getTokenCount(): number {

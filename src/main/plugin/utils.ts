@@ -1,11 +1,37 @@
-export const removeMistakeHighlight = (pos: number, token: string, parId: number) => {
-  $(`#${pos}-${parId}`).removeClass('selected');
-  $(token).removeClass('hovered');
+import { HtmlParagraphChunk } from './../core/correction/HtmlParagraphChunk';
+import { config } from './../core/Config';
+
+export const removeMistakeHighlight = (pos: number, tokens, parId: number, chunk?: HtmlParagraphChunk, mistakeId?) => {
+  const mistake = mistakeId ? config.mistakes.getMistake(chunk.getLastHash(), mistakeId) : undefined;
+
+  if (mistakeId && mistake?.getType() && mistake?.getType().startsWith('agreement')) {
+    const mistakeTokens = $(chunk.getElement()).find(`[data-id='${mistakeId}']`);
+    const card = $('.mistakes').find(`[data-id='${mistakeId}']`)[0];
+    $(card).removeClass('selected');
+    for (const token of mistakeTokens) {
+      $(token).removeClass('hovered');
+    }
+  } else {
+    $(`#${pos}-${parId}`).removeClass('selected');
+    if (Array.isArray(tokens)) {
+      tokens.forEach((token) => {
+        $(token).removeClass('hovered');
+      });
+    } else {
+      $(tokens).removeClass('hovered');
+    }
+  }
 };
 
-export const addMistakeHighlight = (pos: number, token: string, parId: number) => {
+export const addMistakeHighlight = (pos: number, tokens, parId: number) => {
   $(`#${pos}-${parId}`).addClass('selected');
-  $(token).addClass('hovered');
+  if (Array.isArray(tokens)) {
+    tokens.forEach((token) => {
+      $(token).addClass('hovered');
+    });
+  } else {
+    $(tokens).addClass('hovered');
+  }
 };
 
 export const closePopover = (token) => {
@@ -14,33 +40,48 @@ export const closePopover = (token) => {
   $('.popover').remove();
 };
 
-export const setHovers = (token, pos, parId, isPopover) => {
-  let isInTime;
-  $(token).mouseenter(() => {
-    isInTime = true;
-    const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    if (width > 770) {
-      setTimeout(() => {
-        const cardElement = $(`#${pos}-${parId}`).get()[0];
-        if (cardElement && isInTime)
-          cardElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-      }, 750);
-    }
-    $(`#${pos}-${parId}`).addClass('selected');
-  });
+export const setHovers = (token, pos, parId, isPopover, chunk, mistakeId) => {
+  let tokens;
+  tokens = $(chunk.getElement()).find(`[data-id='${mistakeId}']`);
+  const card = $('.mistakes').find(`[data-id='${mistakeId}']`)[0];
+  // When mistakes are reordered, previous token has to be used
+  if (tokens.length === 0) {
+    tokens = $.makeArray(token);
+  }
 
-  $(`#${pos}-${parId}`).mouseenter(() => {
-    addMistakeHighlight(pos, token, parId);
-  });
+  for (const token of tokens) {
+    let isInTime;
+    $(token).mouseenter(() => {
+      isInTime = true;
+      const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      if (width > 770) {
+        setTimeout(() => {
+          const cardElement = $(card).get()[0];
+          if (cardElement && isInTime)
+            cardElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        }, 750);
+      }
+      $(card).addClass('selected');
+      if (Array.isArray(tokens)) {
+        tokens.forEach((token) => {
+          $(token).addClass('hovered');
+        });
+      } else {
+        $(tokens).addClass('hovered');
+      }
+    });
 
-  $(token).mouseleave(() => {
-    isInTime = false;
-    if (!isPopover) {
-      removeMistakeHighlight(pos, token, parId);
-    }
-  });
+    $(card).mouseenter(() => {
+      addMistakeHighlight(pos, token, parId);
+    });
 
-  $(`#${pos}-${parId}`).mouseleave(() => {
-    removeMistakeHighlight(pos, token, parId);
-  });
+    $(token).mouseleave(() => {
+      isInTime = false;
+      removeMistakeHighlight(pos, token, parId, chunk, mistakeId);
+    });
+
+    $(card).mouseleave(() => {
+      removeMistakeHighlight(pos, token, parId, chunk, mistakeId);
+    });
+  }
 };

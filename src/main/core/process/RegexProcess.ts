@@ -39,19 +39,14 @@ export function processRegexHighlight(hash: string, chunk: TextChunk, tokens: st
       correction.setDescription(rule.correctionLabel ? rule.correctionLabel : 'OPRAVIT');
       correction.setRules(rules);
       mistake.addCorrection(correction);
-
-      if (!isMistakeToIgnore(mistake)) {
-        config.mistakes.addMistake(hash, mistake);
-      }
+      config.mistakes.addMistake(hash, mistake);
     }
   });
 }
 
-export const isMistakeToIgnore = (mistake: Mistake) => {
-  return (
-    mistake.getDescription() === 'Použijte pevnou mezeru' ||
-    mistake.getType() === 'punctuation:change_space_to_nbsp_after_onechar'
-  );
+export const isMistakeToAutocorrect = (mistake: Mistake) => {
+  const flags: string[] = mistake.getFlags();
+  return mistake.getDescription() === 'Použijte pevnou mezeru' || flags.includes('autocorrection');
 };
 
 export function getTokensToHighlight(

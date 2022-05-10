@@ -1,12 +1,16 @@
-import { config } from "../Config";
+import { config } from '../Config';
 // import { message as msg } from "../utilities/Message";
-import { Mistake } from "./Mistake";
+import { Mistake } from './Mistake';
 
 export class MistakeManager {
   protected mistakes: Record<string, Mistake[]>;
 
   constructor() {
     this.mistakes = {};
+  }
+
+  public getMistake(hash: string, id: string): Mistake {
+    return this.mistakes[hash].find((mistake) => mistake.getId() === id);
   }
 
   public addMistake(hash: string, mistake: Mistake) {

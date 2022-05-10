@@ -1,4 +1,4 @@
-import { copy, deleteContent } from './interface-utils';
+import { copy } from './interface-utils';
 import Plugin from '../../main/plugin/Plugin';
 
 declare let tinymce: any;
@@ -42,5 +42,4 @@ tinymce.init({
 
 $(() => {
   copy(tinymce);
-  deleteContent(tinymce);
 });
