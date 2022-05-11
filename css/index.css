@@ -12,9 +12,44 @@
   --main-p-l-extra: 10%;
 }
 
-[contenteditable] ~ grammarly-extension,
-input ~ grammarly-extension,
-textarea ~ grammarly-extension {
+.expanded {
+  max-width: 100% !important;
+  width: 100% !important;
+  flex: none;
+  transition: all 0.5s ease-out 0s;
+}
+
+.toggler {
+  transition: all 0.1s ease-out 0s;
+  position: absolute !important;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  top: 17.5%;
+  left: 59%;
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+.toggler:hover {
+  background-color: var(--dark-green);
+}
+
+.toggler--close {
+  transition: all 0.5s ease-out 0s;
+  top: 18.5%;
+  left: 95%;
+}
+
+.toast {
+  position: absolute !important;
+  bottom: 3rem;
+  left: 1rem;
+  border-radius: 5% !important;
+  z-index: 100;
   display: none;
 }
 
@@ -572,12 +607,24 @@ pre {
   .editor-container {
     margin-bottom: 8rem !important;
   }
+
+  .toast {
+    left: 0.5rem;
+  }
 }
 
 @media screen and (max-width: 760px) {
   .main-container {
     height: 100%;
     overflow: auto;
+  }
+
+  .toggler {
+    display: none;
+  }
+
+  .suggestions {
+    display: block !important;
   }
 
   .editor-container {
@@ -605,6 +652,16 @@ pre {
 
   .main-container-with-editor {
     padding-left: calc(var(--main-p-l-extra) + 1rem) !important;
+  }
+
+  .toggler {
+    top: 48%;
+    left: 58%;
+  }
+
+  .toggler--close {
+    transition: all 0.5s ease-out 0s;
+    left: 93%;
   }
 }
 

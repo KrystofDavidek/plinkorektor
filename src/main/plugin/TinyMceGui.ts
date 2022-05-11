@@ -26,7 +26,11 @@ export class TinyMceGui extends ProofreaderGui {
     });
     $(document).on('click', '#process', () => {
       config.proofreader.process();
-      if (!this.wasAPICalled) this.showToast();
+      if (!this.wasAPICalled) {
+        this.showToast();
+      } else {
+        $('.mistakes-counter').fadeOut(500);
+      }
     });
     $(document).on('keydown', (e) => {
       if (e.shiftKey && e.which == 13) {
@@ -36,7 +40,10 @@ export class TinyMceGui extends ProofreaderGui {
     stylesheetLoader();
   }
 
-  public showToast() {}
+  public showToast() {
+    $('.toast').fadeIn(500);
+    $('.toast').fadeOut(5000);
+  }
 
   public setProcessing(processing: boolean) {
     const $editor = $(this.editor.dom.select('html')[0]);
@@ -71,7 +78,7 @@ export class TinyMceGui extends ProofreaderGui {
   private setDisabling(isDisable: boolean) {
     if (isDisable) {
       $('.to-disable').addClass('disable');
-      $('.mistakes').hide(500);
+      $('.mistakes').fadeOut(500);
       $('.tox-tbtn').removeClass('tox-tbtn--active');
     } else {
       $('.to-disable').removeClass('disable');
@@ -201,7 +208,7 @@ export class TinyMceGui extends ProofreaderGui {
           return;
         }
       }
-      if (mistake?.getType()?.startsWith('agreement') && mistake?.getTokens()?.indexOf(pos) > 0) {
+      if (mistake?.getTokens().length > 1 && mistake?.getTokens()?.indexOf(pos) > 0) {
         return;
       }
       this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
@@ -376,7 +383,7 @@ export class TinyMceGui extends ProofreaderGui {
     if (isIgnore) {
       const textToken = $(token).text();
       const mistake = config.mistakes.getMistake(chunk.getLastHash(), tokenMistakeId);
-      if (!this.tokensToIgnore.includes(textToken) && !mistake?.getType().startsWith('agreement')) {
+      if (!this.tokensToIgnore.includes(textToken) && mistake?.getTokens().length < 2) {
         // If not disabling, ignoring another tokens after another correction has to be done
         this.disableOtherTokens(textToken);
         this.tokensToIgnore.push(textToken);
@@ -436,7 +443,7 @@ export class TinyMceGui extends ProofreaderGui {
           }
         });
     } else {
-      $('.mistakes-counter').hide(500);
+      $('.mistakes-counter').fadeOut(500);
     }
     if (!shown) $('#fix-all').hide();
   }

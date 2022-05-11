@@ -42,4 +42,22 @@ tinymce.init({
 
 $(() => {
   copy(tinymce);
+  $(document).on('click', `.toggler`, (e) => {
+    $('.suggestions').hide();
+    $('.editor-container').addClass('expanded');
+    $('.toggler')
+      .addClass('toggler--close')
+      .html(
+        '<img data-toggle="tooltip" data-placement="top" title="Zobrazit seznam chyb"  src="assets/icons/collapse-left.svg" alt="Left Arrow" />',
+      );
+  });
+  $(document).on('click', `.toggler--close`, (e) => {
+    $('.suggestions').fadeIn(500);
+    $('.editor-container').removeClass('expanded');
+    $('.toggler')
+      .removeClass('toggler--close')
+      .html(
+        '<img data-toggle="tooltip" data-placement="top" title="Skrýt seznam chyb" src="assets/icons/collapse-right.svg" alt="Right Arrow" />',
+      );
+  });
 });

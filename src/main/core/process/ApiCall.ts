@@ -37,7 +37,7 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
         // Create tokens and add mistakes if tokenization was successful.
         if (chunk.createTokens(data.tokens)) {
           config.mistakes.removeMistakes(hash);
-          processRegexHighlight(hash, chunk, data.tokens);
+          // processRegexHighlight(hash, chunk, data.tokens);
           data.mistakes.forEach((m) => {
             const mistake = new Mistake();
             mistake.setTokens(m.highlights);

@@ -4,7 +4,7 @@ import { config } from './../core/Config';
 export const removeMistakeHighlight = (pos: number, tokens, parId: number, chunk?: HtmlParagraphChunk, mistakeId?) => {
   const mistake = mistakeId ? config.mistakes.getMistake(chunk.getLastHash(), mistakeId) : undefined;
 
-  if (mistakeId && mistake?.getType() && mistake?.getType().startsWith('agreement')) {
+  if (mistakeId && mistake?.getType() && mistake?.getTokens().length > 1) {
     const mistakeTokens = $(chunk.getElement()).find(`[data-id='${mistakeId}']`);
     const card = $('.mistakes').find(`[data-id='${mistakeId}']`)[0];
     $(card).removeClass('selected');
