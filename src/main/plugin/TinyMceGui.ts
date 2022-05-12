@@ -387,6 +387,14 @@ export class TinyMceGui extends ProofreaderGui {
         // If not disabling, ignoring another tokens after another correction has to be done
         this.disableOtherTokens(textToken);
         this.tokensToIgnore.push(textToken);
+      } else {
+        if (mistake?.getTokens().length > 1) {
+          mistake?.getTokens().forEach((position) => {
+            const tokenToDisable = chunk.getToken(position);
+            closePopover(tokenToDisable);
+            tokenToDisable.removeClass('pk-token-correction');
+          });
+        }
       }
       for (const id of ids) {
         this.ignoreMistake(chunk, id);
@@ -583,21 +591,6 @@ export class TinyMceGui extends ProofreaderGui {
       }
       correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value}</span>`;
     }
-    // switch (correction.getAction().type) {
-    //   case 'description':
-    //     correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value}</span>`;
-    //     break;
-    //   case 'remove':
-    //     correctionPart = `<span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="with-tooltip to-fix-strike" data-dismiss="modal"><strike>${value}</strike></span>`;
-    //     break;
-    //   case 'change':
-    //     correctionPart = `
-    //     <span><strike>${value[0]}</strike></span>
-    //     <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">
-    //     <span data-mistakeId-correctionId="${idTag}" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-tooltip to-fix" data-dismiss="modal">${value[1]}</span>
-    //     `;
-    //     break;
-    // }
     return isLine
       ? `<div class="correction-part">${correctionPart}</div><hr/>`
       : `<div class="correction-part">${correctionPart}</div>`;
@@ -771,7 +764,6 @@ export class TinyMceGui extends ProofreaderGui {
         counter++;
       }
     }
-    // <img id="${pos}-${parId}-ignore" class="cancel-popover icon" data-toggle="tooltip" data-placement="top" title="Neopravovat" src="assets/icons/x.svg" alt="Remove">
     return `
     <div id="${pos}-${parId}-pop" class="popover-body">
       ${rows.htmlParts.join('')}
