@@ -24,6 +24,8 @@ export default () => {
       // Set content without highlights
       editor.setContent(getRawEditorContent(editor));
       $('.mistakes').empty();
+      $('.mistakes-counter').fadeOut(500);
+      $('#fix-all').hide();
     });
     // Autocorrect triggered by editor change
     editor.on('remove', function () {
@@ -38,6 +40,7 @@ export default () => {
     editor.on('keyup', function (e: { key: string }) {
       fixQuotes(e.key, editor.selection);
       localStorage.setItem('content', getRawEditorContent(editor));
+      editor.undoManager.add();
     });
     editor.on('blur', function () {
       if (!catching) {
@@ -191,6 +194,6 @@ export const getRawEditorContent = (editor) => {
     .getContent({ format: 'text' })
     .split('\n')
     .filter((par: string) => par.length > 1)
-    .map((par: string) => `<p>${par}<p/>`)
+    .map((par: string) => `<p>${par}</p>`)
     .join('');
 };

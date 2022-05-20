@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>O projektu</title>
+    <title>O korektoru</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/index.css" />
     <style>
@@ -18,10 +18,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-sm navbar-light mb-2 bg-white rounded justify-content-between">
+    <nav class="navbar navbar-expand-sm navbar-light bg-white rounded justify-content-between">
       <a class="navbar-brand" href="/src/demo/html/index.html">
-        <img class="logo" src="/assets/icons/logo-large.png" alt="Opravidlo"
-      /></a>
+        <img class="logo" src="/assets/icons/logo-large.png" alt="Opravidlo" />
+      </a>
       <button
         class="navbar-toggler"
         type="button"
@@ -36,19 +36,51 @@
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav mobile-nav gap-1 ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/src/demo/html/help.html">Nápověda</a>
+            <a class="nav-link" href="/src/demo/html/co-korektor-umi.html">Co korektor umí</a>
+          </li>
+          <li class="nav-item drop-nav">
+            <a class="nav-link active" href="/src/demo/html/o-korektoru.html">O projektu</a>
+            <ul class="dropdown">
+              <li class="nav-item">
+                <a class="nav-link active" href="/src/demo/html/o-korektoru.html">O korektoru</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/src/demo/html/autori.html">Autoři</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/src/demo/html/pouzite-nastroje.html">Použité nástroje</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/src/demo/html/publikace.html">Publikace</a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="/src/demo/html/about.html">O projektu</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/src/demo/html/terms.html">Podmínky použití</a>
+            <a class="nav-link" href="/src/demo/html/podminky-pouziti.html">Podmínky použití</a>
           </li>
         </ul>
       </div>
     </nav>
-    <main class="container-fluid main-container">
-      <h1>O projektu</h1>
+    <main class="container-fluid main-container page-container">
+      <h1>O korektoru</h1>
+      <p>
+        Korektor byl vyvíjen v rámci projektu TL02000146 Webový pravopisný, gramatický a typografický korektor v
+        programu ÉTA TA ČR (2019–2022). Na jeho realizaci se podílel tým autorů z Ústavu českého jazyka Filozofické
+        fakulty Masarykovy univerzity, Ústavu pro jazyk český Akademie věd ČR a Ústavu teoretické a komputační
+        lingvistiky Univerzity Karlovy. Aplikačními garanty projektu byly společnosti Seznam.cz (2019–2021) a Wikimedia
+        ČR (2021 –2022).
+      </p>
+      <p>
+        Opravy českých textů jsou založeny na formálních pravidlech, která rozeznávají chyby v oblasti pravopisu
+        (interpunkce, velká písmena, časté pravopisné chyby), gramatiky (gramatická shoda, negramatické větné
+        konstrukce) a typografie (dle ČSN 01 6910). Připojena je také kontrola překlepů založená na slovníku, který
+        vznikl spojením a úpravou morfologického slovníku MorfFlex 2.0 a slovníku z Internetové jazykové příručky (celý
+        slovník obsahuje 2,35 milionu tvarů).
+      </p>
+      <p>
+        Nástroj je k dispozici jako volně dostupné webové rozhraní, ve kterém je možné opravovat texty vložené nebo
+        přímo psané.
+      </p>
     </main>
     <div class="footer">
       <div class="logos">
@@ -79,7 +111,7 @@
         <span
           >Provozuje <a href="https://nlp.fi.muni.cz/" target="_blank">Centrum zpracování přirozeného jazyka</a></span
         >
-        <span>Všechna práva vyhrazena © Masarykova univerzita, Brno 2022</span>
+        <span>Všechna práva vyhrazena © MU, ÚJČ AV ČR, UK, 2019-2022</span>
       </div>
     </div>
   </body>

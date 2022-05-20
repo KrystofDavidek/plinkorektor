@@ -3,6 +3,7 @@
   --green: #2ee59d;
   --dark-green: #13be79;
   --shadow-green: rgba(46, 229, 157, 0.4);
+  --bg-tool: #f4f4f4;
   --grey: rgba(0, 0, 0, 0.1);
   --light-red: rgb(251, 160, 160);
   --red: #f61d1d;
@@ -50,6 +51,38 @@ h1 {
 
 .page-container {
   overflow-y: auto !important;
+  justify-content: flex-start !important;
+}
+
+.page-container p:last-child {
+  margin-bottom: 12.5rem;
+}
+
+.page-container-col {
+  overflow-y: auto !important;
+  justify-content: flex-start !important;
+}
+
+.last-child {
+  margin-bottom: 12.5rem;
+}
+
+h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+}
+
+.tool-container {
+  padding: 0.1rem 1rem 0.1rem 1rem;
+  background-color: var(--bg-tool);
+  border-radius: 15px;
+}
+
+.suggestions-title {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  font-size: 2rem;
 }
 
 .toast {
@@ -71,6 +104,57 @@ body {
 
 footer {
   height: 5%;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  list-style: none;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  animation: growDown 300ms ease-in-out forwards;
+  transform-origin: top center;
+  flex-direction: column;
+  gap: 0.5rem;
+  top: 2.2rem;
+}
+
+.dropdown .nav-item {
+  width: fit-content;
+}
+
+@keyframes growDown {
+  0% {
+    transform: scaleY(0);
+  }
+  80% {
+    transform: scaleY(1.1);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.drop-nav:hover .dropdown {
+  display: flex;
+}
+
+.navbar-nav:hover .dropbtn {
+  background-color: #3e8e41;
 }
 
 .logo {
@@ -168,6 +252,7 @@ footer {
   z-index: 2;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+  gap: 3rem;
 }
 
 .mini-footer a {
@@ -190,7 +275,6 @@ footer {
 .suggestions-header {
   margin-left: 1rem;
   margin-bottom: 1rem;
-  margin-top: -8px;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -212,6 +296,10 @@ a.active {
   color: var(--font-green) !important;
   border-bottom: 2px solid var(--font-green);
   padding-bottom: 0.5rem !important;
+}
+
+.navbar-nav {
+  position: relative;
 }
 
 .navbar-nav li {
@@ -702,9 +790,21 @@ pre {
   .toast {
     left: 0.5rem;
   }
+
+  .dropdown {
+    top: 5rem;
+  }
+
+  .nav-item {
+    width: fit-content;
+  }
+
+  .editor-button {
+    margin: 0.5rem;
+  }
 }
 
-@media screen and (max-width: 760px) {
+@media screen and (max-width: 767px) {
   .main-container {
     /* height: 100%; */
     overflow: auto;
@@ -745,7 +845,18 @@ pre {
   .footer {
     height: 9rem;
   }
+
+  .tools {
+    gap: 2rem;
+  }
 }
+
+@media screen and (max-width: 1030px) {
+  .toggler {
+    top: 22%;
+  }
+}
+
 @media screen and (min-width: 1300px) {
   .navbar {
     padding-right: 5rem;
@@ -766,7 +877,7 @@ pre {
   }
 
   .toggler {
-    top: 13%;
+    top: 14%;
     left: 58%;
   }
 
