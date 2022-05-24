@@ -82,7 +82,7 @@ export abstract class ProofreaderGui {
       mistakeStructure.tokens.push({
         token: tokenForm,
         at: tokenRelativePos,
-        description: mistake.getDescription(),
+        description: mistake.getName(),
       });
     });
     return mistakeStructure;

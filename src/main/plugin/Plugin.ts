@@ -37,6 +37,23 @@ export default () => {
         formatMce('focus');
       }
     });
+    // editor.on('paste', function (e) {
+    //   // Prevent default paste behavior
+    //   e.preventDefault();
+    //   const content = (e.originalEvent || e).clipboardData.getData('Text');
+    //   if (content) {
+    //     localStorage.setItem(
+    //       'content',
+    //       content
+    //         .split('\n')
+    //         .filter((par: string) => par.length > 1)
+    //         .map((par: string) => `<p>${par}</p>`)
+    //         .join(''),
+    //     );
+    //     editor.setContent(content || '<p></p>');
+    //     editor.undoManager.add();
+    //   }
+    // });
     editor.on('keyup', function (e: { key: string }) {
       fixQuotes(e.key, editor.selection);
       localStorage.setItem('content', getRawEditorContent(editor));

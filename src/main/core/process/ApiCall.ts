@@ -5,7 +5,6 @@ import { config } from '../Config';
 
 import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
-import { processRegexHighlight } from './RegexProcess';
 import { TextChunk } from '../correction/TextChunk';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
@@ -41,9 +40,12 @@ export function processApiCall(hash: string, chunk: TextChunk, retry = 0) {
           data.mistakes.forEach((m) => {
             const mistake = new Mistake();
             mistake.setTokens(m.highlights);
-            mistake.setDescription(m.description);
+            mistake.setName(m.name);
             if (m.about) {
               mistake.setAbout(m.about);
+            }
+            if (m.hint) {
+              mistake.setHint(m.hint);
             }
             if (m.flags) {
               mistake.setFlags(m.flags);

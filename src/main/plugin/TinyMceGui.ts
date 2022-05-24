@@ -114,7 +114,16 @@ export class TinyMceGui extends ProofreaderGui {
     let content = $(this.editor.dom.select('html')[0]).find('p');
     let chunks: HtmlParagraphChunk[] = [];
     content.each((i, p) => {
-      chunks.push(new HtmlParagraphChunk(p));
+      const splitedInnerText = p.innerText.split('\n');
+      if (splitedInnerText.length > 1) {
+        splitedInnerText.forEach((text) => {
+          const newP = document.createElement('p');
+          newP.innerText = text;
+          chunks.push(new HtmlParagraphChunk(newP));
+        });
+      } else {
+        chunks.push(new HtmlParagraphChunk(p));
+      }
     });
     if (!this.editor.getContent()) {
       this.tokensInfo = {};
@@ -541,7 +550,7 @@ export class TinyMceGui extends ProofreaderGui {
       }
     }
 
-    const mistakeDescription = this.formatDescription(mistakes[0].getDescription());
+    const mistakeDescription = this.formatDescription(mistakes[0].getName());
     const abouts: About[] = mistakes[0].getAbout();
     const showDetails = mistakes.length > 1 || abouts.length > 0 || mistakes[0].corrections.length > 1;
 
@@ -659,10 +668,10 @@ export class TinyMceGui extends ProofreaderGui {
       let isLastCorrection = false;
       if (!this.correctionExists(pos, parId, mistakeId)) {
         if (mistakes[mistakeId].getAbout().length > 0) {
-          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span>`);
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getName())}</span>`);
           rows.htmlParts.push(this.createAboutLinks(mistakes[mistakeId]));
         } else {
-          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span><hr/>`);
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getName())}</span><hr/>`);
         }
       }
 
@@ -672,7 +681,7 @@ export class TinyMceGui extends ProofreaderGui {
           continue correctionsLoop;
 
         if (correctionsCounter === 0)
-          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getDescription())}</span>`);
+          rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getName())}</span>`);
         if (correctionsCounter + 1 === mistakes[mistakeId]['corrections'].length) isLastCorrection = true;
         if (this.isTokenEqualToCorrection(pos, parId, mistakeId)) continue correctionsLoop;
         if (isLastCorrection && mistakes[mistakeId].getAbout().length > 0) {

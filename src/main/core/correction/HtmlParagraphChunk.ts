@@ -8,6 +8,8 @@ export class HtmlParagraphChunk extends TextChunk {
   public constructor(p) {
     super();
     this.p = p;
+    // p.innerText = (p.innerText as string).replace(/\n/g, '<br/>');
+    // console.log(this.p.innerText.split(' '));
     this.processing = this.p.getAttribute('data-pk-processing');
     this.changed = this.p.getAttribute('data-pk-changed');
     this.lastHash = this.p.getAttribute('data-pk-hash');
@@ -30,6 +32,10 @@ export class HtmlParagraphChunk extends TextChunk {
 
   public getText(): string {
     return decode(this.p.textContent.trim());
+  }
+
+  public getRawText(): string {
+    return this.p.textContent;
   }
 
   public setProcessing(processing: boolean): void {

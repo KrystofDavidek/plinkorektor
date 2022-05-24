@@ -23,7 +23,7 @@ export function processRegexHighlight(hash: string, chunk: TextChunk, tokens: st
       const highlights = getTokensToHighlight(match.index, match.index + match[0].length, tokenPositions);
       const mistake = new Mistake();
       mistake.setTokens(highlights.map((val) => val.pos));
-      mistake.setDescription(rule.description);
+      mistake.setName(rule.name);
       if (rule.about) {
         mistake.setAbout(rule.about);
       }
@@ -46,7 +46,7 @@ export function processRegexHighlight(hash: string, chunk: TextChunk, tokens: st
 
 export const isMistakeToAutocorrect = (mistake: Mistake) => {
   const flags: string[] = mistake.getFlags();
-  return mistake.getDescription() === 'Použijte pevnou mezeru' || flags.includes('autocorrection');
+  return flags.includes('autocorrection');
 };
 
 export function getTokensToHighlight(

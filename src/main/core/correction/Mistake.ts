@@ -3,7 +3,8 @@ import { Correction } from './Correction';
 export class Mistake {
   protected id: string; // Random identifier.
   protected tokens: number[]; // Tokens to be highlighted.
-  protected description: string; // Description of the mistake.
+  protected name: string; // Name of the mistake.
+  protected hint: string; // Hint of the mistake.
   protected corrections: Correction[]; // List of possible corrections.
   protected about: { url: string; label: string }[]; // List of possible links.
   protected flags: []; // List of possible flags.
@@ -15,7 +16,7 @@ export class Mistake {
       .toString(36)
       .replace(/[^a-z]+/g, '');
     this.tokens = [];
-    this.description = '';
+    this.name = '';
     this.corrections = [];
     this.about = [];
     this.flags = [];
@@ -25,8 +26,12 @@ export class Mistake {
     this.tokens = [...newTokens];
   }
 
-  public setDescription(newDescription: string) {
-    this.description = newDescription;
+  public setName(name: string) {
+    this.name = name;
+  }
+
+  public setHint(hint: string) {
+    this.hint = hint;
   }
 
   public setAbout(newAbout: { url: string; label: string }[]) {
@@ -57,10 +62,6 @@ export class Mistake {
     return this.id;
   }
 
-  public getDescription() {
-    return this.description;
-  }
-
   public getAbout() {
     return this.about;
   }
@@ -83,5 +84,13 @@ export class Mistake {
 
   public getType() {
     return this.type;
+  }
+
+  public getName() {
+    return this.name;
+  }
+
+  public getHint() {
+    return this.hint;
   }
 }
