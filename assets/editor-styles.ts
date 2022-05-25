@@ -143,6 +143,16 @@ export const cssMainStylesheet = `
         animation-name: fixed;
         animation-duration: 4s;
     }
+
+    .pk-token-autocorrection-fixed {
+        background-color: rgba(76, 206, 76, 1);
+        border-radius: 0.2em;
+        transition: all 0.3s ease 0s;
+    }
+
+     .pk-token-autocorrection-fixed-hide {
+        background-color: white;
+    }
 `;
 
 export const cssMistakeDescription = `

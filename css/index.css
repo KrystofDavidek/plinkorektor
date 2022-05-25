@@ -24,6 +24,11 @@ h1 {
   transition: all 0.5s ease-out 0s;
 }
 
+#toggle-autocorrection {
+  display: none;
+  font-size: 0.5rem;
+}
+
 .toggler {
   transition: all 0.1s ease-out 0s;
   position: absolute !important;
@@ -89,9 +94,15 @@ h2 {
   position: absolute !important;
   bottom: 1rem;
   left: 1rem;
-  border-radius: 5% !important;
   z-index: 100;
+  border-radius: 0.5rem !important;
+
   display: none;
+}
+
+.is-correct {
+  background: var(--dark-green);
+  color: white;
 }
 
 html,
@@ -386,7 +397,7 @@ a:hover {
 }
 
 .editor-button {
-  margin: 1rem 1rem 2rem 0;
+  margin-top: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   border: none;
@@ -398,6 +409,7 @@ a:hover {
 }
 
 .button-red {
+  width: 5rem;
   background: var(--light-red) !important;
   color: white !important;
 }
@@ -408,6 +420,7 @@ a:hover {
 }
 
 .button-green {
+  width: 5rem;
   background: var(--dark-green) !important;
   color: white !important;
 }
@@ -582,7 +595,6 @@ hr {
 }
 
 .button {
-  width: 140px;
   height: 40px;
   font-size: 10px;
   text-transform: uppercase;
@@ -855,6 +867,14 @@ pre {
   .toggler {
     top: 22%;
   }
+
+  .editor-button {
+    margin-right: 0;
+  }
+
+  #mceControl {
+    height: 85%;
+  }
 }
 
 @media screen and (min-width: 1300px) {
@@ -884,6 +904,10 @@ pre {
   .toggler--close {
     transition: all 0.5s ease-out 0s;
     left: 93%;
+  }
+
+  #toggle-autocorrection {
+    font-size: 0.6rem;
   }
 }
 

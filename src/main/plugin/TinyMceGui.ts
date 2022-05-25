@@ -13,6 +13,7 @@ export class TinyMceGui extends ProofreaderGui {
   private tokensInfo: TokensInfo = {};
   private tokensToIgnore: string[] = [];
   private autocorrectedTokens: string[] = [];
+  private isAutoCorrection = false;
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
@@ -24,30 +25,48 @@ export class TinyMceGui extends ProofreaderGui {
       this.tokensInfo = {};
       this.resetMistakesCol();
     });
+    $('#toggle-autocorrection').on('click', () => {
+      $(this.editor.dom.select('html')[0])
+        .find('.pk-token-autocorrection-fixed')
+        .toggleClass('pk-token-autocorrection-fixed-hide');
+    });
     $(document).on('click', '#process', () => {
       config.proofreader.process();
       if (!this.wasAPICalled) {
-        this.showToast();
+        this.showToast('to-edit');
       } else {
         $('.mistakes-counter').fadeOut(500);
       }
     });
+    $(this.editor.dom.select('html')[0]).on('keydown', (e) => {
+      if (!this.isProcessing() && e.shiftKey && e.altKey) {
+        $('#process').click();
+      }
+    });
     $(document).on('keydown', (e) => {
-      if (e.shiftKey && e.which == 13) {
+      if (!this.isProcessing() && e.shiftKey && e.altKey) {
         $('#process').click();
       }
     });
     stylesheetLoader();
   }
 
-  public showToast() {
-    $('.toast').fadeIn(500);
-    $('.toast').fadeOut(5000);
+  public showToast(type: 'to-edit' | 'is-correct') {
+    if (type === 'to-edit') {
+      if (!$('.to-edit').is(':visible')) {
+        $('.to-edit').fadeIn(500);
+        $('.to-edit').fadeOut(5000);
+      }
+    } else if (type === 'is-correct') {
+      $('.is-correct').fadeIn(500);
+      $('.is-correct').fadeOut(5000);
+    }
   }
 
   public setProcessing(processing: boolean) {
     const $editor = $(this.editor.dom.select('html')[0]);
     if (processing) {
+      this.isAutoCorrection = false;
       this.resetMistakesCol();
       // msg('Processing indicator displayed.');
       $editor.removeAttr('data-pk-processing-finished');
@@ -61,6 +80,7 @@ export class TinyMceGui extends ProofreaderGui {
       this.editor.setMode('readonly');
       this.setDisabling(true);
     } else {
+      if ($('.mistakes').children().length === 0) this.showToast('is-correct');
       $editor.children('.loader-container').fadeOut(500, function () {
         $(this).remove();
       });
@@ -78,10 +98,12 @@ export class TinyMceGui extends ProofreaderGui {
   private setDisabling(isDisable: boolean) {
     if (isDisable) {
       $('.to-disable').addClass('disable');
+      $('#toggle-autocorrection').fadeOut(500);
       $('.mistakes').fadeOut(500);
       $('.tox-tbtn').removeClass('tox-tbtn--active');
     } else {
       $('.to-disable').removeClass('disable');
+      if (this.isAutoCorrection) $('#toggle-autocorrection').show(500);
       $('.mistakes').show(500);
       $('.tox-tbtn').addClass('tox-tbtn--active');
     }
@@ -211,8 +233,10 @@ export class TinyMceGui extends ProofreaderGui {
               delete rules[rule];
             }
           }
+          this.isAutoCorrection = true;
           $(token).removeClass('pk-token-correction');
           removeMistakeHighlight(pos, token, parId);
+          $(token).addClass('pk-token-autocorrection-fixed');
           this.fixMistake(chunk, correction.getId(), rules);
           return;
         }
