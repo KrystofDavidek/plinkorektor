@@ -14,6 +14,7 @@ export class TinyMceGui extends ProofreaderGui {
   private tokensToIgnore: string[] = [];
   private autocorrectedTokens: string[] = [];
   private isAutoCorrection = false;
+  private screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
@@ -257,11 +258,11 @@ export class TinyMceGui extends ProofreaderGui {
     this.createIgnoreHandler(chunk, token, pos, parId);
     // For correct highlighting mistakes with multiple tokens
     const firsMistakeId = this.getValueFromTokensInfo('mistakes', pos, parId)[0].getId();
-    if (chunk.getToken(pos).text().length > 1) {
+    if (chunk.getToken(pos).text().length > 1 && this.screenWidth > 770) {
       this.setPopover(token, pos, parId, chunk, firsMistakeId);
-      setHovers(token, pos, parId, true, chunk, firsMistakeId);
+      setHovers(token, pos, parId, true, chunk, firsMistakeId, this.screenWidth);
     } else {
-      setHovers(token, pos, parId, false, chunk, firsMistakeId);
+      setHovers(token, pos, parId, false, chunk, firsMistakeId, this.screenWidth);
     }
     this.onListChanged();
   }
@@ -466,6 +467,9 @@ export class TinyMceGui extends ProofreaderGui {
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, false, Number(mistakeId), Number(correctionId));
       this.editor.undoManager.add();
       // config.proofreader.process();
+      if (this.screenWidth < 770) {
+        $('#mceControl')[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      }
     });
   }
 
@@ -494,6 +498,9 @@ export class TinyMceGui extends ProofreaderGui {
     $(document).on('click', `#${pos}-${parId}-ignore`, () => {
       closePopover(token);
       this.fix(chunk, chunk.getToken(Number(pos)), pos, parId, true);
+      if (this.screenWidth < 770) {
+        $('#mceControl')[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      }
     });
   }
 

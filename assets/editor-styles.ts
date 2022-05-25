@@ -145,13 +145,13 @@ export const cssMainStylesheet = `
     }
 
     .pk-token-autocorrection-fixed {
-        background-color: rgba(76, 206, 76, 1);
+         background-color: white;
         border-radius: 0.2em;
         transition: all 0.3s ease 0s;
     }
 
      .pk-token-autocorrection-fixed-hide {
-        background-color: white;
+        background-color: rgba(76, 206, 76, 1);
     }
 `;
 

@@ -279,6 +279,18 @@ footer {
   min-height: 20rem;
 }
 
+.help {
+  fill: red;
+  width: 3rem;
+  padding: 0.5rem;
+}
+
+.help:hover {
+  background-color: var(--grey);
+  cursor: pointer;
+  border-radius: 100%;
+}
+
 .suggestions {
   padding-left: 0;
 }
@@ -323,6 +335,18 @@ a.active {
 .navbar-nav li > a {
   padding: 0 !important;
   padding-bottom: 0.5rem !important;
+}
+
+.green-text {
+  color: var(--font-green) !important;
+}
+
+.help-list {
+  padding-left: 1.5rem;
+}
+
+.help-item {
+  margin-bottom: 1rem;
 }
 
 a {
@@ -431,13 +455,15 @@ a:hover {
 }
 
 .fix-all-button {
+  padding-left: 1rem;
+  padding-right: 1rem;
   display: none;
 }
 
 .mistakes {
   max-height: 69vh;
   position: relative;
-  overflow-y: overlay;
+  overflow-y: auto;
   width: 100%;
 }
 
@@ -860,6 +886,10 @@ pre {
 
   .tools {
     gap: 2rem;
+  }
+
+  .mistakes {
+    max-height: fit-content;
   }
 }
 
