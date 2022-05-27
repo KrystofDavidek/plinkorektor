@@ -697,6 +697,7 @@ export class TinyMceGui extends ProofreaderGui {
     for (const mistakeId of mistakes.keys()) {
       let correctionsCounter = 0;
       let isLastCorrection = false;
+
       if (!this.correctionExists(pos, parId, mistakeId)) {
         if (mistakes[mistakeId].getAbout().length > 0) {
           rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getName())}</span>`);
@@ -708,13 +709,17 @@ export class TinyMceGui extends ProofreaderGui {
 
       correctionsLoop: for (const correctionId of mistakes[mistakeId]['corrections'].keys()) {
         // Check if exists correction with same position in par
-        if (!this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId]['rules'][pos])
+        if (!this.getValueFromMistakeObj('corrections', pos, parId, mistakeId)[correctionId]['rules'][pos]) {
+          if (mistakes[mistakeId].getAbout().length > 0) {
+            rows.htmlParts.push(this.createAboutLinks(mistakes[mistakeId]));
+          }
           continue correctionsLoop;
-
+        }
         if (correctionsCounter === 0)
           rows.htmlParts.push(`<span>${this.formatDescription(mistakes[mistakeId].getName())}</span>`);
         if (correctionsCounter + 1 === mistakes[mistakeId]['corrections'].length) isLastCorrection = true;
         if (this.isTokenEqualToCorrection(pos, parId, mistakeId)) continue correctionsLoop;
+
         if (isLastCorrection && mistakes[mistakeId].getAbout().length > 0) {
           rows.htmlParts.push(
             this.getCorrectionPart(
@@ -726,6 +731,7 @@ export class TinyMceGui extends ProofreaderGui {
               false,
             ),
           );
+
           rows.htmlParts.push(this.createAboutLinks(mistakes[mistakeId]));
         } else {
           rows.htmlParts.push(
