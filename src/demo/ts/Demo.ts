@@ -41,6 +41,26 @@ tinymce.init({
 });
 
 $(() => {
+  if (window.location.hash.substr(1) !== 'test') {
+    $('.delete-content-container').html(`
+        <button
+          type="button"
+          class="button to-disable editor-button"
+          data-toggle="modal"
+          data-target="#deleteModal"
+        >Vymazat obsah
+        </button>
+     `);
+  } else {
+    $('.delete-content-container').html(`
+        <button
+          id="delete-content" 
+          type="button"
+          class="button to-disable editor-button"
+        >Vymazat obsah
+        </button>
+     `);
+  }
   copy(tinymce);
   $(document).on('click', `.toggler`, (e) => {
     $('.suggestions').hide();

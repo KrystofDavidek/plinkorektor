@@ -85,14 +85,7 @@
               Spustit korektor
             </button>
             <button id="copy" type="button" class="button to-disable editor-button">Kopírovat</button>
-            <button
-              type="button"
-              class="button to-disable editor-button"
-              data-toggle="modal"
-              data-target="#deleteModal"
-            >
-              Vymazat obsah
-            </button>
+            <span class="delete-content-container"></span>
             <button id="toggle-autocorrection" type="button" class="button to-disable editor-button">
               Automatické opravy
             </button>
@@ -164,18 +157,8 @@
           <div class="to-edit toast shadow p-3 mb-5 bg-white">
             <div class="toast-body">Pro spuštění korektoru proveďte<br />nejdříve změnu obsahu v editoru.</div>
           </div>
-          <div class="is-correct toast shadow p-3 mb-5">
-            <div class="toast-body">Opravidlo nenašlo žádnou chybu.</div>
-          </div>
         </div>
-        <div class="suggestions col-12 col-md-5">
-          <div class="suggestions-header">
-            <h2 class="suggestions-title">Návrhy oprav</h2>
-            <div class="mistakes-counter"></div>
-            <button id="fix-all" type="button" class="button fix-all-button">Opravit vše</button>
-          </div>
-          <div class="mistakes"></div>
-        </div>
+        <div class="suggestions col-12 col-md-5"></div>
         <div class="toggler">
           <img
             data-toggle="tooltip"
@@ -190,7 +173,12 @@
         <span
           >Provozuje <a href="https://nlp.fi.muni.cz/" target="_blank">Centrum zpracování přirozeného jazyka</a></span
         >
-        <span>Všechna práva vyhrazena © MU, ÚJČ AV ČR, UK, 2019&#8211;2022</span>
+        <span
+          >© MU, ÚJČ AV ČR, UK,
+          <script>
+            document.write('2019&#8211;' + new Date().getFullYear());
+          </script></span
+        >
       </div>
     </main>
   </body>

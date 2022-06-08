@@ -15,9 +15,11 @@ export class TinyMceGui extends ProofreaderGui {
   private autocorrectedTokens: string[] = [];
   private isAutoCorrection = false;
   private screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  private isCorrect = false;
 
   constructor(editor, stylesheetLoader: () => void = () => {}) {
     super();
+    $('.suggestions').html(this.suggestions());
     this.editor = editor;
     this.processing = $(this.editor.dom.select('html')[0]).attr('data-pk-processing');
     $('#delete-content').on('click', () => {
@@ -67,6 +69,13 @@ export class TinyMceGui extends ProofreaderGui {
   public setProcessing(processing: boolean) {
     const $editor = $(this.editor.dom.select('html')[0]);
     if (processing) {
+      if (this.isCorrect) {
+        const _this = this;
+        $('.suggestions').fadeOut(400, function () {
+          $(this).html(_this.suggestions()).fadeIn(400);
+        });
+        this.isCorrect = false;
+      }
       this.isAutoCorrection = false;
       this.resetMistakesCol();
       // msg('Processing indicator displayed.');
@@ -81,7 +90,13 @@ export class TinyMceGui extends ProofreaderGui {
       this.editor.setMode('readonly');
       this.setDisabling(true);
     } else {
-      if ($('.mistakes').children().length === 0) this.showToast('is-correct');
+      if ($('.mistakes').children().length === 0) {
+        this.isCorrect = true;
+        const _this = this;
+        $('.suggestions').fadeOut(400, function () {
+          $(this).html(_this.isCorrectContainer()).fadeIn(400);
+        });
+      }
       $editor.children('.loader-container').fadeOut(500, function () {
         $(this).remove();
       });
@@ -95,6 +110,26 @@ export class TinyMceGui extends ProofreaderGui {
     }
     this.processing = processing;
   }
+
+  private suggestions = () => `
+        <div class="suggestions-header">
+          <h2 class="suggestions-title">Návrhy oprav</h2>
+          <div class="mistakes-counter"></div>
+          <button id="fix-all" type="button" class="button fix-all-button">Opravit vše</button>
+        </div>
+        <div class="mistakes"></div>
+      `;
+
+  private isCorrectContainer = () => `
+      <div class="correct-container">
+        <p>Opravidlo nenašlo žádnou chybu</p>
+        <img
+            class="is-correct-icon"
+            src="assets/icons/correct.svg"
+            alt="No mistakes"
+          />
+      </div>
+      `;
 
   private setDisabling(isDisable: boolean) {
     if (isDisable) {

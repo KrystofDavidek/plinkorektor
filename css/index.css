@@ -80,6 +80,20 @@ h3 {
   color: black !important;
 }
 
+.correct-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  color: var(--font-green);
+  font-size: x-large;
+}
+
+.is-correct-icon {
+  opacity: 50%;
+}
+
 .tool-container {
   padding: 0.1rem 1rem 0.1rem 1rem;
   background-color: var(--bg-tool);
@@ -250,7 +264,7 @@ footer {
 .mini-footer {
   display: flex;
   width: 100%;
-  justify-content: center;
+  justify-content: flex-end;
   font-size: 0.9rem;
   align-items: center;
   position: relative;
@@ -299,6 +313,18 @@ footer {
 
 .navbar-brand {
   font-size: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.navbar-brand::before {
+  content: 'Betaverze';
+  color: #a4a4a4;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.8rem;
+  z-index: 2;
 }
 
 .navbar-toggler:hover {
@@ -829,10 +855,6 @@ pre {
     padding-top: 7rem !important;
   }
 
-  .editor-container {
-    margin-bottom: 8rem !important;
-  }
-
   .toast {
     left: 0.5rem;
   }
@@ -851,6 +873,10 @@ pre {
 }
 
 @media screen and (max-width: 767px) {
+  .correct-container {
+    margin-left: 0 !important;
+  }
+
   .main-container {
     /* height: 100%; */
     overflow: auto;
@@ -914,6 +940,19 @@ pre {
 }
 
 @media screen and (max-width: 1030px) {
+  .correct-container {
+    gap: 1rem;
+    margin-left: 1rem;
+  }
+
+  .is-correct-icon {
+    width: 15rem;
+  }
+
+  .mini-footer {
+    justify-content: center;
+  }
+
   .footer {
     padding-top: 2rem;
   }
