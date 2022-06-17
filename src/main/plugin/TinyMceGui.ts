@@ -172,7 +172,8 @@ export class TinyMceGui extends ProofreaderGui {
     let content = $(this.editor.dom.select('html')[0]).find('p');
     let chunks: HtmlParagraphChunk[] = [];
     content.each((i, p) => {
-      const splitedInnerText = p.innerText.split('\n');
+      // splitting in firefox works a bit differently than in chrome (adds an empty string to the end of the list)
+      const splitedInnerText = p.innerText.split('\n').filter((text) => text !== '');
       if (splitedInnerText.length > 1) {
         splitedInnerText.forEach((text) => {
           const newP = document.createElement('p');
