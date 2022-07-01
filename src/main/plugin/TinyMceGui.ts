@@ -281,6 +281,11 @@ export class TinyMceGui extends ProofreaderGui {
       if (mistake?.getTokens().length > 1 && mistake?.getTokens()?.indexOf(pos) > 0) {
         return;
       }
+      if (!this.isCapitalBasedOnLastPar(chunk, mistake)) {
+        $(token).removeClass('pk-token-correction');
+        removeMistakeHighlight(pos, token, parId);
+        return;
+      }
       this.pushValueToTokensInfo('mistakes', mistake, pos, parId);
     });
 
@@ -301,6 +306,22 @@ export class TinyMceGui extends ProofreaderGui {
       setHovers(token, pos, parId, false, chunk, firsMistakeId, this.screenWidth);
     }
     this.onListChanged();
+  }
+
+  isCapitalBasedOnLastPar(chunk: HtmlParagraphChunk, mistake: Mistake) {
+    if (mistake.getType() === 'capitals:sentence-start' && mistake.getTokens()[0] === 0 && chunk.getLastHash()) {
+      // get previous paragraph element
+      const element = $(this.editor.dom.select('html')[0]).find(`[data-pk-hash='${chunk.getLastHash()}']`).prev();
+      const trimmedText = element.text().trim();
+      if (trimmedText.length > 0) {
+        const lastChar = trimmedText.slice(-1);
+        const endChars = ['.', '!', '?'];
+        if (!endChars.includes(lastChar)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   sortCards() {
