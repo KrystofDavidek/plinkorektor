@@ -620,12 +620,15 @@ export class TinyMceGui extends ProofreaderGui {
   createCard(pos: number, parId: number) {
     const mistakes = this.sortMistakes(this.getValueFromTokensInfo('mistakes', pos, parId));
     if (!mistakes || !mistakes[0] || this.cardsWithSameMistakeIdExist(mistakes)) return;
+    const isMultipleSpelling = mistakes[0].type.startsWith('spelling') && mistakes[0].corrections.length > 1;
 
     let mainCorrectionPart = '';
     const isCorrection = this.correctionExists(pos, parId, 0);
     if (isCorrection) {
       if ($(`#${pos}-${parId}`).length || this.isTokenEqualToCorrection(pos, parId, 0)) {
         return;
+      } else if (isMultipleSpelling) {
+        mainCorrectionPart = this.getMultipleCorrectionsPart(pos, parId, mistakes[0].corrections, 0);
       } else {
         mainCorrectionPart = this.getCorrectionPart(
           pos,
@@ -666,6 +669,21 @@ export class TinyMceGui extends ProofreaderGui {
   isToStrike(string) {
     if (string.length > 1) return true;
     return /^[\da-z]+$/i.test(string);
+  }
+
+  getMultipleCorrectionsPart(pos, parId, corrections: Correction[], mistakeId): string {
+    let value = corrections[0].getAction().value[0];
+    let correctionPart = `<span><strike>${value}</strike></span><img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="Arrow">`;
+
+    corrections.forEach((correction, id) => {
+      correctionPart += `<span data-mistakeId-correctionId="${
+        mistakeId + '-' + id
+      }" id="${pos}-${parId}-fix" data-toggle="tooltip" data-placement="top" title="Opravit" class="correct-text with-hr-gap with-tooltip to-fix" data-dismiss="modal">${
+        correction.getAction().value[1]
+      }</span>`;
+    });
+
+    return `<div class="correction-part">${correctionPart}</div><hr/>`;
   }
 
   getCorrectionPart(pos, parId, correction: Correction, mistakeId, correctionId, isLine = true): string {

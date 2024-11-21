@@ -274,6 +274,10 @@ footer {
   gap: 3rem;
 }
 
+.with-hr-gap {
+  margin-right: 0.5rem;
+}
+
 .mini-footer a {
   cursor: pointer;
 }

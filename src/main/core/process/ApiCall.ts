@@ -3,8 +3,8 @@ import { config } from '../Config';
 // import { message as msg } from "../utilities/Message";
 // import { MessageImportance as MI } from "../types/MessageImportance";
 
-import { Mistake } from '../correction/Mistake';
 import { Correction } from '../correction/Correction';
+import { Mistake } from '../correction/Mistake';
 import { TextChunk } from '../correction/TextChunk';
 
 const API_PATH = 'https://nlp.fi.muni.cz/projekty/corrector/api/api.cgi';
